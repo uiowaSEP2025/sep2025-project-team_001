@@ -1,5 +1,3 @@
-# modules/django/main.tf
-
 resource "kubernetes_deployment" "django_api" {
   metadata {
     name = "django-api-deployment"
@@ -9,7 +7,7 @@ resource "kubernetes_deployment" "django_api" {
   }
 
   spec {
-    replicas = 2
+    replicas = var.replicas_count
     selector {
       match_labels = {
         app = "django-api"
@@ -24,7 +22,7 @@ resource "kubernetes_deployment" "django_api" {
       spec {
         container {
           name  = "django-api"
-          image = var.image_url  # Pass the ECR image URL via variables
+          image = var.image_url
           port {
             container_port = 8000
           }

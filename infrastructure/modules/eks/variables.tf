@@ -10,3 +10,9 @@ variable "subnet_ids" {
   description = "List of subnet IDs for the EKS cluster"
   type        = list(string)
 }
+
+variable "replicas_count" {
+  description = "Number of replicas for the EKS cluster"
+  type        = number
+  default     = 1
+}
