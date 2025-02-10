@@ -1,7 +1,7 @@
 # modules/rds/main.tf
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  count      = var.activate_rds ? 1 : 0  # Activate/Deactivate RDS
+  count      = var.activate_rds ? 1 : 0
   name       = "rds-subnet-group"
   subnet_ids = var.subnet_ids
 
@@ -11,12 +11,12 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 }
 
 resource "aws_db_instance" "postgres" {
-  count                   = var.activate_rds ? 1 : 0  # Activate/Deactivate RDS
+  count                   = var.activate_rds ? 1 : 0
   identifier              = "project-postgres"
   allocated_storage       = 20
   engine                  = "postgres"
   engine_version          = "13.4"
-  instance_class          = "db.t3.micro"  # Free-tier eligible
+  instance_class          = "db.t3.micro"
   username                = var.db_username
   password                = var.db_password
   db_subnet_group_name    = aws_db_subnet_group.rds_subnet_group[0].name
