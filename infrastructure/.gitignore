@@ -1,13 +1,13 @@
 # Terraform files to ignore
-.terraform/               # Local Terraform modules/plugins directory
-.terraform.lock.hcl        # Lock file with dependency versions
+.terraform/
+/.terraform.lock.hcl
 
 # Terraform state files (can contain sensitive info)
 terraform.tfstate
 terraform.tfstate.backup
 
 # Variable files that may contain sensitive data
-*.tfvars                  # Ignore all .tfvars files (optional if you have secrets here)
+*.tfvars
 *.tfvars.json
 
 # Crash logs and debug files
