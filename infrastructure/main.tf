@@ -107,7 +107,7 @@ module "django" {
 # RDS Module
 module "rds" {
   source      = "./modules/rds"
-  subnet_ids  = [aws_subnet.main_subnet.id]
+  subnet_ids  = [aws_subnet.main_subnet_1.id, aws_subnet.main_subnet_2.id]
   activate_rds = var.activate_rds
   db_username = "admin"
   db_password = "password123"
