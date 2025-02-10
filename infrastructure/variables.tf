@@ -1,13 +1,19 @@
 variable "activate_eks" {
   description = "Toggle to activate (true) or deactivate (false) the EKS cluster"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "activate_rds" {
   description = "Toggle to activate (true) or deactivate (false) the RDS database"
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "deploy_django_api" {
+  description = "Toggle to deploy (true) or not deploy (false) the Django REST API"
+  type        = bool
+  default     = false
 }
 
 variable "subnet_ids" {
