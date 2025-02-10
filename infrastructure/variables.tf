@@ -21,3 +21,9 @@ variable "subnet_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "replicas_count" {
+  description = "Number of replicas for Django API server, EKS cluster, and RDS database"
+  type        = number
+  default     = 1
+}

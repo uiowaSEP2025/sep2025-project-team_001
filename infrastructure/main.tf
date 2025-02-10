@@ -95,22 +95,24 @@ module "eks" {
   source       = "./modules/eks"
   subnet_ids   = [aws_subnet.main_subnet_1.id, aws_subnet.main_subnet_2.id]
   activate_eks = var.activate_eks
+  replicas_count = var.replicas_count
 }
 
 # Django Module
 module "django" {
-  source    = "./modules/django"
-  image_url = "418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api:latest"
-  count     = var.deploy_django_api ? 1 : 0
+  source        = "./modules/django"
+  image_url     = "418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api:latest"
+  replicas_count = var.replicas_count
 }
 
 # RDS Module
 module "rds" {
-  source      = "./modules/rds"
-  subnet_ids  = [aws_subnet.main_subnet_1.id, aws_subnet.main_subnet_2.id]
-  activate_rds = var.activate_rds
-  db_username = "admin"
-  db_password = "password123"
+  source        = "./modules/rds"
+  subnet_ids    = [aws_subnet.main_subnet_1.id, aws_subnet.main_subnet_2.id]
+  activate_rds  = var.activate_rds
+  replicas_count = var.replicas_count
+  db_username   = "Cole"
+  db_password   = "password123"
 }
 
 # Outputs

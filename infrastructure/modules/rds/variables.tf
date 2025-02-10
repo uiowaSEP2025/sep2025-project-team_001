@@ -14,11 +14,17 @@ variable "subnet_ids" {
 variable "db_username" {
   description = "Database username"
   type        = string
-  default     = "admin"
+  default     = "Cole"
 }
 
 variable "db_password" {
   description = "Database password"
   type        = string
   default     = "password123"
+}
+
+variable "replicas_count" {
+  description = "Number of replicas for the RDS database"
+  type        = number
+  default     = 1
 }
