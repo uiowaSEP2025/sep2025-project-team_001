@@ -11,4 +11,9 @@ class AppTextStyles {
     return GoogleFonts.roboto(
         fontWeight: FontWeight.w400, fontSize: screenHeight * 0.025, color: color);
   }
+
+  static TextStyle textFieldLabel(double screenHeight, Color color) {
+    return GoogleFonts.roboto(
+        fontWeight: FontWeight.bold, fontSize: screenHeight * 0.02, color: color);
+  }
 }
