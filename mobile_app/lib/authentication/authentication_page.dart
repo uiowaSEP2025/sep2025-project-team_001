@@ -47,24 +47,61 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               ),
             ),
             SizedBox(
+              height: spacing*2,
+            ),
+            
+            Padding(
+              padding: EdgeInsets.only(left: spacing, right: spacing),
+              child: InputTextBox(label: "Email", hintText: "johndoe@gmail.com",screenWidth: screenWidth, screenHeight: screenHeight,),
+            ),
+            SizedBox(
               height: spacing,
             ),
             Padding(
-              padding: EdgeInsets.only(left: spacing / 2, right: spacing / 2),
-              child: const TextField(
-                decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.whiteText,
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue, 
-                        width: 10, 
-                      ),
-                    ),
-                    hintText: "Email"),
-              ),
-            )
+              padding: EdgeInsets.only(left: spacing, right: spacing),
+              child: InputTextBox(label: "Password", hintText: "********",screenWidth: screenWidth, screenHeight: screenHeight,),
+            ),
           ]),
         ));
+  }
+}
+
+class InputTextBox extends StatelessWidget {
+  const InputTextBox({
+    super.key,
+    required this.screenWidth,
+    required this.screenHeight,
+    required this.label,
+    required this.hintText
+  });
+
+  final double screenWidth;
+  final double screenHeight;
+  final String label;
+  final String hintText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+              children: [
+                Text(label,style: AppTextStyles.textFieldLabel(screenHeight, AppColors.whiteText),),
+              ],
+            ),
+            
+        Container(
+          height: screenWidth*0.12,
+          child: TextField(
+            decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.whiteText,
+                
+                border: OutlineInputBorder(),
+                hintText: hintText),
+          ),
+        ),
+      ],
+    );
   }
 }
