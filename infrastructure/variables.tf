@@ -1,3 +1,5 @@
+# infrastructure/variables.tf
+
 variable "activate_eks" {
   description = "Toggle to activate (true) or deactivate (false) the EKS cluster"
   type        = bool

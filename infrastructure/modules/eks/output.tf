@@ -1,4 +1,4 @@
-# modules/eks/outputs.tf
+# infrastructure/modules/eks/output.tf
 
 output "eks_cluster_endpoint" {
   description = "EKS Cluster API endpoint"
