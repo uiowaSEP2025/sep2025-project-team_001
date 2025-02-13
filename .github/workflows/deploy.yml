@@ -36,8 +36,7 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-          terraform plan
-          terraform apply -auto-approve -target=aws_db_instance.postgres -target=aws_ecr_repository.django_api_repo
+          terraform apply -target=aws_db_instance.postgres -target=aws_db_subnet_group.rds_subnet_group -target=aws_db_instance.postgres_replica
 
       - name: Get Terraform Outputs
         run: |
