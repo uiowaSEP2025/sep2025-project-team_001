@@ -1,0 +1,75 @@
+name: 'Build, Push Docker Image & Deploy to EKS'
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Set up AWS CLI
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1  # Adjust to your desired region
+
+    # Step 1: Set up Terraform (already in the original workflow)
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    # Step 2: Initialize Terraform
+    - name: Terraform Init
+      run: terraform init
+
+    # Step 3: Run Terraform plan
+    - name: Terraform Plan
+      run: terraform plan -input=false
+
+    # Step 4: Create ECR repository with Terraform (if not already created)
+    - name: Terraform Apply (Create ECR)
+      run: |
+        terraform apply -auto-approve -target=aws_ecr_repository.django_api_repo
+
+    # Step 5: Log in to Amazon ECR
+    - name: Log in to Amazon ECR
+      run: |
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 418272801449.dkr.ecr.us-east-1.amazonaws.com
+
+    # Step 6: Build Docker image for Django
+    - name: Build Docker image
+      run: |
+        docker build -t django-api .
+
+    # Step 7: Tag Docker image
+    - name: Tag Docker image for ECR
+      run: |
+        docker tag django-api:latest 418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api-repo:latest
+
+    # Step 8: Push Docker image to ECR
+    - name: Push Docker image to ECR
+      run: |
+        docker push 418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api-repo:latest
+
+    # Step 9: Apply Terraform changes and deploy to EKS
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
