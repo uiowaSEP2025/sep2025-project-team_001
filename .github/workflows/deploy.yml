@@ -3,7 +3,7 @@ name: Build, Push Docker Image & Deploy to EKS
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - SCRUM-12-github-actions
 
 permissions:
   contents: read
