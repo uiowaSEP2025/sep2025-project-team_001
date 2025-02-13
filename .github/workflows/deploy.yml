@@ -36,12 +36,12 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-          terraform apply -target=aws_vpc.main_vpc -target=aws_subnet.main_subnet_1 -target=aws_subnet.main_subnet_2 -target=aws_internet_gateway.igw -target=aws_route_table.public_rt -target=aws_route_table_association.public_rt_assoc_1 -target=aws_route_table_association.public_rt_assoc_2
+          terraform apply -auto-approve -target=aws_vpc.main_vpc -target=aws_subnet.main_subnet_1 -target=aws_subnet.main_subnet_2 -target=aws_internet_gateway.igw -target=aws_route_table.public_rt -target=aws_route_table_association.public_rt_assoc_1 -target=aws_route_table_association.public_rt_assoc_2
 
       - name: Terraform Apply (Create RDS and ECR)
         run: |
           cd infrastructure
-          terraform apply -target=module.rds -target=module.ecr
+          terraform apply -auto-approve -target=module.rds -target=module.ecr
 
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
       - name: Get Terraform Outputs
