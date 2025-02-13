@@ -34,6 +34,7 @@ jobs:
       - name: Terraform Destroy (Destroy Basic Resources)
         run: |
           cd infrastructure
+          terraform init
           terraform refresh
           terraform init
           terraform destroy -auto-approve
