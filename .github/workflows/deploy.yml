@@ -38,6 +38,25 @@ jobs:
           terraform init
           terraform apply -auto-approve -target=aws_db_instance.postgres -target=aws_ecr_repository.django_api_repo
 
+      - name: Get Terraform Outputs
+        run: |
+          RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n')  # Remove any newline characters
+          DB_USERNAME=$(terraform output -raw db_username | tr -d '\n')
+          DB_PASSWORD=$(terraform output -raw db_password | tr -d '\n')
+          ECR_REPO_URL=$(terraform output -raw ecr_repository_url | tr -d '\n')
+      
+          # Print output to debug and ensure they are formatted correctly
+          echo "RDS_ENDPOINT=$RDS_ENDPOINT"
+          echo "DB_USERNAME=$DB_USERNAME"
+          echo "DB_PASSWORD=$DB_PASSWORD"
+          echo "ECR_REPO_URL=$ECR_REPO_URL"
+      
+          # Set the environment variables
+          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "ECR_REPO_URL=$ECR_REPO_URL" >> $GITHUB_ENV
+
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
       - name: Get Terraform Outputs
         run: |
