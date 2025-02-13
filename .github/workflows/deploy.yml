@@ -1,9 +1,9 @@
-name: 'Build, Push Docker Image & Deploy to EKS'
+name: Build, Push Docker Image & Deploy to EKS
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main branch
 
 permissions:
   contents: read
@@ -11,18 +11,13 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: production
-
-    defaults:
-      run:
-        shell: bash
 
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
-    # Set up AWS CLI
+    # Set up AWS CLI credentials for Terraform and Docker
     - name: Set up AWS CLI
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -30,46 +25,38 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    # Step 1: Set up Terraform
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-    # Step 2: Initialize Terraform
-    - name: Terraform Init
-      run: terraform init
-
-    # Step 3: Run Terraform plan
-    - name: Terraform Plan
-      run: terraform plan -input=false
-
-    # Step 4: Create ECR repository with Terraform
-    - name: Terraform Apply (Create ECR)
+    # Step 1: Run Terraform to apply resources for the database and ECR (only those resources)
+    - name: Terraform Apply (Create RDS & ECR)
       run: |
-        terraform apply -auto-approve -target=aws_ecr_repository.django_api_repo
+        terraform init
+        terraform apply -auto-approve -target=aws_db_instance.postgres -target=aws_ecr_repository.django_api_repo
 
-    # Step 5: Log in to Amazon ECR
+    # Step 2: Get Terraform Outputs (RDS details, ECR URL)
+    - name: Get Terraform Outputs
+      id: outputs
+      run: |
+        echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
+        echo "DB_USERNAME=$(terraform output -raw db_username)" >> $GITHUB_ENV
+        echo "DB_PASSWORD=$(terraform output -raw db_password)" >> $GITHUB_ENV
+        echo "ECR_REPO_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
+
+    # Step 3: Log in to Amazon ECR
     - name: Log in to Amazon ECR
       run: |
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 418272801449.dkr.ecr.us-east-1.amazonaws.com
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
 
-    # Step 6: Build Docker image for Django
+    # Step 4: Build the Docker image
     - name: Build Docker image
-      run: |
-        docker build -t django-api .
+      run: docker build -t django-api .
 
-    # Step 7: Tag Docker image
+    # Step 5: Tag the Docker image for ECR
     - name: Tag Docker image for ECR
-      run: |
-        docker tag django-api:latest 418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api-repo:latest
+      run: docker tag django-api:latest ${{ env.ECR_REPO_URL }}:latest
 
-    # Step 8: Push Docker image to ECR
+    # Step 6: Push Docker image to ECR
     - name: Push Docker image to ECR
-      run: |
-        docker push 418272801449.dkr.ecr.us-east-1.amazonaws.com/django-api-repo:latest
+      run: docker push ${{ env.ECR_REPO_URL }}:latest
 
-    # Step 9: Apply Terraform changes and deploy to EKS
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+    # Step 7: Apply Terraform for the rest of the resources
+    - name: Terraform Apply (Create EKS and deploy)
+      run: terraform apply -auto-approve
