@@ -35,7 +35,7 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-          terraform destroy
+          terraform destroy -auto-approve
 
       # Run Terraform to apply resources for the database and ECR (only those resources)
       - name: Terraform Apply (Create Basic Resources)
