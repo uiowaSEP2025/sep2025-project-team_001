@@ -40,6 +40,8 @@ jobs:
 
       - name: Get Terraform Outputs
         run: |
+          cd infrastructure
+          terraform refresh
           RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n')  # Remove any newline characters
           DB_USERNAME=$(terraform output -raw db_username | tr -d '\n')
           DB_PASSWORD=$(terraform output -raw db_password | tr -d '\n')
