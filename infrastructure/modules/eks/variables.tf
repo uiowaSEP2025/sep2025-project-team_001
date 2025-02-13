@@ -3,7 +3,7 @@
 variable "activate_eks" {
   description = "Toggle to activate (true) or deactivate (false) the EKS cluster"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "subnet_ids" {

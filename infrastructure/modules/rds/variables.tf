@@ -3,7 +3,7 @@
 variable "activate_rds" {
   description = "Toggle to activate (true) or deactivate (false) the RDS database"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "subnet_ids" {
