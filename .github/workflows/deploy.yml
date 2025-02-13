@@ -28,9 +28,9 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1  # Adjust to your desired region
+        aws-region: us-east-1
 
-    # Step 1: Set up Terraform (already in the original workflow)
+    # Step 1: Set up Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
@@ -44,7 +44,7 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -input=false
 
-    # Step 4: Create ECR repository with Terraform (if not already created)
+    # Step 4: Create ECR repository with Terraform
     - name: Terraform Apply (Create ECR)
       run: |
         terraform apply -auto-approve -target=aws_ecr_repository.django_api_repo
