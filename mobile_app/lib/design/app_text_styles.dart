@@ -16,4 +16,9 @@ class AppTextStyles {
     return GoogleFonts.roboto(
         fontWeight: FontWeight.bold, fontSize: screenHeight * 0.02, color: color);
   }
+
+  static TextStyle buttonText(double screenHeight, Color color) {
+    return GoogleFonts.roboto(
+        fontWeight: FontWeight.bold, fontSize: screenHeight * 0.022, color: color);
+  }
 }
