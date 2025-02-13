@@ -21,7 +21,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         body: Container(
       width: screenWidth,
       height: screenHeight,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xff1A1D1A), Color(0xff313538)], // Gradient colors
           begin: Alignment.topLeft, // Gradient start position
@@ -37,7 +37,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           child: Image.asset("assets/images/StreamlineLogo.png"),
         ),
         SizedBox(
-          height: spacing,
+          height: spacing / 2,
         ),
         Container(
           width: screenWidth * 0.75,
@@ -49,7 +49,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           ),
         ),
         SizedBox(
-          height: spacing * 2,
+          height: spacing,
         ),
         Padding(
           padding: EdgeInsets.only(left: spacing, right: spacing),
@@ -90,7 +90,57 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       screenHeight, AppColors.whiteText),
                 ),
               ),
-            ))
+            )),
+        SizedBox(
+          height: spacing,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 1,
+              width: screenWidth * 0.3,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.backgroundColor,
+                    Color(0xffD9D9D9)
+                  ], // Gradient colors
+                  begin: Alignment.topLeft, // Gradient start position
+                  end: Alignment.bottomRight, // Gradient end position
+                ),
+              ),
+            ),
+            SizedBox(
+              width: spacing / 2,
+            ),
+            Text(
+              "Or continue with",
+              style: AppTextStyles.subtitleParagraph(
+                  screenHeight, AppColors.whiteText),
+            ),
+            SizedBox(
+              width: spacing / 2,
+            ),
+            Container(
+              height: 1,
+              width: screenWidth * 0.3,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.backgroundColor,
+                    Color(0xffD9D9D9)
+                  ], // Gradient colors
+                  begin: Alignment.bottomRight, // Gradient start position
+                  end: Alignment.bottomLeft, // Gradient end position
+                ),
+              ),
+            ),
+            SizedBox(height: spacing,),
+            
+          ],
+        )
       ]),
     ));
   }

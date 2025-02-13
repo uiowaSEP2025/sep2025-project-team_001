@@ -9,7 +9,7 @@ class AppTextStyles {
 
   static TextStyle subtitleParagraph(double screenHeight, Color color) {
     return GoogleFonts.roboto(
-        fontWeight: FontWeight.w400, fontSize: screenHeight * 0.025, color: color);
+        fontWeight: FontWeight.w400, fontSize: screenHeight * 0.02, color: color);
   }
 
   static TextStyle textFieldLabel(double screenHeight, Color color) {
