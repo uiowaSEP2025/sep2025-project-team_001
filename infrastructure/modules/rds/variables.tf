@@ -1,4 +1,4 @@
-# modules/rds/variables.tf
+# infrastructure/modules/rds/variables.tf
 
 variable "activate_rds" {
   description = "Toggle to activate (true) or deactivate (false) the RDS database"

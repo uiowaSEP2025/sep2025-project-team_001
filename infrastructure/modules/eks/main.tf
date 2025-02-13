@@ -1,3 +1,5 @@
+# infrastructure/modules/eks/main.tf
+
 # EKS IAM Role
 resource "aws_iam_role" "eks_cluster_role" {
   count = var.activate_eks ? 1 : 0

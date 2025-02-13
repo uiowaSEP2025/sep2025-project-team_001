@@ -1,3 +1,5 @@
+# infrastructure/modules/rds/main.tf
+
 resource "aws_db_subnet_group" "rds_subnet_group" {
   count      = var.activate_rds ? 1 : 0
   name       = "rds-subnet-group"
