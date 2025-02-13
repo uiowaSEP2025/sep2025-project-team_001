@@ -31,6 +31,12 @@ jobs:
         with:
           terraform_version: "1.0.0"
 
+      - name: Terraform Destroy (Destroy Basic Resources)
+        run: |
+          cd infrastructure
+          terraform init
+          terraform destroy
+
       # Run Terraform to apply resources for the database and ECR (only those resources)
       - name: Terraform Apply (Create Basic Resources)
         run: |
