@@ -38,14 +38,15 @@ jobs:
           terraform init
           terraform apply -auto-approve -target=aws_vpc.main_vpc -target=aws_subnet.main_subnet_1 -target=aws_subnet.main_subnet_2 -target=aws_internet_gateway.igw -target=aws_route_table.public_rt -target=aws_route_table_association.public_rt_assoc_1 -target=aws_route_table_association.public_rt_assoc_2
 
-      - name: Terraform Apply (Create RDS and ECR)
+      - name: Create RDS and ECR resources
         run: |
           cd infrastructure
           terraform apply -auto-approve -target=module.rds -target=module.ecr
 
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
-      - name: Get Terraform Outputs
+      - name: Get RDS and ECR details
         run: |
+          cd infrastructure
           echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
           echo "DB_USERNAME=$(terraform output -raw db_username)" >> $GITHUB_ENV
           echo "DB_PASSWORD=$(terraform output -raw db_password)" >> $GITHUB_ENV
