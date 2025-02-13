@@ -81,3 +81,4 @@ jobs:
         run: |
           cd infrastructure
           terraform apply -auto-approve
+
