@@ -20,8 +20,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     return Scaffold(
         body: GestureDetector(
       onTap: () {
-    FocusManager.instance.primaryFocus?.unfocus();
-  },
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Container(
         width: screenWidth,
         height: screenHeight,
@@ -83,7 +83,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               height: spacing * 2,
             ),
             ElevatedButton(
-                onPressed: signIn(),
+                onPressed: authenticate(),
                 child: Container(
                   height: screenWidth * 0.12,
                   width: screenWidth - spacing * 2,
@@ -153,15 +153,15 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: screenWidth * 0.15,
-                  width: screenWidth * 0.15,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColors.whiteText, // Border color
-                        width: 2, // Border width
-                      ),
-                      borderRadius: BorderRadius.circular(10)),
-                ),
+                    height: screenWidth * 0.15,
+                    width: screenWidth * 0.15,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.whiteText, // Border color
+                          width: 2, // Border width
+                        ),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Image.asset("assets/logos/GoogleLogo.png")),
                 SizedBox(
                   width: spacing * 2,
                 ),
@@ -174,6 +174,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                         width: 2, // Border width
                       ),
                       borderRadius: BorderRadius.circular(10)),
+                  child: Icon(Icons.apple, size: screenWidth*0.11, color: AppColors.whiteText,) , //todo check what platform is running and dont show if it is running on an android 
                 ),
               ],
             )
@@ -183,9 +184,9 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     ));
   }
 
-  signIn() {}
+  authenticate() {}
 
-  closeKeyboard(){}
+  closeKeyboard() {}
 }
 
 class InputTextBox extends StatelessWidget {
