@@ -32,32 +32,16 @@ jobs:
           terraform_version: "1.0.0"
 
       # Run Terraform to apply resources for the database and ECR (only those resources)
-      - name: Terraform Apply (Create RDS & ECR)
+      - name: Terraform Apply (Create Basic Resources)
         run: |
           cd infrastructure
           terraform init
-          terraform apply -target=aws_db_instance.postgres -target=aws_db_subnet_group.rds_subnet_group -target=aws_db_instance.postgres_replica
+          terraform apply -target=aws_vpc.main_vpc -target=aws_subnet.main_subnet_1 -target=aws_subnet.main_subnet_2 -target=aws_internet_gateway.igw -target=aws_route_table.public_rt -target=aws_route_table_association.public_rt_assoc_1 -target=aws_route_table_association.public_rt_assoc_2
 
-      - name: Get Terraform Outputs
+      - name: Terraform Apply (Create RDS and ECR)
         run: |
           cd infrastructure
-          terraform refresh
-          RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n')  # Remove any newline characters
-          DB_USERNAME=$(terraform output -raw db_username | tr -d '\n')
-          DB_PASSWORD=$(terraform output -raw db_password | tr -d '\n')
-          ECR_REPO_URL=$(terraform output -raw ecr_repository_url | tr -d '\n')
-      
-          # Print output to debug and ensure they are formatted correctly
-          echo "RDS_ENDPOINT=$RDS_ENDPOINT"
-          echo "DB_USERNAME=$DB_USERNAME"
-          echo "DB_PASSWORD=$DB_PASSWORD"
-          echo "ECR_REPO_URL=$ECR_REPO_URL"
-      
-          # Set the environment variables
-          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
-          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
-          echo "ECR_REPO_URL=$ECR_REPO_URL" >> $GITHUB_ENV
+          terraform apply -target=module.rds -target=module.ecr
 
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
       - name: Get Terraform Outputs
