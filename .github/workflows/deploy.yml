@@ -34,6 +34,7 @@ jobs:
       - name: Terraform Destroy (Destroy Basic Resources)
         run: |
           cd infrastructure
+          terraform refresh
           terraform init
           terraform destroy -auto-approve
 
@@ -47,6 +48,7 @@ jobs:
       - name: Create RDS and ECR resources
         run: |
           cd infrastructure
+          terraform init
           terraform apply -auto-approve -target=module.rds -target=module.ecr
 
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
