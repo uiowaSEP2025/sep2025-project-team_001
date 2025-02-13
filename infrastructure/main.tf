@@ -117,7 +117,6 @@ module "rds" {
   db_password   = "password123"
 }
 
-# Outputs
 output "vpc_id" {
   value = aws_vpc.main_vpc.id
 }
@@ -128,4 +127,21 @@ output "subnet_ids" {
 
 output "internet_gateway_id" {
   value = aws_internet_gateway.igw.id
+}
+
+output "rds_endpoint" {
+  value = module.rds.rds_endpoint
+}
+
+output "db_username" {
+  value = module.rds.db_username
+}
+
+output "db_password" {
+  value = module.rds.db_password
+  sensitive   = true
+}
+
+output "ecr_repository_url" {
+  value = module.django.repository_url
 }

@@ -43,9 +43,3 @@ resource "aws_db_instance" "postgres_replica" {
     Name = "project-postgres-replica-${count.index}"
   }
 }
-
-# Output the RDS endpoint for the main PostgreSQL instance
-output "rds_endpoint" {
-  value       = var.activate_rds ? aws_db_instance.postgres[0].endpoint : ""
-  description = "PostgreSQL Database Endpoint"
-}

@@ -61,3 +61,8 @@ resource "kubernetes_service" "django_service" {
     type = "LoadBalancer"
   }
 }
+
+output "repository_url" {
+  value       = aws_ecr_repository.django_api_repo.repository_url
+  description = "URL of the ECR repository for Django API"
+}
