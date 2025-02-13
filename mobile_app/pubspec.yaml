@@ -61,6 +61,8 @@ flutter:
 
   assets:
     - assets/images/StreamlineLogo.png
+    - assets/logos/GoogleLogo.png
+    - assets/logos/AppleLogo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
