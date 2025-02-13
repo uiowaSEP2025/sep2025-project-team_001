@@ -137,8 +137,37 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                 ),
               ),
             ),
-            SizedBox(height: spacing,),
-            
+          ],
+        ),
+        SizedBox(
+          height: spacing*2,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: screenWidth * 0.15,
+              width: screenWidth * 0.15,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.whiteText, // Border color
+                    width: 2, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            SizedBox(
+              width: spacing * 2,
+            ),
+            Container(
+              height: screenWidth * 0.15,
+              width: screenWidth * 0.15,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.whiteText, // Border color
+                    width: 2, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(10)),
+            ),
           ],
         )
       ]),
