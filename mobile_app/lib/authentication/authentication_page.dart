@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
@@ -149,10 +151,41 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             SizedBox(
               height: spacing * 2,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
+            (Platform.isIOS)
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                          height: screenWidth * 0.15,
+                          width: screenWidth * 0.15,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.whiteText, // Border color
+                                width: 2, // Border width
+                              ),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Image.asset("assets/logos/GoogleLogo.png")),
+                      SizedBox(
+                        width: spacing * 2,
+                      ),
+                      Container(
+                        height: screenWidth * 0.15,
+                        width: screenWidth * 0.15,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.whiteText, // Border color
+                              width: 2, // Border width
+                            ),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Icon(
+                          Icons.apple,
+                          size: screenWidth * 0.11,
+                          color: AppColors.whiteText,
+                        ), 
+                      ),
+                    ],
+                  )
+                : Container(
                     height: screenWidth * 0.15,
                     width: screenWidth * 0.15,
                     decoration: BoxDecoration(
@@ -162,22 +195,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                         ),
                         borderRadius: BorderRadius.circular(10)),
                     child: Image.asset("assets/logos/GoogleLogo.png")),
-                SizedBox(
-                  width: spacing * 2,
-                ),
-                Container(
-                  height: screenWidth * 0.15,
-                  width: screenWidth * 0.15,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColors.whiteText, // Border color
-                        width: 2, // Border width
-                      ),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Icon(Icons.apple, size: screenWidth*0.11, color: AppColors.whiteText,) , //todo check what platform is running and dont show if it is running on an android 
-                ),
-              ],
-            )
           ]),
         ),
       ),
