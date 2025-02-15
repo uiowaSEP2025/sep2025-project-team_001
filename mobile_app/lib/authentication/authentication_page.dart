@@ -12,17 +12,38 @@ class AuthenticationPage extends StatefulWidget {
 }
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  String email = "";
+  String password = "";
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    double spacing = screenWidth * 0.05;
+    double horizontalSpacing = screenWidth * 0.05;
+    double verticalSpacing = screenHeight * 0.025;
 
     return Scaffold(
         body: GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
+        FocusManager.instance.primaryFocus
+            ?.unfocus(); //unfocus to close keyboard
       },
       child: Container(
         width: screenWidth,
@@ -39,14 +60,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
             SizedBox(
-              height: screenWidth * 0.2,
+              height: screenHeight * 0.1,
             ),
             Container(
-              width: screenWidth * 0.7,
+              width: screenWidth * 0.6,
               child: Image.asset("assets/images/StreamlineLogo.png"),
             ),
             SizedBox(
-              height: spacing / 2,
+              height: verticalSpacing / 2,
             ),
             Container(
               width: screenWidth * 0.75,
@@ -58,50 +79,55 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               ),
             ),
             SizedBox(
-              height: spacing,
+              height: verticalSpacing,
             ),
             Padding(
-              padding: EdgeInsets.only(left: spacing, right: spacing),
+              padding: EdgeInsets.only(
+                  left: horizontalSpacing, right: horizontalSpacing),
               child: InputTextBox(
                 label: "Email",
                 hintText: "johndoe@gmail.com",
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
+                controller: _emailController,
+                onSubmitted: authenticate,
               ),
             ),
             SizedBox(
-              height: spacing,
+              height: verticalSpacing,
             ),
             Padding(
-              padding: EdgeInsets.only(left: spacing, right: spacing),
+              padding: EdgeInsets.only(
+                  left: horizontalSpacing, right: horizontalSpacing),
               child: InputTextBox(
                 label: "Password",
                 hintText: "********",
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
+                controller: _passwordController,
+                onSubmitted: authenticate,
               ),
             ),
             SizedBox(
-              height: spacing * 2,
+              height: verticalSpacing * 2,
             ),
-            ElevatedButton(
-                onPressed: authenticate(),
-                child: Container(
-                  height: screenWidth * 0.12,
-                  width: screenWidth - spacing * 2,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: AppColors.primaryColor),
+            Container(
+              height: screenWidth * 0.12,
+              width: screenWidth - horizontalSpacing * 2,
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor),
+                  onPressed: authenticate,
                   child: Center(
                     child: Text(
                       "SIGN UP/LOGIN",
                       style: AppTextStyles.buttonText(
                           screenHeight, AppColors.whiteText),
                     ),
-                  ),
-                )),
+                  )),
+            ),
             SizedBox(
-              height: spacing,
+              height: verticalSpacing * 2,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +148,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                   ),
                 ),
                 SizedBox(
-                  width: spacing / 2,
+                  width: horizontalSpacing / 2,
                 ),
                 Text(
                   "Or continue with",
@@ -130,7 +156,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       screenHeight, AppColors.whiteText),
                 ),
                 SizedBox(
-                  width: spacing / 2,
+                  width: horizontalSpacing / 2,
                 ),
                 Container(
                   height: 1,
@@ -149,7 +175,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               ],
             ),
             SizedBox(
-              height: spacing * 2,
+              height: verticalSpacing,
             ),
             (Platform.isIOS)
                 ? Row(
@@ -166,7 +192,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                               borderRadius: BorderRadius.circular(10)),
                           child: Image.asset("assets/logos/GoogleLogo.png")),
                       SizedBox(
-                        width: spacing * 2,
+                        width: horizontalSpacing * 2,
                       ),
                       Container(
                         height: screenWidth * 0.15,
@@ -181,7 +207,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                           Icons.apple,
                           size: screenWidth * 0.11,
                           color: AppColors.whiteText,
-                        ), 
+                        ),
                       ),
                     ],
                   )
@@ -201,9 +227,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     ));
   }
 
-  authenticate() {}
-
-  closeKeyboard() {}
+  void authenticate() {
+    print("Email: ${_emailController.text}");
+    print("Password: ${_passwordController.text}");
+  }
 }
 
 class InputTextBox extends StatelessWidget {
@@ -212,12 +239,16 @@ class InputTextBox extends StatelessWidget {
       required this.screenWidth,
       required this.screenHeight,
       required this.label,
-      required this.hintText});
+      required this.hintText,
+      required this.controller,
+      required this.onSubmitted});
 
   final double screenWidth;
   final double screenHeight;
   final String label;
   final String hintText;
+  final TextEditingController controller;
+  final VoidCallback onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +266,11 @@ class InputTextBox extends StatelessWidget {
         Container(
           height: screenWidth * 0.12,
           child: TextField(
+            onSubmitted: (value) {
+              onSubmitted();
+            },
+            controller: controller,
+            cursorColor: AppColors.primaryColor,
             decoration: InputDecoration(
                 filled: true,
                 fillColor: AppColors.whiteText,
