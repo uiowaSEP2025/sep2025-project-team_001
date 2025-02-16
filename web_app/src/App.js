@@ -14,11 +14,39 @@ function Signup() {
   };
   return (
     <Container className = "page-container">
-      <h1>Online Registration</h1>
+      <h1>Online Manager Registration</h1>
       <Form onSubmit = {handleRegister} className = "form-container">
+        <Form.Group controlId = "firstName" className = "form-group-spacing">
+          <Form.Label>First & Last Name</Form.Label>
+          <Form.Control type = "text" placeholder = "Enter first and last name" required />
+        </Form.Group>
         <Form.Group controlId = "desiredUsername" className = "form-group-spacing">
           <Form.Label>Desired Username</Form.Label>
           <Form.Control type = "text" placeholder = "Enter desired username" required />
+        </Form.Group>
+        <Form.Group controlId = "desiredPassword" className = "form-group-spacing">
+          <Form.Label>Desired Password</Form.Label>
+          <Form.Control type = "password" placeholder = "Enter desired password" required />
+        </Form.Group>
+        <Form.Group controlId = "confirmPassword" className = "form-group-spacing">
+          <Form.Label>Confirm Password</Form.Label>
+          <Form.Control type = "password" placeholder = "Confirm password" required />
+        </Form.Group>
+        <Form.Group controlId = "email" className = "form-group-spacing">
+          <Form.Label>Email</Form.Label>
+          <Form.Control type = "email" placeholder = "Enter email" required />
+        </Form.Group>
+        <Form.Group controlId = "phoneNumber" className = "form-group-spacing">
+          <Form.Label>Phone Number</Form.Label>
+          <Form.Control type = "tel" placeholder = "Enter phone number" required />
+        </Form.Group>
+        <Form.Group controlId='businessName' className = "form-group-spacing">
+          <Form.Label>Business Name</Form.Label>
+          <Form.Control type='text' placeholder='Enter business name' required />
+        </Form.Group>
+        <Form.Group controlId='businessAddress' className = "form-group-spacing">
+          <Form.Label>Business Address</Form.Label>
+          <Form.Control type='text' placeholder='Enter business address' required />
         </Form.Group>
         <Button variant="primary" type="submit">
           Register
@@ -30,7 +58,7 @@ function Signup() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path ="/signup" element={<Signup />} />
+      <Route path ="/managerial-signup" element={<Signup />} />
       {/* <Route path ="/login" element={<Login />} /> */}
     </Routes>
   )
