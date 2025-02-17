@@ -6,6 +6,13 @@ import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
+function Banner() {
+  return (
+    <header className="banner">
+      <h1>Streamline Manager</h1>
+    </header>
+  );
+}
 function ManagerialSignup() {
   const navigate = useNavigate();
   const handleRegister = (event) => {
@@ -14,6 +21,7 @@ function ManagerialSignup() {
   };
   return (
     <Container className = "page-container">
+      <Banner />  
       <h1>Online Manager Registration</h1>
       <Form onSubmit = {handleRegister} className = "form-container">
         <Form.Group controlId = "name" className = "form-group-spacing">
@@ -55,11 +63,33 @@ function ManagerialSignup() {
     </Container>
   )
 }
+
+function Login(){
+  return (
+    <Container className = "page-container">
+      <Banner />
+      <h1>Login</h1>
+      <Form className = "form-container">
+        <Form.Group controlId = "username" className = "form-group-spacing">
+          <Form.Label>Username</Form.Label>
+          <Form.Control type = "text" placeholder = "Enter username" required />
+        </Form.Group>
+        <Form.Group controlId = "password" className = "form-group-spacing">
+          <Form.Label>Password</Form.Label>
+          <Form.Control type = "password" placeholder = "Enter password" required />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Login
+        </Button>
+      </Form>
+    </Container>
+  )
+}
 function AppRoutes() {
   return (
     <Routes>
       <Route path ="/managerial-signup" element={<ManagerialSignup />} />
-      {/* <Route path ="/login" element={<Login />} /> */}
+      <Route path ="/login" element={<Login />} />
     </Routes>
   )
 }
