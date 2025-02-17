@@ -22,7 +22,7 @@ function ManagerialSignup() {
   return (
     <Container className = "page-container">
       <Banner />  
-      <h1>Online Manager Registration</h1>
+      <h1>Manager Registration</h1>
       <Form onSubmit = {handleRegister} className = "form-container">
         <Form.Group controlId = "name" className = "form-group-spacing">
           <Form.Label>First & Last Name</Form.Label>
