@@ -64,10 +64,27 @@ jobs:
         run: |
           cd infrastructure
           terraform refresh
-          echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
-          echo "DB_USERNAME=$(terraform output -raw db_username)" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$(terraform output -raw db_password)" >> $GITHUB_ENV
-          echo "ECR_REPO_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV || (terraform destroy -auto-approve && exit 1)
+          # Capture Terraform outputs safely
+          RDS_ENDPOINT=$(terraform output -raw rds_endpoint 2>/dev/null || echo "ERROR")
+          DB_USERNAME=$(terraform output -raw db_username 2>/dev/null || echo "ERROR")
+          DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null || echo "ERROR")
+          
+          # Debug outputs
+          echo "RDS_ENDPOINT: $RDS_ENDPOINT"
+          echo "DB_USERNAME: $DB_USERNAME"
+          echo "DB_PASSWORD: [HIDDEN]"
+      
+          # Ensure values are valid
+          if [[ "$RDS_ENDPOINT" == "ERROR" || "$DB_USERNAME" == "ERROR" || "$DB_PASSWORD" == "ERROR" ]]; then
+            echo "Terraform output failed. Destroying infrastructure..."
+            terraform destroy -auto-approve
+            exit 1
+          fi
+      
+          # Write outputs to GitHub environment
+          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
