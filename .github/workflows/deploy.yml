@@ -44,7 +44,14 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-          terraform apply -auto-approve -target=aws_vpc.main_vpc -target=aws_subnet.main_subnet_1 -target=aws_subnet.main_subnet_2 -target=aws_internet_gateway.igw -target=aws_route_table.public_rt -target=aws_route_table_association.public_rt_assoc_1 -target=aws_route_table_association.public_rt_assoc_2
+          terraform apply -auto-approve \
+            -target=aws_vpc.main_vpc \
+            -target=aws_subnet.main_subnet_1 \
+            -target=aws_subnet.main_subnet_2 \
+            -target=aws_internet_gateway.igw \
+            -target=aws_route_table.public_rt \
+            -target=aws_route_table_association.public_rt_assoc_1 \
+            -target=aws_route_table_association.public_rt_assoc_2
 
       - name: Create RDS and ECR resources
         run: |
@@ -64,7 +71,8 @@ jobs:
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
+          aws ecr get-login-password --region us-east-1
+          docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
 
       # Build the Docker image
       - name: Build Docker image
