@@ -117,6 +117,11 @@ module "rds" {
   db_password   = "password123"
 }
 
+# ECR Module
+module "ecr" {
+  source = "./modules/ecr"
+}
+
 output "vpc_id" {
   value = aws_vpc.main_vpc.id
 }
@@ -143,5 +148,5 @@ output "db_password" {
 }
 
 output "ecr_repository_url" {
-  value = module.django.repository_url
+  value = module.ecr.repository_url
 }
