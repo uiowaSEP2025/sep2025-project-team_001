@@ -51,13 +51,13 @@ jobs:
             -target=aws_internet_gateway.igw \
             -target=aws_route_table.public_rt \
             -target=aws_route_table_association.public_rt_assoc_1 \
-            -target=aws_route_table_association.public_rt_assoc_2
+            -target=aws_route_table_association.public_rt_assoc_2 || (terraform destroy -auto-approve && exit 1)
 
       - name: Create RDS and ECR resources
         run: |
           cd infrastructure
           terraform init
-          terraform apply -auto-approve -target=module.rds -target=module.ecr
+          terraform apply -auto-approve -target=module.rds -target=module.ecr || (terraform destroy -auto-approve && exit 1)
 
       # Get Terraform Outputs (RDS details, ECR URL) and set them as environment variables
       - name: Get RDS and ECR details
@@ -66,13 +66,13 @@ jobs:
           echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
           echo "DB_USERNAME=$(terraform output -raw db_username)" >> $GITHUB_ENV
           echo "DB_PASSWORD=$(terraform output -raw db_password)" >> $GITHUB_ENV
-          echo "ECR_REPO_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
+          echo "ECR_REPO_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV || (terraform destroy -auto-approve && exit 1)
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
         run: |
           aws ecr get-login-password --region us-east-1
-          docker login --username AWS --password-stdin $ECR_REPO_URL
+          docker login --username AWS --password-stdin $ECR_REPO_URL || (terraform destroy -auto-approve && exit 1)
 
       # Build the Docker image
       - name: Build Docker image
@@ -83,19 +83,19 @@ jobs:
             --build-arg DB_NAME=your_db_name \
             --build-arg DB_USER=$DB_USERNAME \
             --build-arg DB_PASSWORD=$DB_PASSWORD \
-            -t django-api .
+            -t django-api . || (terraform destroy -auto-approve && exit 1)
 
       # Tag Docker image for ECR
       - name: Tag Docker image for ECR
-        run: docker tag django-api:latest $ECR_REPO_URL:latest
+        run: docker tag django-api:latest $ECR_REPO_URL:latest || (terraform destroy -auto-approve && exit 1)
 
       # Push Docker image to ECR
       - name: Push Docker image to ECR
-        run: docker push $ECR_REPO_URL:latest
+        run: docker push $ECR_REPO_URL:latest || (terraform destroy -auto-approve && exit 1)
 
       # Apply Terraform for the rest of the resources (EKS, etc.)
       - name: Terraform Apply (Create EKS and deploy)
         run: |
           cd infrastructure
-          terraform apply -auto-approve
+          terraform apply -auto-approve || (terraform destroy -auto-approve && exit 1)
 
