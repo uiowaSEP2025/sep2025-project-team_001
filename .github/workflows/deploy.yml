@@ -64,27 +64,40 @@ jobs:
         run: |
           cd infrastructure
           terraform refresh
-          # Capture Terraform outputs safely
-          RDS_ENDPOINT=$(terraform output -raw rds_endpoint 2>/dev/null || echo "ERROR")
-          DB_USERNAME=$(terraform output -raw db_username 2>/dev/null || echo "ERROR")
-          DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null || echo "ERROR")
-          
+          # Capture Terraform outputs safely, removing trailing newlines
+          RDS_ENDPOINT=$(terraform output -raw rds_endpoint 2>/dev/null | tr -d '\n' || echo "ERROR")
+          DB_USERNAME=$(terraform output -raw db_username 2>/dev/null | tr -d '\n' || echo "ERROR")
+          DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null | tr -d '\n' || echo "ERROR")
+          ECR_REPO_URL=$(terraform output -raw ecr_repository_url 2>/dev/null | tr -d '\n' || echo "ERROR")
+      
           # Debug outputs
           echo "RDS_ENDPOINT: $RDS_ENDPOINT"
           echo "DB_USERNAME: $DB_USERNAME"
+          echo "ECR_REPO_URL: $ECR_REPO_URL"
           echo "DB_PASSWORD: [HIDDEN]"
       
           # Ensure values are valid
-          if [[ "$RDS_ENDPOINT" == "ERROR" || "$DB_USERNAME" == "ERROR" || "$DB_PASSWORD" == "ERROR" ]]; then
+          if [[ "$RDS_ENDPOINT" == "ERROR" || "$DB_USERNAME" == "ERROR" || "$DB_PASSWORD" == "ERROR" || "$ECR_REPO_URL" == "ERROR" ]]; then
             echo "Terraform output failed. Destroying infrastructure..."
             terraform destroy -auto-approve
             exit 1
           fi
       
-          # Write outputs to GitHub environment
-          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
-          echo "DB_USERNAME=$DB_USERNAME" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          # Write outputs to GitHub environment properly using EOF syntax
+          {
+            echo "RDS_ENDPOINT<<EOF"
+            echo "$RDS_ENDPOINT"
+            echo "EOF"
+            echo "DB_USERNAME<<EOF"
+            echo "$DB_USERNAME"
+            echo "EOF"
+            echo "DB_PASSWORD<<EOF"
+            echo "$DB_PASSWORD"
+            echo "EOF"
+            echo "ECR_REPO_URL<<EOF"
+            echo "$ECR_REPO_URL"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
