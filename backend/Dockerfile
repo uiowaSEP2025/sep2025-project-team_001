@@ -2,7 +2,7 @@
 FROM python:3.9-slim
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /api
 
 # Install system dependencies (optional, based on your app's requirements)
 RUN apt-get update && apt-get install -y \
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the current directory contents into the container at /app
-COPY . /app/
+COPY . /api/
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt

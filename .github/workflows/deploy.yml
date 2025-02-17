@@ -63,6 +63,7 @@ jobs:
       - name: Get RDS and ECR details
         run: |
           cd infrastructure
+          terraform refresh
           echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
           echo "DB_USERNAME=$(terraform output -raw db_username)" >> $GITHUB_ENV
           echo "DB_PASSWORD=$(terraform output -raw db_password)" >> $GITHUB_ENV
