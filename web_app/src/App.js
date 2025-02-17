@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
-function Signup() {
+function ManagerialSignup() {
   const navigate = useNavigate();
   const handleRegister = (event) => {
     console.log('Form submitted');
@@ -16,7 +16,7 @@ function Signup() {
     <Container className = "page-container">
       <h1>Online Manager Registration</h1>
       <Form onSubmit = {handleRegister} className = "form-container">
-        <Form.Group controlId = "firstName" className = "form-group-spacing">
+        <Form.Group controlId = "name" className = "form-group-spacing">
           <Form.Label>First & Last Name</Form.Label>
           <Form.Control type = "text" placeholder = "Enter first and last name" required />
         </Form.Group>
@@ -58,7 +58,7 @@ function Signup() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path ="/managerial-signup" element={<Signup />} />
+      <Route path ="/managerial-signup" element={<ManagerialSignup />} />
       {/* <Route path ="/login" element={<Login />} /> */}
     </Routes>
   )
