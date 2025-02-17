@@ -72,26 +72,26 @@ jobs:
       - name: Log in to Amazon ECR
         run: |
           aws ecr get-login-password --region us-east-1
-          docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
+          docker login --username AWS --password-stdin $ECR_REPO_URL
 
       # Build the Docker image
       - name: Build Docker image
         run: |
           cd backend
           docker build \
-            --build-arg DB_HOST=${{ env.RDS_ENDPOINT }} \
+            --build-arg DB_HOST=$RDS_ENDPOINT \
             --build-arg DB_NAME=your_db_name \
-            --build-arg DB_USER=${{ env.DB_USERNAME }} \
-            --build-arg DB_PASSWORD=${{ env.DB_PASSWORD }} \
+            --build-arg DB_USER=$DB_USERNAME \
+            --build-arg DB_PASSWORD=$DB_PASSWORD \
             -t django-api .
 
       # Tag Docker image for ECR
       - name: Tag Docker image for ECR
-        run: docker tag django-api:latest ${{ env.ECR_REPO_URL }}:latest
+        run: docker tag django-api:latest $ECR_REPO_URL:latest
 
       # Push Docker image to ECR
       - name: Push Docker image to ECR
-        run: docker push ${{ env.ECR_REPO_URL }}:latest
+        run: docker push $ECR_REPO_URL:latest
 
       # Apply Terraform for the rest of the resources (EKS, etc.)
       - name: Terraform Apply (Create EKS and deploy)
