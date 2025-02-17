@@ -23,7 +23,7 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name    = aws_db_subnet_group.rds_subnet_group[0].name
   skip_final_snapshot     = true
   publicly_accessible     = true
-  multi_az                = var.replicas_count > 1  # Enable Multi-AZ if needed
+  multi_az                = var.replicas_count > 1
 
   tags = {
     Name = "project-postgres"
