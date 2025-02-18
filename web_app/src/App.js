@@ -1,13 +1,15 @@
-import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (
-    <Container className="d-flex flex-column justify-content-center align-items-center vh-100">
-      <Button variant="primary">Login</Button>
-    </Container>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </Router>
   );
 }
 
