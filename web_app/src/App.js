@@ -1,13 +1,25 @@
-import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Home from "./pages/Home";
+import Registration from './pages/Registration';
+import Login from './pages/Login';
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/register" element={<Registration />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
-    <Container className="d-flex flex-column justify-content-center align-items-center vh-100">
-      <Button variant="primary">Login</Button>
-    </Container>
+    <Router>
+      <AppRoutes />
+    </Router>
   );
 }
 
