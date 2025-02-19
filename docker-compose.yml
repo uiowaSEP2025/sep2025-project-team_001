@@ -1,9 +1,38 @@
-version: '3.8'
-
 services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   backend:
     build: ./backend
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=db
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+    depends_on:
+      - db
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app  # Sync local changes with container
+      - ./backend:/app
+  frontend:
+    build: ./web_app
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web_app:/app
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
