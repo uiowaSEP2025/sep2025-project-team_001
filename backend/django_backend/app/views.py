@@ -13,10 +13,10 @@ def register_user(request):
         data = json.loads(request.body)
 
         if CustomUser.objects.filter(username=data["username"]).exists():
-            return JsonResponse({"error": "Username already taken"}, status=400)
+            return JsonResponse({"message": "Username already taken"}, status=400)
 
         if CustomUser.objects.filter(email=data["email"]).exists():
-            return JsonResponse({"error": "Email already registered"}, status=400)
+            return JsonResponse({"message": "Email already registered"}, status=400)
 
         # Create a new user with the extended fields
         user = CustomUser.objects.create_user(
