@@ -47,26 +47,13 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-resource "aws_route_table" "public_rt" {
-  vpc_id = var.vpc_id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "PublicRouteTable"
-  }
-}
-
 resource "aws_route_table_association" "public_rta_a" {
-  route_table_id = aws_route_table.public_rt.id
+  route_table_id = var.rtb_id
   subnet_id      = aws_subnet.public_subnet_a.id
 }
 
 resource "aws_route_table_association" "public_rta_b" {
-  route_table_id = aws_route_table.public_rt.id
+  route_table_id = var.rtb_id
   subnet_id      = aws_subnet.public_subnet_b.id
 }
 
@@ -90,4 +77,24 @@ module "rds" {
 
   # Allow wide open access (NOT for production!)
   allowed_cidr_blocks   = ["0.0.0.0/0"]
+}
+
+########################################
+# Call the EC2 Module
+########################################
+module "ec2_docker" {
+  source = "./modules/ec2"
+
+  # Provide subnets and VPC for the instance
+  vpc_id            = var.vpc_id
+  public_subnet_ids = [
+    aws_subnet.public_subnet_a.id,
+    aws_subnet.public_subnet_b.id
+  ]
+
+  # You can pass the RDS endpoint if you want
+  rds_endpoint      = module.rds.db_endpoint
+
+  # Provide any other variables needed by the ec2 module
+  key_pair_name     = var.key_pair_name
 }
