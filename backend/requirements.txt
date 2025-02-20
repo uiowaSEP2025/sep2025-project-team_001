@@ -1,0 +1,10 @@
+pip
+Django
+asgiref
+sqlparse
+psycopg2
+psycopg2-binary
+djangorestframework
+setuptools
+django-cors-headers
+
