@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/authentication/authentication_page.dart';
+import 'package:mobile_app/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => AuthenticationPage(), 
+        '/home' : (context) => HomePage(),
         }
       
     );
