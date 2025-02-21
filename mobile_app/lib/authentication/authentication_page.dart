@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
@@ -16,6 +17,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   late TextEditingController _passwordController;
   String email = "";
   String password = "";
+  bool isLoading = false;
+
+  final Dio _dio = Dio();
+  final String apiUrl = "http://localhost:8000/auth/login/";
 
   @override
   void dispose() {
@@ -117,14 +122,16 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor),
-                  onPressed: authenticate,
-                  child: Center(
-                    child: Text(
-                      "SIGN UP/LOGIN",
-                      style: AppTextStyles.buttonText(
-                          screenHeight, AppColors.whiteText),
-                    ),
-                  )),
+                  onPressed: isLoading ? null : authenticate,
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Center(
+                          child: Text(
+                            "SIGN UP/LOGIN",
+                            style: AppTextStyles.buttonText(
+                                screenHeight, AppColors.whiteText),
+                          ),
+                        )),
             ),
             SizedBox(
               height: verticalSpacing * 2,
@@ -227,9 +234,42 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     ));
   }
 
-  void authenticate() {
-    print("Email: ${_emailController.text}");
-    print("Password: ${_passwordController.text}");
+  void authenticate() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      Response response = await _dio.post(
+        apiUrl,
+        data: {"username": email, "password": password},
+        options: Options(headers: {"Content-Type": "application/json"}),
+      );
+
+      print("Login successful: ${response.data}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login Successful!")),
+      );
+
+      Navigator.pushReplacementNamed(context, "/home");
+    } catch (error) {
+      print("Login error: $error");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Invalid email or password")),
+      );
+    }
+
+    setState(() => isLoading = false);
   }
 }
 
