@@ -1,3 +1,5 @@
+# modules/rds/variables.tf
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID for RDS security group"

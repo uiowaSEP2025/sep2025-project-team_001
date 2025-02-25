@@ -1,3 +1,5 @@
+# outputs.tf
+
 output "public_subnet_a_id" {
   description = "ID of the newly created public subnet a"
   value       = aws_subnet.public_subnet_a.id
