@@ -102,7 +102,7 @@ module "frontend_ec2" {
   subnet_id      = aws_subnet.public_subnet_a.id
   key_pair_name  = var.key_pair_name
   instance_type  = "t3.micro"
-  backend_api_url   = "https://api.streamlinebars.com:8000"
+  backend_api_url   = "http://api.streamlinebars.com:8000"
 
   repo_url = var.repo_url
   repo_branch = var.repo_branch
