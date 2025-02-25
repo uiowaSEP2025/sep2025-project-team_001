@@ -26,5 +26,5 @@ variable "db_password" {
 variable "key_pair_name" {
   type        = string
   description = "EC2 key pair for SSH"
-  default     = "my-keypair"
+  default     = "terraform-key-pair"
 }

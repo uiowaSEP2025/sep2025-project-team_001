@@ -39,13 +39,13 @@ resource "aws_subnet" "public_subnet_b" {
   }
 }
 
-resource "aws_internet_gateway" "igw" {
-  vpc_id = var.vpc_id
-
-  tags = {
-    Name = "IGW"
-  }
-}
+# resource "aws_internet_gateway" "igw" {
+#   vpc_id = var.vpc_id
+#
+#   tags = {
+#     Name = "IGW"
+#   }
+# }
 
 resource "aws_route_table_association" "public_rta_a" {
   route_table_id = var.rtb_id
@@ -82,19 +82,19 @@ module "rds" {
 ########################################
 # Call the EC2 Module
 ########################################
-module "ec2_docker" {
+module "backend_ec2" {
   source = "./modules/ec2"
 
-  # Provide subnets and VPC for the instance
-  vpc_id            = var.vpc_id
-  public_subnet_ids = [
-    aws_subnet.public_subnet_a.id,
-    aws_subnet.public_subnet_b.id
-  ]
+  name_prefix = "my-backend"
+  vpc_id      = var.vpc_id
+  subnet_id   = aws_subnet.public_subnet_a.id
 
-  # You can pass the RDS endpoint if you want
-  rds_endpoint      = module.rds.db_endpoint
+  key_pair_name = var.key_pair_name
 
-  # Provide any other variables needed by the ec2 module
-  key_pair_name     = var.key_pair_name
+  # RDS info from the rds module
+  db_host = module.rds.db_endpoint
+  db_name = "TestDatabase"
+  db_user = "TestUser"
+  db_pass = var.db_password
+  dj_secret_key = "mysecretkey123"
 }

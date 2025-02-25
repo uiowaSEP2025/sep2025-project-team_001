@@ -1,9 +1,9 @@
-########################################
-# Security Group for EC2
-########################################
-resource "aws_security_group" "ec2_sg" {
-  name        = "ec2-docker-sg"
-  description = "Allow inbound traffic for SSH, HTTP, React(3000), Django(8000)"
+############################
+# Security Group
+############################
+resource "aws_security_group" "backend_sg" {
+  name        = "${var.name_prefix}-backend-sg"
+  description = "Allow inbound traffic for SSH and backend on port 8000"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -11,27 +11,12 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    # In production, limit to your IP range
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "React dev port"
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Django dev port"
+    description = "Backend port"
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp"
@@ -46,45 +31,65 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   tags = {
-    Name = "ec2-docker-sg"
+    Name = "${var.name_prefix}-backend-sg"
   }
 }
 
-########################################
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-ebs"]
+  }
+}
+
+############################
 # EC2 Instance
-########################################
-resource "aws_instance" "docker_ec2" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t3.micro"
-
-  # Pick the first public subnet for the EC2 instance
-  subnet_id = var.public_subnet_ids[0]
-
-  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
-  key_name                    = var.key_pair_name
+############################
+resource "aws_instance" "backend_ec2" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.backend_sg.id]
+  key_name               = var.key_pair_name
   associate_public_ip_address = true
 
-  # user_data installs Docker, Docker Compose, etc.
   user_data = <<-EOF
     #!/bin/bash
+    # Update OS
     yum update -y
+
+    # Install Docker
     amazon-linux-extras install docker -y
     service docker start
     usermod -aG docker ec2-user
 
-    # Install Docker Compose v2
-    curl -SL https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    # Install Git if you need to clone your repo
+    yum install -y git
 
-    # (Optional) If you want to pass RDS_ENDPOINT as an env variable, you can:
-    echo "export RDS_ENDPOINT=${var.rds_endpoint}" >> /home/ec2-user/.bashrc
+    # Clone your backend code
+    cd /home/ec2-user
+    git clone -b moving-to-aws ${var.backend_repo_url} repo
+    cd repo
+    cd backend
 
-    # You can clone your repo or pull images from ECR here if you like.
+    # If you need environment variables for RDS, create an .env or pass them at runtime
+    echo "DB_HOST=${var.db_host}" >> .env
+    echo "DB_NAME=${var.db_name}" >> .env
+    echo "DB_USER=${var.db_user}" >> .env
+    echo "DB_PASS=${var.db_pass}" >> .env
+    echo "DJANGO_SECRET_KEY=${var.dj_secret_key}" >> .env
 
-    echo "EC2 module setup complete" > /home/ec2-user/setup.log
+    # Build Docker image from Dockerfile in your backend folder
+    docker build -t backend-image .
+
+    # Run container on port 8000, passing .env as environment variables
+    docker run -d -p 8000:8000 --env-file .env backend-image
   EOF
 
   tags = {
-    Name = "docker-compose-ec2"
+    Name = "${var.name_prefix}-backend-ec2"
   }
 }

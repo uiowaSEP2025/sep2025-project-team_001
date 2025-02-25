@@ -1,11 +1,17 @@
+variable "name_prefix" {
+  type        = string
+  description = "Prefix for naming resources"
+  default     = "my-backend"
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID where EC2 is deployed"
 }
 
-variable "public_subnet_ids" {
-  type        = list(string)
-  description = "List of public subnet IDs"
+variable "subnet_id" {
+  type        = string
+  description = "Public subnet ID"
 }
 
 variable "key_pair_name" {
@@ -13,8 +19,41 @@ variable "key_pair_name" {
   description = "EC2 key pair"
 }
 
-variable "rds_endpoint" {
+variable "instance_type" {
+  type    = string
+  default = "t3.micro"
+}
+
+variable "backend_repo_url" {
   type        = string
-  description = "RDS endpoint (optional)"
+  description = "GitHub URL"
+  default     = "https://github.com/uiowaSEP2025/sep2025-project-team_001.git"
+}
+
+variable "db_host" {
+  type        = string
+  description = "RDS endpoint"
   default     = ""
+}
+
+variable "db_name" {
+  type        = string
+  default     = "TestDatabase"
+}
+
+variable "db_user" {
+  type        = string
+  default     = "TestUser"
+}
+
+variable "db_pass" {
+  type      = string
+  sensitive = true
+  default   = "password"
+}
+
+variable "dj_secret_key" {
+  type      = string
+  sensitive = true
+  default   = "mysecretkey"
 }
