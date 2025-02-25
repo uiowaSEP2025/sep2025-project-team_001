@@ -30,3 +30,21 @@ variable "key_pair_name" {
   description = "EC2 key pair for SSH"
   default     = "terraform-key-pair"
 }
+
+variable "route53_zone_id" {
+  type        = string
+  description = "The Route 53 Hosted Zone ID for the domain"
+  default     = "Z0727502VK8U5ZTLMAOQ"
+}
+
+variable "repo_url" {
+  type        = string
+  description = "Git repo URL"
+  default     = "https://github.com/uiowaSEP2025/sep2025-project-team_001.git"
+}
+
+variable "repo_branch" {
+  type        = string
+  description = "Git repo branch"
+  default     = "moving-to-aws"
+}

@@ -3,7 +3,7 @@
 variable "name_prefix" {
   type        = string
   description = "Prefix for naming resources"
-  default     = "my-backend"
+  default     = "backend"
 }
 
 variable "vpc_id" {
@@ -26,13 +26,13 @@ variable "instance_type" {
   default = "t3.micro"
 }
 
-variable "backend_repo_url" {
+variable "repo_url" {
   type        = string
   description = "GitHub URL"
   default     = "https://github.com/uiowaSEP2025/sep2025-project-team_001.git"
 }
 
-variable "backend_repo_branch" {
+variable "repo_branch" {
   type        = string
   description = "GitHub branch"
   default     = "moving-to-aws"

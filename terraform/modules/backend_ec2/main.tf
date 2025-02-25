@@ -73,7 +73,7 @@ resource "aws_instance" "backend_ec2" {
 
     # Clone your backend code
     cd /home/ec2-user
-    git clone -b ${var.backend_repo_branch} ${var.backend_repo_url} repo
+    git clone -b ${var.repo_branch} ${var.repo_url} repo
     cd repo
     cd backend
 
