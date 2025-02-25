@@ -1,4 +1,4 @@
-# modules/ec2/variables.tf
+# modules/backend_ec2/variables.tf
 
 variable "name_prefix" {
   type        = string
@@ -30,6 +30,12 @@ variable "backend_repo_url" {
   type        = string
   description = "GitHub URL"
   default     = "https://github.com/uiowaSEP2025/sep2025-project-team_001.git"
+}
+
+variable "backend_repo_branch" {
+  type        = string
+  description = "GitHub branch"
+  default     = "moving-to-aws"
 }
 
 variable "db_host" {

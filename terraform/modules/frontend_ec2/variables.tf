@@ -1,67 +1,45 @@
-# modules/backend_ec2/variables.tf
+# modules/frontend_ec2/variables.tf
 
 variable "name_prefix" {
   type        = string
-  description = "Prefix for naming resources"
-  default     = "my-backend"
+  description = "Prefix for naming frontend resources"
+  default     = "my-frontend"
 }
 
 variable "vpc_id" {
   type        = string
-  description = "VPC ID where EC2 is deployed"
+  description = "VPC ID where the frontend EC2 instance will be deployed"
 }
 
 variable "subnet_id" {
   type        = string
-  description = "Public subnet ID"
+  description = "Public subnet ID for the frontend EC2 instance"
 }
 
 variable "key_pair_name" {
   type        = string
-  description = "EC2 key pair"
+  description = "EC2 key pair name for SSH access"
 }
 
 variable "instance_type" {
   type    = string
+  description = "EC2 instance type"
   default = "t3.micro"
 }
 
-variable "backend_repo_url" {
+variable "frontend_repo_url" {
   type        = string
-  description = "GitHub URL"
+  description = "Git repository URL for the frontend application"
   default     = "https://github.com/uiowaSEP2025/sep2025-project-team_001.git"
 }
 
-variable "db_host" {
+variable "frontend_repo_branch" {
   type        = string
-  description = "RDS endpoint"
-  default     = ""
+  description = "Git branch"
+  default     = "moving-to-aws"
 }
 
-variable "db_port" {
+variable "backend_api_url" {
   type        = string
-  description = "The database port"
-  default     = "5432"
-}
-
-variable "db_name" {
-  type        = string
-  default     = "TestDatabase"
-}
-
-variable "db_user" {
-  type        = string
-  default     = "TestUser"
-}
-
-variable "db_pass" {
-  type      = string
-  sensitive = true
-  default   = "password"
-}
-
-variable "dj_secret_key" {
-  type      = string
-  sensitive = true
-  default   = "mysecretkey"
+  description = "The URL of the backend API that the frontend will call (e.g., http://api.example.com:8000)"
 }

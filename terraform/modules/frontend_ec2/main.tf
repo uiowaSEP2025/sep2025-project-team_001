@@ -1,31 +1,23 @@
-# modules/backend_ec2/main.tf
+# modules/frontend_ec2/main.tf
 
 ############################
-# Security Group
+# Security Group for Frontend
 ############################
-resource "aws_security_group" "backend_sg" {
-  name        = "${var.name_prefix}-backend-sg"
-  description = "Allow inbound traffic for SSH and backend on port 8000"
+resource "aws_security_group" "frontend_sg" {
+  name        = "${var.name_prefix}-frontend-sg"
+  description = "Allow inbound HTTP traffic on port 3000 for the frontend"
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    # In production, limit to your IP range
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Backend port"
-    from_port   = 8000
-    to_port     = 8000
+    description = "HTTP (frontend)"
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
+    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -33,10 +25,13 @@ resource "aws_security_group" "backend_sg" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-backend-sg"
+    Name = "${var.name_prefix}-frontend-sg"
   }
 }
 
+############################
+# Data Source for Amazon Linux AMI
+############################
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -48,51 +43,42 @@ data "aws_ami" "amazon_linux" {
 }
 
 ############################
-# EC2 Instance
+# EC2 Instance for Frontend
 ############################
-resource "aws_instance" "backend_ec2" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [aws_security_group.backend_sg.id]
-  key_name               = var.key_pair_name
+resource "aws_instance" "frontend_ec2" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = [aws_security_group.frontend_sg.id]
+  key_name                    = var.key_pair_name
   associate_public_ip_address = true
 
   user_data = <<-EOF
     #!/bin/bash
-    # Update OS
+    # Update OS and install required packages
     yum update -y
-
-    # Install Docker
     amazon-linux-extras install docker -y
     service docker start
     usermod -aG docker ec2-user
-
-    # Install Git if you need to clone your repo
     yum install -y git
 
-    # Clone your backend code
+    # Clone the frontend repository
     cd /home/ec2-user
-    git clone -b moving-to-aws ${var.backend_repo_url} repo
+    git clone -b ${var.frontend_repo_branch} ${var.frontend_repo_url} repo
     cd repo
-    cd backend
+    cd web_app
 
-    # If you need environment variables for RDS, create an .env or pass them at runtime
-    echo "DB_HOST=${var.db_host}" >> .env
-    echo "DB_PORT=${var.db_port}" >> .env
-    echo "DB_NAME=${var.db_name}" >> .env
-    echo "DB_USER=${var.db_user}" >> .env
-    echo "DB_PASS=${var.db_pass}" >> .env
-    echo "DJANGO_SECRET_KEY=${var.dj_secret_key}" >> .env
+    # Create .env file for frontend environment variables (e.g., backend API URL)
+    echo "REACT_APP_API_URL=${var.backend_api_url}" > .env
 
-    # Build Docker image from Dockerfile in your backend folder
-    docker build -t backend-image .
+    # Build the Docker image for the frontend
+    docker build -t frontend-image .
 
-    # Run container on port 8000, passing .env as environment variables
-    docker run -d -p 8000:8000 --env-file .env backend-image
+    # Run the frontend container, mapping container port 3000 to host port 3000
+    docker run -d -p 3000:3000 --env-file .env frontend-image
   EOF
 
   tags = {
-    Name = "${var.name_prefix}-backend-ec2"
+    Name = "${var.name_prefix}-frontend-ec2"
   }
 }
