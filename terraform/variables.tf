@@ -34,7 +34,7 @@ variable "key_pair_name" {
 variable "route53_zone_id" {
   type        = string
   description = "The Route 53 Hosted Zone ID for the domain"
-  default     = "Z0727502VK8U5ZTLMAOQ"
+  default     = "Z089938016IU61IWTN6PN"
 }
 
 variable "repo_url" {
