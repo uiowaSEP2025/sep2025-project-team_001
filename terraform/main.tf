@@ -17,7 +17,7 @@ provider "aws" {
 }
 
 ########################################
-# Create 2 Public Subnets in an Existing VPC
+# Public Subnets
 ########################################
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = var.vpc_id
@@ -41,14 +41,6 @@ resource "aws_subnet" "public_subnet_b" {
   }
 }
 
-# resource "aws_internet_gateway" "igw" {
-#   vpc_id = var.vpc_id
-#
-#   tags = {
-#     Name = "IGW"
-#   }
-# }
-
 resource "aws_route_table_association" "public_rta_a" {
   route_table_id = var.rtb_id
   subnet_id      = aws_subnet.public_subnet_a.id
@@ -60,12 +52,11 @@ resource "aws_route_table_association" "public_rta_b" {
 }
 
 ########################################
-# Call the RDS Module
+# RDS Module
 ########################################
 module "rds" {
   source = "./modules/rds"
 
-  # Pass in VPC/Subnet for RDS
   vpc_id      = var.vpc_id
   subnet_ids  = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
 
@@ -74,18 +65,15 @@ module "rds" {
   db_username   = "TestUser"
   db_password   = var.db_password
 
-  # Make RDS publicly accessible for easy testing
   publicly_accessible = true
-
-  # Allow wide open access (NOT for production!)
   allowed_cidr_blocks   = ["0.0.0.0/0"]
 }
 
 ########################################
-# Call the EC2 Modules
+# Backend EC2 Module
 ########################################
 module "backend_ec2" {
-  source = "modules/backend_ec2"
+  source = "./modules/backend_ec2"
 
   name_prefix = "backend"
   vpc_id      = var.vpc_id
@@ -99,8 +87,14 @@ module "backend_ec2" {
   db_user = "TestUser"
   db_pass = var.db_password
   dj_secret_key = "mysecretkey123"
+
+  repo_url = var.repo_url
+  repo_branch = var.repo_branch
 }
 
+########################################
+# Frontend EC2 Module
+########################################
 module "frontend_ec2" {
   source         = "./modules/frontend_ec2"
   name_prefix    = "frontend"
@@ -108,5 +102,24 @@ module "frontend_ec2" {
   subnet_id      = aws_subnet.public_subnet_a.id
   key_pair_name  = var.key_pair_name
   instance_type  = "t3.micro"
-  backend_api_url   = "http://api.example.com:8000"
+  backend_api_url   = "http://api.streamline.com:8000"
+
+  repo_url = var.repo_url
+  repo_branch = var.repo_branch
+}
+
+resource "aws_route53_record" "backend" {
+  zone_id = var.route53_zone_id
+  name    = "api.streamline.com"
+  type    = "A"
+  ttl     = 300
+  records = [module.backend_ec2.public_ip]
+}
+
+resource "aws_route53_record" "frontend" {
+  zone_id = var.route53_zone_id
+  name    = "app.streamline.com"
+  type    = "A"
+  ttl     = 300
+  records = [module.frontend_ec2.public_ip]
 }

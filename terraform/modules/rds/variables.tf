@@ -10,12 +10,6 @@ variable "subnet_ids" {
   description = "List of subnets for the DB Subnet Group"
 }
 
-variable "security_group_ids" {
-  type        = list(string)
-  description = "Existing SGs if not creating a new one"
-  default     = []
-}
-
 variable "allowed_cidr_blocks" {
   type        = list(string)
   description = "CIDR blocks allowed for Postgres access"

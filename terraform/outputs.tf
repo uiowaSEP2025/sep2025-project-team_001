@@ -15,12 +15,12 @@ output "rds_endpoint" {
   value       = module.rds.db_endpoint
 }
 
-output "backend_ec2_public_ip" {
-  value       = module.backend_ec2.public_ip
-  description = "Public IP of the backend EC2"
+output "backend_dns" {
+  description = "DNS name for the backend"
+  value       = aws_route53_record.backend.fqdn
 }
 
-output "frontend_ec2_public_ip" {
-  description = "Public IP of the frontend EC2 instance"
-  value       = module.frontend_ec2.public_ip
+output "frontend_dns" {
+  description = "DNS name for the frontend"
+  value       = aws_route53_record.frontend.fqdn
 }

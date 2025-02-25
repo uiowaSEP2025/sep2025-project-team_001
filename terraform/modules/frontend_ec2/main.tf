@@ -64,7 +64,7 @@ resource "aws_instance" "frontend_ec2" {
 
     # Clone the frontend repository
     cd /home/ec2-user
-    git clone -b ${var.frontend_repo_branch} ${var.frontend_repo_url} repo
+    git clone -b ${var.repo_branch} ${var.repo_url} repo
     cd repo
     cd web_app
 
