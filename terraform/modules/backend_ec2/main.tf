@@ -1,4 +1,4 @@
-# modules/ec2/main.tf
+# modules/backend_ec2/main.tf
 
 ############################
 # Security Group
@@ -73,7 +73,7 @@ resource "aws_instance" "backend_ec2" {
 
     # Clone your backend code
     cd /home/ec2-user
-    git clone -b moving-to-aws ${var.backend_repo_url} repo
+    git clone -b ${var.backend_repo_branch} ${var.backend_repo_url} repo
     cd repo
     cd backend
 

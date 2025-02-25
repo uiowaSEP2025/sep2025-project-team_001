@@ -1,4 +1,4 @@
-# modules/ec2/outputs.tf
+# modules/backend_ec2/outputs.tf
 
 output "public_ip" {
   description = "Public IP of the backend EC2 instance"

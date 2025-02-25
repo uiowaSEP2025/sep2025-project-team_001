@@ -82,15 +82,14 @@ module "rds" {
 }
 
 ########################################
-# Call the EC2 Module
+# Call the EC2 Modules
 ########################################
 module "backend_ec2" {
-  source = "./modules/ec2"
+  source = "modules/backend_ec2"
 
-  name_prefix = "my-backend"
+  name_prefix = "backend"
   vpc_id      = var.vpc_id
   subnet_id   = aws_subnet.public_subnet_a.id
-
   key_pair_name = var.key_pair_name
 
   # RDS info from the rds module
@@ -100,4 +99,14 @@ module "backend_ec2" {
   db_user = "TestUser"
   db_pass = var.db_password
   dj_secret_key = "mysecretkey123"
+}
+
+module "frontend_ec2" {
+  source         = "./modules/frontend_ec2"
+  name_prefix    = "frontend"
+  vpc_id         = var.vpc_id
+  subnet_id      = aws_subnet.public_subnet_a.id
+  key_pair_name  = var.key_pair_name
+  instance_type  = "t3.micro"
+  backend_api_url   = "http://api.example.com:8000"
 }
