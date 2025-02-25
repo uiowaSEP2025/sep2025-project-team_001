@@ -1,3 +1,5 @@
+# modules/ec2/variables.tf
+
 variable "name_prefix" {
   type        = string
   description = "Prefix for naming resources"
@@ -34,6 +36,12 @@ variable "db_host" {
   type        = string
   description = "RDS endpoint"
   default     = ""
+}
+
+variable "db_port" {
+  type        = string
+  description = "The database port"
+  default     = "5432"
 }
 
 variable "db_name" {

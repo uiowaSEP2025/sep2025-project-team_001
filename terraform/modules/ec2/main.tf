@@ -1,3 +1,5 @@
+# modules/ec2/main.tf
+
 ############################
 # Security Group
 ############################
@@ -77,6 +79,7 @@ resource "aws_instance" "backend_ec2" {
 
     # If you need environment variables for RDS, create an .env or pass them at runtime
     echo "DB_HOST=${var.db_host}" >> .env
+    echo "DB_PORT=${var.db_port}" >> .env
     echo "DB_NAME=${var.db_name}" >> .env
     echo "DB_USER=${var.db_user}" >> .env
     echo "DB_PASS=${var.db_pass}" >> .env

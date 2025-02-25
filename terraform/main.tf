@@ -1,3 +1,5 @@
+# main.tf
+
 ########################################
 # Terraform & Provider Configuration
 ########################################
@@ -92,7 +94,8 @@ module "backend_ec2" {
   key_pair_name = var.key_pair_name
 
   # RDS info from the rds module
-  db_host = module.rds.db_endpoint
+  db_host       = module.rds.db_endpoint
+  db_port       = module.rds.db_port
   db_name = "TestDatabase"
   db_user = "TestUser"
   db_pass = var.db_password
