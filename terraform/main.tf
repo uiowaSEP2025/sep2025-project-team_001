@@ -102,7 +102,7 @@ module "frontend_ec2" {
   subnet_id      = aws_subnet.public_subnet_a.id
   key_pair_name  = var.key_pair_name
   instance_type  = "t3.micro"
-  backend_api_url   = "http://api.streamline.com:8000"
+  backend_api_url   = "http://api.streamlinebars.com:8000"
 
   repo_url = var.repo_url
   repo_branch = var.repo_branch
@@ -110,7 +110,7 @@ module "frontend_ec2" {
 
 resource "aws_route53_record" "backend" {
   zone_id = var.route53_zone_id
-  name    = "api.streamline.com"
+  name    = "api.streamlinebars.com"
   type    = "A"
   ttl     = 300
   records = [module.backend_ec2.public_ip]
@@ -118,7 +118,7 @@ resource "aws_route53_record" "backend" {
 
 resource "aws_route53_record" "frontend" {
   zone_id = var.route53_zone_id
-  name    = "app.streamline.com"
+  name    = "app.streamlinebars.com"
   type    = "A"
   ttl     = 300
   records = [module.frontend_ec2.public_ip]
