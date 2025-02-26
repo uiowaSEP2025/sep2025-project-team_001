@@ -41,6 +41,31 @@ resource "aws_subnet" "public_subnet_b" {
   }
 }
 
+########################################
+# Private Subnets
+########################################
+resource "aws_subnet" "private_subnet_a" {
+  vpc_id                  = var.vpc_id
+  cidr_block              = "172.31.112.0/20"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "PrivateSubnet1A"
+  }
+}
+
+resource "aws_subnet" "private_subnet_b" {
+  vpc_id                  = var.vpc_id
+  cidr_block              = "172.31.128.0/20"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "PrivateSubnet1B"
+  }
+}
+
 resource "aws_route_table_association" "public_rta_a" {
   route_table_id = var.rtb_id
   subnet_id      = aws_subnet.public_subnet_a.id
@@ -58,7 +83,7 @@ module "rds" {
   source = "./modules/rds"
 
   vpc_id      = var.vpc_id
-  subnet_ids  = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+  subnet_ids  = [aws_subnet.private_subnet_a.id, aws_subnet.private_subnet_b.id]
 
   db_identifier = "postgres-db"
   db_name       = "TestDatabase"
@@ -66,31 +91,36 @@ module "rds" {
   db_password   = var.db_password
 
   publicly_accessible = true
-  allowed_cidr_blocks   = ["0.0.0.0/0"]
+  allowed_cidr_blocks   = []
+
+  backend_sg_id = module.backend_ec2.backend_sg_id
 }
 
 ########################################
 # Backend EC2 Module
 ########################################
 module "backend_ec2" {
-  source = "./modules/backend_ec2"
-
-  name_prefix = "backend"
-  vpc_id      = var.vpc_id
-  subnet_id   = aws_subnet.public_subnet_a.id
+  source       = "./modules/backend_ec2"
+  name_prefix  = "backend"
+  vpc_id       = var.vpc_id
+  subnet_id    = aws_subnet.public_subnet_a.id
   key_pair_name = var.key_pair_name
 
-  # RDS info from the rds module
   db_host       = module.rds.db_endpoint
   db_port       = module.rds.db_port
-  db_name = "TestDatabase"
-  db_user = "TestUser"
-  db_pass = var.db_password
+  db_name       = "TestDatabase"
+  db_user       = "TestUser"
+  db_pass       = var.db_password
   dj_secret_key = "mysecretkey123"
 
-  repo_url = var.repo_url
-  repo_branch = var.repo_branch
+  repo_url     = var.repo_url
+  repo_branch  = var.repo_branch
+
+  frontend_sg_id      = module.frontend_ec2.frontend_sg_id
+  mobile_cidr_blocks  = var.mobile_cidr_blocks
+  admin_ip            = var.admin_ip
 }
+
 
 ########################################
 # Frontend EC2 Module
