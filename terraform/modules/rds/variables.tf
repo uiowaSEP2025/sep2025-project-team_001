@@ -70,3 +70,8 @@ variable "skip_final_snapshot" {
   type    = bool
   default = true
 }
+
+variable "backend_sg_id" {
+  type        = string
+  description = "Security Group ID of the backend EC2 instance"
+}

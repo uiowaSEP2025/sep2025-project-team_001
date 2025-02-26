@@ -71,3 +71,20 @@ variable "dj_secret_key" {
   sensitive = true
   default   = "mysecretkey"
 }
+
+variable "frontend_sg_id" {
+  type        = string
+  description = "Security Group ID of the frontend EC2 instance"
+}
+
+variable "mobile_cidr_blocks" {
+  type        = list(string)
+  description = "Allowed CIDR blocks for mobile clients"
+  default     = ["0.0.0.0/0"]  # Replace with specific IP ranges if possible
+}
+
+variable "admin_ip" {
+  type        = string
+  description = "Allowed IP address for SSH access"
+  default     = "0.0.0.0/0"
+}
