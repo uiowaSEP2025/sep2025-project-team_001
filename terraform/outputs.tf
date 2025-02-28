@@ -17,7 +17,7 @@ output "rds_endpoint" {
 
 output "backend_dns" {
   description = "DNS name for the backend"
-  value       = aws_route53_record.backend.fqdn
+  value       = aws_route53_record.backend_private_dns.fqdn
 }
 
 output "frontend_dns" {
