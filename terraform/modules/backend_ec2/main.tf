@@ -68,7 +68,7 @@ resource "aws_instance" "backend_ec2" {
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   key_name               = var.key_pair_name
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   user_data = <<-EOF
     #!/bin/bash

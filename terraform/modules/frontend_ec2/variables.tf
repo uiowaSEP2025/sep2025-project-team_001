@@ -47,3 +47,8 @@ variable "admin_ip" {
   description = "Your IP address for SSH access"
   default     = "0.0.0.0/0"
 }
+
+variable "nginx_sg_id" {
+  description = "Security Group ID of the NGINX instance"
+  type        = string
+}
