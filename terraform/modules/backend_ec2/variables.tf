@@ -77,6 +77,11 @@ variable "frontend_sg_id" {
   description = "Security Group ID of the frontend EC2 instance"
 }
 
+variable "nginx_sg_id" {
+  type        = string
+  description = "Security Group ID of the NGINX EC2 instance"
+}
+
 variable "mobile_cidr_blocks" {
   type        = list(string)
   description = "Allowed CIDR blocks for mobile clients"

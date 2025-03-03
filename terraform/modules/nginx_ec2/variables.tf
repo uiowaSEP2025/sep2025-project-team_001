@@ -32,13 +32,18 @@ variable "domain_name" {
   type        = string
 }
 
-variable "proxy_target" {
-  description = "The target address (e.g., private IP or DNS) to which NGINX should proxy traffic"
-  type        = string
-}
-
 variable "admin_ip" {
   type        = string
   description = "Your IP address for SSH access"
   default     = "0.0.0.0/0"
+}
+
+variable "frontend_target" {
+  description = "The private IP or DNS of the frontend (port 3000)."
+  type        = string
+}
+
+variable "backend_target" {
+  description = "The private IP or DNS of the backend (port 8000)."
+  type        = string
 }

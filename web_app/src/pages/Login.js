@@ -19,7 +19,7 @@ function Login() {
     console.log('Login form submitted');
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login/`, {
+      const response = await axios.post('/api/login/', {
         username,
         password,
       });
