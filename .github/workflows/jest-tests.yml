@@ -19,9 +19,19 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
+          cache-dependency-path: web_app/package-lock.json  # Cache dependencies from web_app/
+
+      - name: Check for lock file in web_app
+        run: |
+          if [ ! -f web_app/package-lock.json ]; then
+            echo "❌ Error: package-lock.json not found in web_app/. Ensure it is committed.";
+            exit 1;
+          fi
 
       - name: Install dependencies
         run: npm ci
+        working-directory: web_app  # Run npm ci inside web_app/
 
       - name: Run Jest tests
-        run: npm test -- web_app/src/tests
+        run: npm test -- src/tests
+        working-directory: web_app  # Run Jest inside web_app/
