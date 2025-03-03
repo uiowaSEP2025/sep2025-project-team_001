@@ -73,7 +73,7 @@ resource "aws_instance" "nginx" {
 
     # 3) Obtain the SSL certificate (standalone mode uses port 80)
     certbot certonly --standalone -n --agree-tos \
-      --email youremail@example.com \
+      --email ardusercole@gmail.com \
       -d ${var.domain_name}
 
     # 4) Create an NGINX config for HTTP -> HTTPS and an HTTPS server
