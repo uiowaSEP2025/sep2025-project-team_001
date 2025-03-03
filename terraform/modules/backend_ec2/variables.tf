@@ -35,7 +35,7 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "GitHub branch"
-  default     = "moving-to-aws"
+  default     = "aws-security-hardening"
 }
 
 variable "db_host" {
