@@ -8,7 +8,7 @@ resource "aws_security_group" "backend_sg" {
   description = "Allow inbound traffic only from frontend EC2 and mobile app"
   vpc_id      = var.vpc_id
 
-  # Allow SSH only from your IP (for admin access)
+  # Allow SSH only from Admin IP
   ingress {
     description = "Allow SSH from trusted IP"
     from_port   = 22
@@ -89,16 +89,15 @@ resource "aws_instance" "backend_ec2" {
     service docker start
     usermod -aG docker ec2-user
 
-    # Install Git if you need to clone your repo
+    # Install Git
     yum install -y git
 
-    # Clone your backend code
+    # Clone Repo and Build Docker Image
     cd /home/ec2-user
     git clone -b ${var.repo_branch} ${var.repo_url} repo
     cd repo
     cd backend
 
-    # If you need environment variables for RDS, create an .env or pass them at runtime
     echo "DB_HOST=${var.db_host}" >> .env
     echo "DB_PORT=${var.db_port}" >> .env
     echo "DB_NAME=${var.db_name}" >> .env

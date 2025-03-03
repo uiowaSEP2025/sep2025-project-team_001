@@ -18,7 +18,7 @@ provider "aws" {
 # Networking Resources
 ########################################
 
-# Public Subnets (for NAT Gateway and Route Table Associations)
+# Public Subnets
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = var.vpc_id
   cidr_block              = "172.31.80.0/20"
@@ -102,7 +102,7 @@ resource "aws_nat_gateway" "nat_gateway" {
 
 # Route Tables
 
-## Public Route Table Associations (using an existing route table for public subnets)
+## Public Route Table Associations
 resource "aws_route_table_association" "public_rta_a" {
   route_table_id = var.rtb_id
   subnet_id      = aws_subnet.public_subnet_a.id
@@ -113,7 +113,7 @@ resource "aws_route_table_association" "public_rta_b" {
   subnet_id      = aws_subnet.public_subnet_b.id
 }
 
-## Private Route Table (for instances without public IPs)
+## Private Route Table
 resource "aws_route_table" "private_route_table" {
   vpc_id = var.vpc_id
 
@@ -151,7 +151,7 @@ resource "aws_route_table_association" "private_rds_2" {
 # Modules
 ########################################
 
-# RDS Module – Deploys RDS in the private backend and RDS subnets
+# RDS Module
 module "rds" {
   source = "./modules/rds"
 
@@ -168,7 +168,7 @@ module "rds" {
   backend_sg_id         = module.backend_ec2.backend_sg_id
 }
 
-# Backend EC2 Module – Deployed into the private backend subnet
+# Backend EC2 Module
 module "backend_ec2" {
   source       = "./modules/backend_ec2"
   name_prefix  = "backend"
@@ -191,7 +191,7 @@ module "backend_ec2" {
   admin_ip            = var.admin_ip
 }
 
-# Frontend EC2 Module – Deployed into the private frontend subnet
+# Frontend EC2 Module
 module "frontend_ec2" {
   source         = "./modules/frontend_ec2"
   name_prefix    = "frontend"
@@ -240,7 +240,7 @@ resource "aws_route53_record" "backend_private_dns" {
   records = [module.backend_ec2.private_ip]
 }
 
-# Public Route53 Record for frontend (pointing to the private frontend IP behind a proxy, if needed)
+# Public Route53 Record for frontend
 resource "aws_route53_record" "frontend" {
   zone_id = var.route53_zone_id
   name    = "streamlinebars.com"

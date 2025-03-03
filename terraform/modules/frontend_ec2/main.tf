@@ -17,7 +17,7 @@ resource "aws_security_group" "frontend_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Restrict SSH to only your IP
+  # Restrict SSH to admin_ip
   ingress {
     description = "Allow SSH from trusted IP"
     from_port   = 22
@@ -82,7 +82,7 @@ resource "aws_instance" "frontend_ec2" {
     usermod -aG docker ec2-user
     yum install -y git
 
-    # 2) Clone your frontend repository
+    # 2) Clone repository
     cd /home/ec2-user
     git clone -b ${var.repo_branch} ${var.repo_url} repo
     cd repo
@@ -90,10 +90,10 @@ resource "aws_instance" "frontend_ec2" {
 
     echo "REACT_APP_API_URL=${var.backend_api_url}" >> .env
 
-    # 4) Build the production image using Dockerfile.production
+    # 3) Build the production image using Dockerfile.production
     docker build -t frontend-image -f Dockerfile.production .
 
-    # 5) Run the container
+    # 4) Run the container
     docker run -d -p 3000:80 frontend-image
   EOF
 
