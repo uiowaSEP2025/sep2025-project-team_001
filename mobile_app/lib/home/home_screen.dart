@@ -1,4 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:mobile_app/design/app_colors.dart';
+import 'package:mobile_app/design/app_text_styles.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/objects/bar.dart';
 
@@ -11,6 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Bar> bars = [];
+  int? selectedBarIndex;
 
   @override
   void initState() {
@@ -44,6 +49,16 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
+  void selectBar(int i) {
+    setState(() {
+      if (selectedBarIndex == i) {
+        selectedBarIndex = null;
+      } else {
+        selectedBarIndex = i;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -73,26 +88,69 @@ class _HomePageState extends State<HomePage> {
         child: bars.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
+                    SizedBox(
+                      height: horizontalSpacing,
+                    ),
                     for (int i = 0; i < bars.length; i += 2) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          BarCard(bar: bars[i]),
+                          GestureDetector(
+                            onTap: () => selectBar(i),
+                            child: BarCard(
+                              bar: bars[i],
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
+                              isSelected: selectedBarIndex == i,
+                            ),
+                          ),
                           if (i + 1 < bars.length) ...[
                             SizedBox(
-                              width: horizontalSpacing,
+                              width: horizontalSpacing * 1.5,
                             ),
-                            BarCard(bar: bars[i + 1]),
+                            GestureDetector(
+                              onTap: () => selectBar(i + 1),
+                              child: BarCard(
+                                bar: bars[i + 1],
+                                screenHeight: screenHeight,
+                                screenWidth: screenWidth,
+                                isSelected: selectedBarIndex == i + 1,
+                              ),
+                            ),
                           ]
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: horizontalSpacing),
                     ]
                   ],
                 ),
               ),
+      ),
+      floatingActionButton: Container(
+        height: screenWidth * 0.12,
+        width: screenWidth - horizontalSpacing * 2,
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: selectedBarIndex != null
+                    ? AppColors.primaryColor
+                    : Colors.grey),
+            onPressed: () {
+              if (selectedBarIndex != null) {
+                print("Bar: ${bars[selectedBarIndex!].name}");
+              } else {
+                print("No bar selected");
+              }
+            },
+            child: Center(
+              child: Text(
+                "SELECT BAR",
+                style:
+                    AppTextStyles.buttonText(screenHeight, AppColors.whiteText),
+              ),
+            )),
       ),
     );
   }
