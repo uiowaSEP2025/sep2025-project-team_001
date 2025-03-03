@@ -186,6 +186,7 @@ module "backend_ec2" {
   repo_url            = var.repo_url
   repo_branch         = var.repo_branch
   frontend_sg_id      = module.frontend_ec2.frontend_sg_id
+  nginx_sg_id         = module.nginx_ec2.nginx_sg_id
   mobile_cidr_blocks  = var.mobile_cidr_blocks
   admin_ip            = var.admin_ip
 }
@@ -214,7 +215,9 @@ module "nginx_ec2" {
   instance_type  = "t3.micro"
   name_prefix    = "nginx"
   domain_name    = "streamlinebars.com"
-  proxy_target   = module.frontend_ec2.private_ip
+
+  frontend_target = module.frontend_ec2.private_ip
+  backend_target  = module.backend_ec2.private_ip
 }
 
 ########################################

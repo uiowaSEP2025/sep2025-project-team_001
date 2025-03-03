@@ -2,10 +2,10 @@
 
 data "aws_ami" "amazon_linux" {
   most_recent = true
-  owners      = ["amazon"]
+  owners = ["amazon"]
 
   filter {
-    name   = "name"
+    name = "name"
     values = ["amzn2-ami-hvm-*-x86_64-ebs"]
   }
 }
@@ -47,24 +47,34 @@ resource "aws_instance" "nginx" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_pair_name
-  vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
+  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
   user_data = <<-EOF
     #!/bin/bash
-    # Update OS and install NGINX
     yum update -y
     amazon-linux-extras install nginx1 -y
     systemctl start nginx
     systemctl enable nginx
 
-    # Create an NGINX configuration to proxy traffic to the target backend/frontend
     cat <<EOT > /etc/nginx/conf.d/default.conf
     server {
       listen 80;
       server_name ${var.domain_name};
 
+      # Proxy to Frontend
       location / {
-        proxy_pass http://${var.proxy_target}:3000;
+        proxy_pass http://${var.frontend_target}:3000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      }
+
+      # Proxy to Backend API
+      location /api/ {
+        proxy_pass http://${var.backend_target}:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -79,3 +89,4 @@ resource "aws_instance" "nginx" {
     Name = "${var.name_prefix}-nginx"
   }
 }
+

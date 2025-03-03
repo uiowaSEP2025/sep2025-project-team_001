@@ -26,6 +26,15 @@ resource "aws_security_group" "backend_sg" {
     security_groups = [var.frontend_sg_id]
   }
 
+  # Allow backend requests from NGINX
+  ingress {
+    description     = "Allow backend API access from NGINX"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [var.nginx_sg_id]
+  }
+
   # Allow backend API access from mobile clients (modify this for security)
   ingress {
     description = "Allow backend API access from Mobile App"
