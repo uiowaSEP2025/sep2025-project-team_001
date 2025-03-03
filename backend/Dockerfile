@@ -11,12 +11,8 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entrypoint script and make it executable
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Expose port 8000 for Django
 EXPOSE 8000
 
-# Use the entrypoint script to run migrations then start the server
-ENTRYPOINT ["/entrypoint.sh"]
+# Run migrations and start Django server
+ENTRYPOINT ["sh", "-c", "python manage.py migrate --noinput && exec python manage.py runserver 0.0.0.0:8000"]
