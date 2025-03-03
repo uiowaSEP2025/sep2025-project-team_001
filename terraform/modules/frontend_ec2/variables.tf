@@ -34,12 +34,12 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "Git branch to clone for the frontend application"
-  default     = "moving-to-aws"
+  default     = "aws-security-hardening"
 }
 
 variable "backend_api_url" {
   type        = string
-  description = "The URL of the backend API that the frontend will call (e.g., http://api.yourcompany.com:8000)"
+  description = "The URL of the backend API that the frontend will call"
 }
 
 variable "admin_ip" {
