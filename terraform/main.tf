@@ -164,7 +164,6 @@ module "rds" {
   db_password   = var.db_password
 
   publicly_accessible   = false
-  allowed_cidr_blocks   = []
   backend_sg_id         = module.backend_ec2.backend_sg_id
 }
 

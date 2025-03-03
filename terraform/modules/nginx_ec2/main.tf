@@ -23,6 +23,15 @@ resource "aws_security_group" "nginx_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTPS
+  ingress {
+    description = "Allow HTTPS from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   ingress {
     description = "Allow SSH from trusted IP"
     from_port   = 22
@@ -46,19 +55,44 @@ resource "aws_instance" "nginx" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_pair_name
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
 
   user_data = <<-EOF
     #!/bin/bash
+    set -xe
+
+    # 1) Install updates, NGINX, certbot
     yum update -y
-    amazon-linux-extras install nginx1 -y
+    amazon-linux-extras install nginx1 epel -y
+    yum install -y certbot
+
+    # 2) Start and then stop NGINX (so it creates default dirs)
     systemctl start nginx
     systemctl enable nginx
+    systemctl stop nginx
 
+    # 3) Obtain the SSL certificate (standalone mode uses port 80)
+    certbot certonly --standalone -n --agree-tos \
+      --email youremail@example.com \
+      -d ${var.domain_name}
+
+    # 4) Create an NGINX config for HTTP -> HTTPS and an HTTPS server
     cat <<EOT > /etc/nginx/conf.d/default.conf
+    # Redirect all HTTP to HTTPS
     server {
       listen 80;
       server_name ${var.domain_name};
+      return 301 https://\$host\$request_uri;
+    }
+
+    # HTTPS server
+    server {
+      listen 443 ssl;
+      server_name ${var.domain_name};
+
+      # SSL certificate from certbot
+      ssl_certificate /etc/letsencrypt/live/${var.domain_name}/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/${var.domain_name}/privkey.pem;
 
       # Proxy to Frontend
       location / {
@@ -68,7 +102,7 @@ resource "aws_instance" "nginx" {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
       }
 
-      # Proxy to Backend API
+      # Proxy to Backend
       location /api/ {
         proxy_pass http://${var.backend_target}:8000/;
         proxy_http_version 1.1;
@@ -81,11 +115,12 @@ resource "aws_instance" "nginx" {
     }
     EOT
 
-    systemctl restart nginx
+    # 5) Restart NGINX with SSL
+    systemctl start nginx
+    systemctl enable nginx
   EOF
 
   tags = {
     Name = "${var.name_prefix}-nginx"
   }
 }
-
