@@ -3,9 +3,10 @@ name: Jest Tests
 on:
   pull_request:
     branches:
-      - main  # Runs tests on PRs targeting the main branch
+      - main
 
 jobs:
+  # 1) Unit Test Job
   unit-tests:
     name: Run Jest Tests
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: web_app/package-lock.json  # Cache dependencies from web_app/
+          cache-dependency-path: web_app/package-lock.json
 
       - name: Check for lock file in web_app
         run: |
@@ -30,8 +31,50 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: web_app  # Run npm ci inside web_app/
+        working-directory: web_app
 
       - name: Run Jest tests
         run: npm test -- src/tests
-        working-directory: web_app  # Run Jest inside web_app/
+        working-directory: web_app
+
+  # 2) Cypress Acceptance Test Job
+  cypress-tests:
+    name: Cypress Acceptance Tests
+    runs-on: ubuntu-latest
+
+    # Optionally ensure this only runs after the Jest tests have passed:
+    # needs: [unit-tests]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: web_app/package-lock.json
+
+      - name: Check for lock file in web_app
+        run: |
+          if [ ! -f web_app/package-lock.json ]; then
+            echo "❌ Error: package-lock.json not found in web_app/. Ensure it is committed.";
+            exit 1;
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web_app
+
+      # Start the React App in the background and wait for it to be accessible
+      - name: Start React App
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000
+        working-directory: web_app
+
+      # Run Cypress in headless mode
+      - name: Run Cypress tests
+        run: npx cypress run
+        working-directory: web_app
