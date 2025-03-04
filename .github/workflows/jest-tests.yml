@@ -1,4 +1,4 @@
-name: Jest Tests
+name: Jest & Cypress Tests
 
 on:
   pull_request:
@@ -46,26 +46,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5
         with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: web_app/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: web_app
-
-      # Install start-server-and-test globally or add it to your devDependencies
-      - name: Install start-server-and-test
-        run: npm install -g start-server-and-test
-        working-directory: web_app
-
-      # This single command will:
-      # 1) Run "npm start"
-      # 2) Wait for "http://localhost:3000" to become available
-      # 3) Run "npx cypress run"
-      - name: Start server and run Cypress
-        run: npx start-server-and-test "npm start" http://localhost:3000 "npx cypress run"
-        working-directory: web_app
+          build: npm run build            # Build the React app
+          start: npm start                 # Start the dev server
+          wait-on: http://localhost:3000   # Wait for the app to be available
+          working-directory: web_app
