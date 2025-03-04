@@ -37,11 +37,6 @@ variable "repo_branch" {
   default     = "aws-security-hardening"
 }
 
-variable "backend_api_url" {
-  type        = string
-  description = "The URL of the backend API that the frontend will call"
-}
-
 variable "admin_ip" {
   type        = string
   description = "Your IP address for SSH access"

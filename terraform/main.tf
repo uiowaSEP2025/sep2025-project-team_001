@@ -164,7 +164,6 @@ module "rds" {
   db_password   = var.db_password
 
   publicly_accessible   = false
-  allowed_cidr_blocks   = []
   backend_sg_id         = module.backend_ec2.backend_sg_id
 }
 
@@ -199,7 +198,6 @@ module "frontend_ec2" {
   subnet_id      = aws_subnet.private_subnet_frontend.id
   key_pair_name  = var.key_pair_name
   instance_type  = "t3.micro"
-  backend_api_url = "http://api.streamlinebars.com:8000"
 
   repo_url    = var.repo_url
   repo_branch = var.repo_branch
