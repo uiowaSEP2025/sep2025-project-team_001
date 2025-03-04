@@ -42,9 +42,6 @@ jobs:
     name: Cypress Acceptance Tests
     runs-on: ubuntu-latest
 
-    # Optionally ensure this only runs after the Jest tests have passed:
-    # needs: [unit-tests]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,25 +53,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: web_app/package-lock.json
 
-      - name: Check for lock file in web_app
-        run: |
-          if [ ! -f web_app/package-lock.json ]; then
-            echo "❌ Error: package-lock.json not found in web_app/. Ensure it is committed.";
-            exit 1;
-          fi
-
       - name: Install dependencies
         run: npm ci
         working-directory: web_app
 
-      # Start the React App in the background and wait for it to be accessible
-      - name: Start React App
-        run: |
-          npm start &
-          npx wait-on http://localhost:3000
+      # Install start-server-and-test globally or add it to your devDependencies
+      - name: Install start-server-and-test
+        run: npm install -g start-server-and-test
         working-directory: web_app
 
-      # Run Cypress in headless mode
-      - name: Run Cypress tests
-        run: npx cypress run
+      # This single command will:
+      # 1) Run "npm start"
+      # 2) Wait for "http://localhost:3000" to become available
+      # 3) Run "npx cypress run"
+      - name: Start server and run Cypress
+        run: npx start-server-and-test "npm start" http://localhost:3000 "npx cypress run"
         working-directory: web_app
