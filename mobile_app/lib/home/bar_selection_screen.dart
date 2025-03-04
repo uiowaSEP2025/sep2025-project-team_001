@@ -6,24 +6,24 @@ import 'package:mobile_app/design/app_text_styles.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/objects/bar.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class BarSelectionScreen extends StatefulWidget {
+  const BarSelectionScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<BarSelectionScreen> createState() => _BarSelectionScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _BarSelectionScreenState extends State<BarSelectionScreen> {
   List<Bar> bars = [];
   int? selectedBarIndex;
 
   @override
   void initState() {
     super.initState();
-    _initializeBars();
+    initializeBars();
   }
 
-  void _initializeBars() {
+  void initializeBars() {
     //todo call api to initialize the bars
     bars = [
       Bar(
@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                     : Colors.grey),
             onPressed: () {
               if (selectedBarIndex != null) {
-                print("Bar: ${bars[selectedBarIndex!].name}");
+                print("${bars[selectedBarIndex!].name}");
               } else {
                 print("No bar selected");
               }
