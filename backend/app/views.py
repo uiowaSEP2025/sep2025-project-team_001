@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import CustomUser, Customer
+from .models import CustomUser
 
 
 @csrf_exempt
@@ -29,7 +29,7 @@ def register_user(request):
             business_address=data["business_address"],
         )
 
-        Customer.objects.create(user=user)
+        user.save()
 
         return JsonResponse({"message": "User registered successfully"}, status=201)
 
