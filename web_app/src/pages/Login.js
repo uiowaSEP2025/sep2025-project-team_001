@@ -16,22 +16,27 @@ function Login() {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    console.log('Login form submitted');
-
+  
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}login/`, {
         username,
         password,
       });
-
-      console.log('Login successful:', response.data);
-      // Redirect to the dashboard
-      navigate('/');
+  
+      console.log("Login successful:", response.data);
+      const { access, refresh } = response.data.tokens;
+  
+      // Store tokens in localStorage
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+  
+      // Redirect user to dashboard
+      navigate("/");
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      alert('Invalid username or password. Please try again.');
+      console.error("Login error:", error.response?.data || error.message);
+      alert("Invalid username or password. Please try again.");
     }
-  };
+  };    
 
   return (
     <Container className="page-container">
