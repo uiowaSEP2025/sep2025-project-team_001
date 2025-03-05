@@ -1,0 +1,55 @@
+name: Jest & Cypress Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # 1) Unit Test Job
+  unit-tests:
+    name: Run Jest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: web_app/package-lock.json
+
+      - name: Check for lock file in web_app
+        run: |
+          if [ ! -f web_app/package-lock.json ]; then
+            echo "❌ Error: package-lock.json not found in web_app/. Ensure it is committed.";
+            exit 1;
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web_app
+
+      - name: Run Jest tests
+        run: npm test -- src/tests
+        working-directory: web_app
+
+  # 2) Cypress Acceptance Test Job
+  cypress-tests:
+    name: Cypress Acceptance Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5
+        with:
+          build: npm run build            # Build the React app
+          start: npm start                 # Start the dev server
+          wait-on: http://localhost:3000   # Wait for the app to be available
+          working-directory: web_app
