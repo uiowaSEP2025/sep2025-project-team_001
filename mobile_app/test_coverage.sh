@@ -9,5 +9,5 @@ flutter test --coverage
 # Generate LCOV report from coverage files
 genhtml coverage/lcov.info --output=coverage/report
 
-# Open the coverage report in default browser (optional)
+# Open the coverage report in default browser
 open coverage/report/index.html
