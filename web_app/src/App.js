@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import "./auth";
-import PrivateRoute from "./PrivateRoute";
+//import PrivateRoute from "./PrivateRoute";
 
 function AppRoutes() {
   return (
