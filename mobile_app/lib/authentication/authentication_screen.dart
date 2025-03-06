@@ -223,8 +223,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     width: screenWidth * 0.15,
                     decoration: BoxDecoration(
                         border: Border.all(
-                          color: AppColors.whiteText, // Border color
-                          width: 2, // Border width
+                          color: AppColors.whiteText,
+                          width: 2, 
                         ),
                         borderRadius: BorderRadius.circular(10)),
                     child: Image.asset("assets/logos/GoogleLogo.png")),
@@ -254,7 +254,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         options: Options(headers: {"Content-Type": "application/json"}),
       );
 
-      print("Login successful: ${response.data}");
+      print("Login successful: ${response.data}"); //
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login Successful!")),

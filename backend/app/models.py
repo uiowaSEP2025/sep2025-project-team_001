@@ -79,4 +79,3 @@ class OrderItems(models.Model):
         return f"{self.quantity} of {self.item.name} from {self.restaurant.name}"
 
 
-
