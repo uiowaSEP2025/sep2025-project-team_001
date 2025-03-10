@@ -33,7 +33,7 @@ function Registration() {
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}register/`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, {
         name: formData.name,
         username: formData.username,
         password: formData.password,

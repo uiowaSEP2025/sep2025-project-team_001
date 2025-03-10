@@ -5,27 +5,38 @@
 ############################
 resource "aws_security_group" "frontend_sg" {
   name        = "${var.name_prefix}-frontend-sg"
-  description = "Allow inbound HTTP traffic on port 3000 for the frontend"
+  description = "Allow HTTPS traffic and restrict SSH access"
   vpc_id      = var.vpc_id
 
+  # Allow HTTPS (port 443) from anywhere (for secure frontend access)
   ingress {
-    description = "HTTP (frontend)"
-    from_port   = 3000
-    to_port     = 3000
+    description = "Allow HTTPS"
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Restrict SSH to admin_ip
   ingress {
-    description = "SSH access"
+    description = "Allow SSH from trusted IP"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.admin_ip]
   }
 
+  # Add a rule for port 3000 from the NGINX SG
+  ingress {
+    description     = "Allow inbound on port 3000 from NGINX"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [var.nginx_sg_id]
+  }
+
+  # Allow outbound traffic
   egress {
-    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -36,6 +47,7 @@ resource "aws_security_group" "frontend_sg" {
     Name = "${var.name_prefix}-frontend-sg"
   }
 }
+
 
 ############################
 # Data Source for Amazon Linux AMI
@@ -59,31 +71,30 @@ resource "aws_instance" "frontend_ec2" {
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [aws_security_group.frontend_sg.id]
   key_name                    = var.key_pair_name
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   user_data = <<-EOF
     #!/bin/bash
-    # Update OS and install required packages
+    # 1) Update OS and install Docker + Git
     yum update -y
     amazon-linux-extras install docker -y
     service docker start
     usermod -aG docker ec2-user
     yum install -y git
 
-    # Clone the frontend repository
+    # 2) Clone repository
     cd /home/ec2-user
     git clone -b ${var.repo_branch} ${var.repo_url} repo
     cd repo
     cd web_app
 
-    # Create .env file for frontend environment variables (e.g., backend API URL)
-    echo "REACT_APP_API_URL=${var.backend_api_url}" > .env
+    echo "REACT_APP_API_URL=/api" >> .env
 
-    # Build the Docker image for the frontend
-    docker build -t frontend-image .
+    # 3) Build the production image using Dockerfile.production
+    docker build -t frontend-image -f Dockerfile.production .
 
-    # Run the frontend container, mapping container port 3000 to host port 3000
-    docker run -d -p 3000:3000 --env-file .env frontend-image
+    # 4) Run the container
+    docker run -d -p 3000:80 frontend-image
   EOF
 
   tags = {
