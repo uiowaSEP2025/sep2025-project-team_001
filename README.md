@@ -38,13 +38,13 @@ REACT_APP_API_URL=http://localhost:8000/auth/
 
 1. Build the project:  
 ```bash
-docker compose up --build
+docker compose -f ./docker-compose-all-local.yml up --build
 ```
 
-2. Run PostgreSQL migrations:  
+2. Run PostgreSQL migrations:
 ```bash
-docker compose exec backend python django_backend/manage.py makemigrations
-docker compose exec backend python django_backend/manage.py migrate
+docker compose -f ./docker-compose-all-local.yml exec backend python django_backend/manage.py makemigrations
+docker compose -f ./docker-compose-all-local.yml exec backend python django_backend/manage.py migrate
 ```
 
 ---
