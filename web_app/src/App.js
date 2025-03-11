@@ -4,6 +4,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Home from "./pages/Home";
 import Registration from './pages/Registration';
 import Login from './pages/Login';
+import "./auth";
+//import PrivateRoute from "./PrivateRoute";
 
 function AppRoutes() {
   return (
