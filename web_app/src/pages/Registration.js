@@ -26,14 +26,14 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-
+  
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-
+  
     try {
-      const response = await axios.post('/api/register/', {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, {
         name: formData.name,
         username: formData.username,
         password: formData.password,
@@ -42,14 +42,21 @@ function Registration() {
         business_name: formData.business_name,
         business_address: formData.business_address,
       });
-
+  
       console.log("Registration successful:", response.data);
-      navigate("/login"); // Redirect to login on success
+      const { access, refresh } = response.data.tokens;
+  
+      // Store tokens in localStorage
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+  
+      // Redirect to dashboard
+      navigate("/");
     } catch (error) {
       console.error("Registration failed:", error.response?.data || error.message);
-      alert("Registration failed: " + error.response?.data || error.message);
+      alert("Registration failed: " + (error.response?.data || error.message));
     }
-  };
+  };  
 
   return (
     <Container className="page-container">
