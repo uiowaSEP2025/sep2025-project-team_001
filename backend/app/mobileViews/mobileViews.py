@@ -21,9 +21,6 @@ def register_customer(request):
             email=data["email"],
             password=data["password"],
             first_name=data["name"],
-            phone=data["phone"],
-            business_name=data["business_name"],
-            business_address=data["business_address"],
         )
 
         user.save()
