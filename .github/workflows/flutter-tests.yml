@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: ls -R
-        working-directory: mobile_app
+        working-directory: sep2025-project-team_001/mobile_app
 
       - uses: futureware-tech/simulator-action@v3
         with:
@@ -25,4 +25,7 @@ jobs:
           channel: 'stable'
 
       - run: flutter pub get
+        working-directory: sep2025-project-team_001/mobile_app
+
       - run: flutter test
+        working-directory: sep2025-project-team_001/mobile_app
