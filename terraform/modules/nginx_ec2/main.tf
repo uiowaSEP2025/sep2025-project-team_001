@@ -61,22 +61,34 @@ resource "aws_instance" "nginx" {
     #!/bin/bash
     set -xe
 
-    # 1) Install updates, NGINX, certbot
+    # Update system and install necessary packages
     yum update -y
-    amazon-linux-extras install nginx1 epel -y
-    yum install -y certbot
+    amazon-linux-extras install epel
+    amazon-linux-extras enable epel
+    amazon-linux-extras install nginx1 -y
+    yum install -y nginx epel-release certbot python2-certbot-nginx
 
-    # 2) Start and then stop NGINX (so it creates default dirs)
+    # Create NGINX configuration BEFORE running Certbot
+    cat <<EOT > /etc/nginx/conf.d/default.conf
+    server {
+      listen 80;
+      server_name ${var.domain_name};
+      location /.well-known/acme-challenge/ {
+          root /usr/share/nginx/html;
+      }
+    }
+    EOT
+
+    # Start and enable NGINX (temporarily for Certbot validation)
     systemctl start nginx
     systemctl enable nginx
-    systemctl stop nginx
 
-    # 3) Obtain the SSL certificate (standalone mode uses port 80)
-    certbot certonly --standalone -n --agree-tos \
+    # Obtain SSL certificate (standalone mode using port 80)
+    certbot certonly --nginx -n --agree-tos \
       --email ardusercole@gmail.com \
       -d ${var.domain_name}
 
-    # 4) Create an NGINX config for HTTP -> HTTPS and an HTTPS server
+    # Update NGINX Configuration for SSL
     cat <<EOT > /etc/nginx/conf.d/default.conf
     # Redirect all HTTP to HTTPS
     server {
@@ -115,10 +127,10 @@ resource "aws_instance" "nginx" {
     }
     EOT
 
-    # 5) Restart NGINX with SSL
-    systemctl start nginx
-    systemctl enable nginx
+    # Restart NGINX with SSL enabled
+    systemctl restart nginx
   EOF
+
 
   tags = {
     Name = "${var.name_prefix}-nginx"
