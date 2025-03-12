@@ -127,14 +127,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       ? CircularProgressIndicator(color: Colors.white)
                       : Center(
                           child: Text(
-                            "SIGN UP/LOGIN",
+                            "LOGIN",
                             style: AppTextStyles.buttonText(
                                 screenHeight, AppColors.whiteText),
                           ),
                         )),
             ),
             SizedBox(
-              height: verticalSpacing * 2,
+              height: verticalSpacing,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -228,6 +228,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                         ),
                         borderRadius: BorderRadius.circular(10)),
                     child: Image.asset("assets/logos/GoogleLogo.png")),
+                Text("Don't have an account? Sign Up"),
           ]),
         ),
       ),
