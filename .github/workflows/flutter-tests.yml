@@ -5,9 +5,9 @@ on:
     branches:
       - main
 
-  push:
-    branches:
-      - ${{ github.head_ref || github.ref_name }
+  # push:
+  #   branches:
+  #     - ${{ github.head_ref || github.ref_name }}
 
 jobs:
   test:
