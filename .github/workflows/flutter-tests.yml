@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - run: cd mobile_app
+        working-directory: mobile_app
+        
       - uses: futureware-tech/simulator-action@v3
         with:
           model: 'iPhone 15'
