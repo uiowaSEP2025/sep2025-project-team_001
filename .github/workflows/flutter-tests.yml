@@ -19,14 +19,13 @@ jobs:
       - run: ls -R
         working-directory: mobile_app
 
-      # - uses: subosito/flutter-action@v2
-      #   with:
-      #     flutter-version: '3.19.3'
-      #     channel: 'stable'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.3'
+          channel: 'stable'
 
+      - run: flutter pub get
+        working-directory: mobile_app
 
-      # - run: flutter pub get
-      #   working-directory: mobile_app
-
-      # - run: flutter test
-      #   working-directory: sep2025-project-team_001/mobile_app
+      - run: flutter test
+        working-directory: mobile_app
