@@ -1,9 +1,11 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import login_user, register_user
+from app.views import login_user, register_user
+from app.views import CurrentItemsList
 
 urlpatterns = [
     path('login/', login_user, name='login'),
     path('register/', register_user, name='register'),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('bartender_view/', CurrentItemsList.as_view(), name='bartender_view'),
 ]
