@@ -35,7 +35,7 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "GitHub branch"
-  default     = "SCRUM-58-aws-security-part-2"
+  default     = "main"
 }
 
 variable "db_host" {
