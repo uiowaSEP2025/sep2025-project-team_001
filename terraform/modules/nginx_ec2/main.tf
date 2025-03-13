@@ -23,6 +23,15 @@ resource "aws_security_group" "nginx_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTPS
+  ingress {
+    description = "Allow HTTPS from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   ingress {
     description = "Allow SSH from trusted IP"
     from_port   = 22
@@ -46,19 +55,56 @@ resource "aws_instance" "nginx" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_pair_name
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
 
   user_data = <<-EOF
     #!/bin/bash
-    yum update -y
-    amazon-linux-extras install nginx1 -y
-    systemctl start nginx
-    systemctl enable nginx
+    set -xe
 
+    # Update system and install necessary packages
+    yum update -y
+    amazon-linux-extras install epel
+    amazon-linux-extras enable epel
+    amazon-linux-extras install nginx1 -y
+    yum install -y nginx epel-release certbot python2-certbot-nginx
+
+    # Create NGINX configuration BEFORE running Certbot
     cat <<EOT > /etc/nginx/conf.d/default.conf
     server {
       listen 80;
       server_name ${var.domain_name};
+      location /.well-known/acme-challenge/ {
+          root /usr/share/nginx/html;
+      }
+    }
+    EOT
+
+    # Start and enable NGINX (temporarily for Certbot validation)
+    systemctl start nginx
+    systemctl enable nginx
+
+    # Obtain SSL certificate (standalone mode using port 80)
+    certbot certonly --nginx -n --agree-tos \
+      --email ardusercole@gmail.com \
+      -d ${var.domain_name}
+
+    # Update NGINX Configuration for SSL
+    cat <<EOT > /etc/nginx/conf.d/default.conf
+    # Redirect all HTTP to HTTPS
+    server {
+      listen 80;
+      server_name ${var.domain_name};
+      return 301 https://\$host\$request_uri;
+    }
+
+    # HTTPS server
+    server {
+      listen 443 ssl;
+      server_name ${var.domain_name};
+
+      # SSL certificate from certbot
+      ssl_certificate /etc/letsencrypt/live/${var.domain_name}/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/${var.domain_name}/privkey.pem;
 
       # Proxy to Frontend
       location / {
@@ -68,7 +114,7 @@ resource "aws_instance" "nginx" {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
       }
 
-      # Proxy to Backend API
+      # Proxy to Backend
       location /api/ {
         proxy_pass http://${var.backend_target}:8000/;
         proxy_http_version 1.1;
@@ -81,11 +127,12 @@ resource "aws_instance" "nginx" {
     }
     EOT
 
+    # Restart NGINX with SSL enabled
     systemctl restart nginx
   EOF
+
 
   tags = {
     Name = "${var.name_prefix}-nginx"
   }
 }
-

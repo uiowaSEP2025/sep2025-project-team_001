@@ -46,7 +46,7 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "Git repo branch"
-  default     = "aws-security-hardening"
+  default     = "main"
 }
 
 
