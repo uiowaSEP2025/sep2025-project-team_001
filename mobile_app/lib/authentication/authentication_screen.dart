@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
@@ -48,7 +49,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         body: GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus
-            ?.unfocus(); //unfocus to close keyboard
+            ?.unfocus();
       },
       child: Container(
         width: screenWidth,
@@ -224,11 +225,33 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     decoration: BoxDecoration(
                         border: Border.all(
                           color: AppColors.whiteText,
-                          width: 2, 
+                          width: 2,
                         ),
                         borderRadius: BorderRadius.circular(10)),
                     child: Image.asset("assets/logos/GoogleLogo.png")),
-                Text("Don't have an account? Sign Up"),
+            SizedBox(
+              height: verticalSpacing * 1.5,
+            ),
+            RichText(
+              text: TextSpan(
+                text: "Don't have an account? ",
+                style: AppTextStyles.subtitleParagraph(
+                    screenHeight, AppColors.whiteText),
+                children: [
+                  TextSpan(
+                    text: "Sign Up",
+                    style: const TextStyle(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.pushNamed(context, "/register");
+                      },
+                  ),
+                ],
+              ),
+            ),
           ]),
         ),
       ),

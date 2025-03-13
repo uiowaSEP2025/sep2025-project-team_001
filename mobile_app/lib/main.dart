@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => AuthenticationPage(), 
         '/home' : (context) => BarSelectionScreen(),
+        '/register' : (context) => BarSelectionScreen(),
         }
       
     );

@@ -82,52 +82,59 @@ class _BarSelectionScreenState extends State<BarSelectionScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding:
-            EdgeInsets.only(left: horizontalSpacing, right: horizontalSpacing),
-        child: bars.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: horizontalSpacing,
-                    ),
-                    for (int i = 0; i < bars.length; i += 2) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () => selectBar(i),
-                            child: BarCard(
-                              bar: bars[i],
-                              screenHeight: screenHeight,
-                              screenWidth: screenWidth,
-                              isSelected: selectedBarIndex == i,
-                            ),
-                          ),
-                          if (i + 1 < bars.length) ...[
-                            SizedBox(
-                              width: horizontalSpacing * 1.5,
-                            ),
+      body: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedBarIndex = null;
+          });
+        },
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: horizontalSpacing, right: horizontalSpacing),
+          child: bars.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: horizontalSpacing,
+                      ),
+                      for (int i = 0; i < bars.length; i += 2) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             GestureDetector(
-                              onTap: () => selectBar(i + 1),
+                              onTap: () => selectBar(i),
                               child: BarCard(
-                                bar: bars[i + 1],
+                                bar: bars[i],
                                 screenHeight: screenHeight,
                                 screenWidth: screenWidth,
-                                isSelected: selectedBarIndex == i + 1,
+                                isSelected: selectedBarIndex == i,
                               ),
                             ),
-                          ]
-                        ],
-                      ),
-                      SizedBox(height: horizontalSpacing),
-                    ]
-                  ],
+                            if (i + 1 < bars.length) ...[
+                              SizedBox(
+                                width: horizontalSpacing * 1.5,
+                              ),
+                              GestureDetector(
+                                onTap: () => selectBar(i + 1),
+                                child: BarCard(
+                                  bar: bars[i + 1],
+                                  screenHeight: screenHeight,
+                                  screenWidth: screenWidth,
+                                  isSelected: selectedBarIndex == i + 1,
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                        SizedBox(height: horizontalSpacing),
+                      ]
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
       floatingActionButton: Container(
         height: screenWidth * 0.12,
