@@ -88,7 +88,7 @@ resource "aws_instance" "frontend_ec2" {
     cd repo
     cd web_app
 
-    echo "REACT_APP_API_URL=/api" >> .env
+    echo "REACT_APP_API_URL=http://streamlinebars.com/api" >> .env
 
     # 3) Build the production image using Dockerfile.production
     docker build -t frontend-image -f Dockerfile.production .
