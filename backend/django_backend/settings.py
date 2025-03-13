@@ -131,4 +131,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://streamlinebars.com",
+    "http://api.streamlinebars.com",
+    "https://streamlinebars.com",
+    "https://api.streamlinebars.com",
+    r"^https://.*\.streamlinebars\.com$",
 ]
