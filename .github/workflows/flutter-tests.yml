@@ -1,0 +1,31 @@
+name: test-mobile
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: futureware-tech/simulator-action@v3
+        with:
+          model: 'iPhone 15'
+
+      - run: ls -R
+        working-directory: mobile_app
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.3'
+          channel: 'stable'
+
+      - run: flutter pub get
+        working-directory: mobile_app
+
+      - run: flutter test
+        working-directory: mobile_app
