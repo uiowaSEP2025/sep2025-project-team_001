@@ -3,8 +3,12 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/input_text_box.dart';
+import 'dart:ui';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -45,217 +49,260 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     double horizontalSpacing = screenWidth * 0.05;
     double verticalSpacing = screenHeight * 0.025;
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+          statusBarColor: Colors.white, statusBarBrightness: Brightness.dark),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(title: StreamlineLogo(screenHeight: screenHeight, color: Colors.white,), backgroundColor: Colors.transparent, scrolledUnderElevation: 0,),
+        backgroundColor: Colors.white,
         body: GestureDetector(
-      onTap: () {
-        FocusManager.instance.primaryFocus
-            ?.unfocus();
-      },
-      child: Container(
-        width: screenWidth,
-        height: screenHeight,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xff1A1D1A), Color(0xff313538)], // Gradient colors
-            begin: Alignment.topLeft, // Gradient start position
-            end: Alignment.bottomRight, // Gradient end position
-          ),
-        ),
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            SizedBox(
-              height: screenHeight * 0.1,
-            ),
-            Container(
-              width: screenWidth * 0.6,
-              child: Image.asset("assets/images/StreamlineLogo.png"),
-            ),
-            SizedBox(
-              height: verticalSpacing / 2,
-            ),
-            Container(
-              width: screenWidth * 0.75,
-              child: Text(
-                "Please sign in to start enjoying special treatment from your favorite restaurant",
-                textAlign: TextAlign.center,
-                style: AppTextStyles.subtitleParagraph(
-                    screenHeight, AppColors.whiteText),
-              ),
-            ),
-            SizedBox(
-              height: verticalSpacing,
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: horizontalSpacing, right: horizontalSpacing),
-              child: InputTextBox(
-                label: "Email",
-                hintText: "johndoe@gmail.com",
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                controller: _emailController,
-                onSubmitted: authenticate,
-              ),
-            ),
-            SizedBox(
-              height: verticalSpacing,
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: horizontalSpacing, right: horizontalSpacing),
-              child: InputTextBox(
-                label: "Password",
-                hintText: "********",
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                controller: _passwordController,
-                onSubmitted: authenticate,
-              ),
-            ),
-            SizedBox(
-              height: verticalSpacing * 2,
-            ),
-            Container(
-              height: screenWidth * 0.12,
-              width: screenWidth - horizontalSpacing * 2,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor),
-                  onPressed: isLoading ? null : authenticate,
-                  child: isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Center(
-                          child: Text(
-                            "LOGIN",
-                            style: AppTextStyles.buttonText(
-                                screenHeight, AppColors.whiteText),
-                          ),
-                        )),
-            ),
-            SizedBox(
-              height: verticalSpacing,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  height: 1,
-                  width: screenWidth * 0.3,
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Stack(children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                child: Container(
+                  height: screenHeight * 0.25,
+                  clipBehavior: Clip.hardEdge,
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.backgroundColor,
-                        Color(0xffD9D9D9)
-                      ], // Gradient colors
-                      begin: Alignment.topLeft, // Gradient start position
-                      end: Alignment.bottomRight, // Gradient end position
-                    ),
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(0)),
+                  ),
+                  child: Image.asset(
+                    "assets/images/partyDancingPicture.jpg",
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                   ),
                 ),
-                SizedBox(
-                  width: horizontalSpacing / 2,
-                ),
-                Text(
-                  "Or continue with",
-                  style: AppTextStyles.subtitleParagraph(
-                      screenHeight, AppColors.whiteText),
-                ),
-                SizedBox(
-                  width: horizontalSpacing / 2,
-                ),
-                Container(
-                  height: 1,
-                  width: screenWidth * 0.3,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.backgroundColor,
-                        Color(0xffD9D9D9)
-                      ], // Gradient colors
-                      begin: Alignment.bottomRight, // Gradient start position
-                      end: Alignment.bottomLeft, // Gradient end position
+              ),
+            ),
+            Positioned.fill(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: screenHeight * 0.25,
                     ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: verticalSpacing,
-            ),
-            (Platform.isIOS)
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                          height: screenWidth * 0.15,
-                          width: screenWidth * 0.15,
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.whiteText, // Border color
-                                width: 2, // Border width
-                              ),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Image.asset("assets/logos/GoogleLogo.png")),
-                      SizedBox(
-                        width: horizontalSpacing * 2,
-                      ),
-                      Container(
-                        height: screenWidth * 0.15,
-                        width: screenWidth * 0.15,
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.whiteText, // Border color
-                              width: 2, // Border width
+                    Container(
+                      color: Colors.white,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: verticalSpacing / 2,
                             ),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Icon(
-                          Icons.apple,
-                          size: screenWidth * 0.11,
-                          color: AppColors.whiteText,
-                        ),
-                      ),
-                    ],
-                  )
-                : Container(
-                    height: screenWidth * 0.15,
-                    width: screenWidth * 0.15,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.whiteText,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Image.asset("assets/logos/GoogleLogo.png")),
-            SizedBox(
-              height: verticalSpacing * 1.5,
-            ),
-            RichText(
-              text: TextSpan(
-                text: "Don't have an account? ",
-                style: AppTextStyles.subtitleParagraph(
-                    screenHeight, AppColors.whiteText),
-                children: [
-                  TextSpan(
-                    text: "Sign Up",
-                    style: const TextStyle(
-                      color: AppColors.primaryColor,
-                      fontWeight: FontWeight.bold,
+                            Container(
+                              width: screenWidth * 0.75,
+                              child: Text(
+                                "Sign in",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.bigBoldLetters(
+                                    screenHeight * 0.7, Colors.black),
+                              ),
+                            ),
+                            SizedBox(
+                              height: verticalSpacing / 2,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: horizontalSpacing,
+                                  right: horizontalSpacing),
+                              child: InputTextBox(
+                                label: "Email",
+                                hintText: "johndoe@gmail.com",
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                controller: _emailController,
+                                onSubmitted: authenticate,
+                              ),
+                            ),
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: horizontalSpacing,
+                                  right: horizontalSpacing),
+                              child: InputTextBox(
+                                label: "Password",
+                                hintText: "********",
+                                screenWidth: screenWidth,
+                                screenHeight: screenHeight,
+                                controller: _passwordController,
+                                onSubmitted: authenticate,
+                              ),
+                            ),
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            Container(
+                              height: screenWidth * 0.12,
+                              width: screenWidth - horizontalSpacing * 2,
+                              child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryColor),
+                                  onPressed: isLoading ? null : authenticate,
+                                  child: isLoading
+                                      ? CircularProgressIndicator(
+                                          color: Colors.white)
+                                      : Center(
+                                          child: Text(
+                                            "LOGIN",
+                                            style: AppTextStyles.buttonText(
+                                                screenHeight,
+                                                AppColors.whiteText),
+                                          ),
+                                        )),
+                            ),
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 1,
+                                  width: screenWidth * 0.4,
+                                  color: AppColors.paragraphText,
+                                ),
+                                SizedBox(
+                                  width: horizontalSpacing / 2,
+                                ),
+                                Text(
+                                  "Or",
+                                  style: AppTextStyles.subtitleParagraph(
+                                      screenHeight, AppColors.paragraphText),
+                                ),
+                                SizedBox(
+                                  width: horizontalSpacing / 2,
+                                ),
+                                Container(
+                                  height: 1,
+                                  width: screenWidth * 0.4,
+                                  color: AppColors.paragraphText,
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            Platform.isIOS
+                                ? Container(
+                                    height: screenWidth * 0.12,
+                                    width: screenWidth - horizontalSpacing * 2,
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.black),
+                                        onPressed:
+                                            isLoading ? null : authenticate,
+                                        child: isLoading
+                                            ? CircularProgressIndicator(
+                                                color: Colors.white)
+                                            : Center(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.apple,
+                                                      size: screenWidth * 0.08,
+                                                      color:
+                                                          AppColors.whiteText,
+                                                    ),
+                                                    SizedBox(
+                                                      width:
+                                                          horizontalSpacing / 2,
+                                                    ),
+                                                    Text(
+                                                      "Sign Up with Apple",
+                                                      style: AppTextStyles
+                                                          .buttonText(
+                                                              screenHeight,
+                                                              AppColors
+                                                                  .whiteText),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )),
+                                  )
+                                : Container(),
+                            Platform.isIOS
+                                ? SizedBox(
+                                    height: verticalSpacing,
+                                  )
+                                : Container(),
+                            Container(
+                                height: screenWidth * 0.12,
+                                width: screenWidth - horizontalSpacing * 2,
+                                child: OutlinedButton(
+                                  onPressed: isLoading ? null : authenticate,
+                                  child: isLoading
+                                      ? CircularProgressIndicator(
+                                          color: Colors.white)
+                                      : Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                  height: screenWidth * 0.1,
+                                                  width: screenWidth * 0.1,
+                                                  child: Image.asset(
+                                                      "assets/logos/GoogleLogo.png")),
+                                              SizedBox(
+                                                width: horizontalSpacing / 2,
+                                              ),
+                                              Text(
+                                                "Sign Up with Google",
+                                                style: AppTextStyles.buttonText(
+                                                    screenHeight, Colors.black),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                )),
+                            SizedBox(
+                              height: verticalSpacing * 2,
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                text: "Don't have an account? ",
+                                style: AppTextStyles.subtitleParagraph(
+                                    screenHeight, AppColors.paragraphText),
+                                children: [
+                                  TextSpan(
+                                    text: "Sign Up",
+                                    style: const TextStyle(
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.pushNamed(
+                                            context, "/register");
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
                     ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.pushNamed(context, "/register");
-                      },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ]),
         ),
       ),
-    ));
+    );
   }
 
   void authenticate() async {
@@ -297,52 +344,19 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   }
 }
 
-class InputTextBox extends StatelessWidget {
-  const InputTextBox(
-      {super.key,
-      required this.screenWidth,
-      required this.screenHeight,
-      required this.label,
-      required this.hintText,
-      required this.controller,
-      required this.onSubmitted});
+class StreamlineLogo extends StatelessWidget {
+  const StreamlineLogo({
+    super.key,
+    required this.screenHeight,
+    required this.color,
+  });
 
-  final double screenWidth;
   final double screenHeight;
-  final String label;
-  final String hintText;
-  final TextEditingController controller;
-  final VoidCallback onSubmitted;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.textFieldLabel(
-                  screenHeight, AppColors.whiteText),
-            ),
-          ],
-        ),
-        Container(
-          height: screenWidth * 0.12,
-          child: TextField(
-            onSubmitted: (value) {
-              onSubmitted();
-            },
-            controller: controller,
-            cursorColor: AppColors.primaryColor,
-            decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.whiteText,
-                border: OutlineInputBorder(),
-                hintText: hintText),
-          ),
-        ),
-      ],
-    );
+    return Text("STREAMLINE",
+        style: AppTextStyles.logoStyle(screenHeight, color));
   }
 }

@@ -71,7 +71,7 @@ class _BarSelectionScreenState extends State<BarSelectionScreen> {
       appBar: AppBar(
         title: Text(
           'Select a bar',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
         actions: [
           IconButton(
