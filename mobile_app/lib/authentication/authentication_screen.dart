@@ -5,12 +5,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mobile_app/design/app_colors.dart';
-import 'package:mobile_app/design/app_text_styles.dart';
-import 'package:mobile_app/design/widgets/input_text_box.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'dart:ui';
 
-import 'package:mobile_app/design/widgets/password_text_box.dart';
+import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});

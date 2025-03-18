@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mobile_app/design/app_colors.dart';
-import 'package:mobile_app/design/app_text_styles.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/objects/bar.dart';
 

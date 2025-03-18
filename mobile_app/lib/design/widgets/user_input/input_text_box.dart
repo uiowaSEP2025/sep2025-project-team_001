@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/design/app_colors.dart';
-import 'package:mobile_app/design/app_text_styles.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 
 class InputTextBox extends StatelessWidget {
   const InputTextBox(
