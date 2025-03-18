@@ -3,9 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mobile_app/design/app_colors.dart';
-import 'package:mobile_app/design/app_text_styles.dart';
-import 'package:mobile_app/design/widgets/input_text_box.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
+import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -19,6 +20,7 @@ class _CreateAccountState extends State<CreateAccount> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
+  late TextEditingController _birthdateController;
 
   bool termsAccepted = false;
   bool isLoading = false;
@@ -28,8 +30,10 @@ class _CreateAccountState extends State<CreateAccount> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _birthdateController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
     super.dispose();
   }
 
@@ -37,6 +41,7 @@ class _CreateAccountState extends State<CreateAccount> {
   void initState() {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
+    _birthdateController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
     super.initState();
@@ -69,51 +74,90 @@ class _CreateAccountState extends State<CreateAccount> {
           title: Text("Set up your account",
               style: AppTextStyles.appBarText(screenHeight, Colors.black)),
         ),
-        body: Padding(
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: verticalSpacing,
+                      left: horizontalSpacing,
+                      right: horizontalSpacing),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        "Please complete all fields to create your account on Streamline",
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.subtitleParagraph(
+                            screenHeight, AppColors.paragraphText),
+                      ),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      InputTextBox(
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                          label: "Name",
+                          hintText: "Name",
+                          controller: _nameController,
+                          onSubmitted: onTextFieldSubmitted),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      InputTextBox(
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                          label: "Email",
+                          hintText: "Email",
+                          controller: _emailController,
+                          onSubmitted: onTextFieldSubmitted),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      DateInputBox(
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                          label: "Birthdate",
+                          hintText: "Birthdate",
+                          controller: _birthdateController),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      InputTextBox(
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                          label: "Password",
+                          hintText: "********",
+                          controller: _passwordController,
+                          onSubmitted: onTextFieldSubmitted),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      InputTextBox(
+                          screenWidth: screenWidth,
+                          screenHeight: screenHeight,
+                          label: "Confirm Password",
+                          hintText: "********",
+                          controller: _confirmPasswordController,
+                          onSubmitted: onTextFieldSubmitted),
+                      // Spacer(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: Padding(
           padding: EdgeInsets.only(
-              top: verticalSpacing,
               left: horizontalSpacing,
-              right: horizontalSpacing),
+              right: horizontalSpacing,
+              top: verticalSpacing),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Please complete all fields to create your account on Streamline",
-                textAlign: TextAlign.center,
-                style: AppTextStyles.subtitleParagraph(
-                    screenHeight, AppColors.paragraphText),
-              ),
-              SizedBox(
-                height: verticalSpacing,
-              ),
-              InputTextBox(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  label: "Name",
-                  hintText: "Name",
-                  controller: _nameController,
-                  onSubmitted: onTextFieldSubmitted),
-              InputTextBox(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  label: "Email",
-                  hintText: "Email",
-                  controller: _emailController,
-                  onSubmitted: onTextFieldSubmitted),
-              InputTextBox(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  label: "Password",
-                  hintText: "********",
-                  controller: _passwordController,
-                  onSubmitted: onTextFieldSubmitted),
-              InputTextBox(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  label: "Confirm Password",
-                  hintText: "********",
-                  controller: _confirmPasswordController,
-                  onSubmitted: onTextFieldSubmitted),
-              Spacer(),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -173,7 +217,8 @@ class _CreateAccountState extends State<CreateAccount> {
                           backgroundColor: AppColors.primaryColor),
                       onPressed: (_emailController.text.isEmpty ||
                               _nameController.text.isEmpty ||
-                              _passwordController.text.isEmpty || !termsAccepted)
+                              _passwordController.text.isEmpty ||
+                              !termsAccepted)
                           ? null
                           : createAccount,
                       child: Center(
