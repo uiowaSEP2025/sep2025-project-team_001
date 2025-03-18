@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
@@ -54,7 +55,17 @@ class _CreateAccountState extends State<CreateAccount> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          ),
+          backgroundColor: Colors.transparent,
           title: Text("Set up your account",
               style: AppTextStyles.appBarText(screenHeight, Colors.black)),
         ),
@@ -100,7 +111,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   screenHeight: screenHeight,
                   label: "Confirm Password",
                   hintText: "********",
-                  controller: _nameController,
+                  controller: _confirmPasswordController,
                   onSubmitted: onTextFieldSubmitted),
               Spacer(),
               GestureDetector(
@@ -108,7 +119,6 @@ class _CreateAccountState extends State<CreateAccount> {
                   setState(() {
                     termsAccepted = !termsAccepted;
                   });
-                  
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,15 +136,17 @@ class _CreateAccountState extends State<CreateAccount> {
                         activeColor: AppColors.primaryColor,
                       ),
                     ),
+                    Spacer(),
                     Container(
                       width: screenWidth * 0.77,
                       child: RichText(
                         text: TextSpan(
                           text: "I agree to the ",
-                          style: AppTextStyles.subtitleParagraph(screenHeight, AppColors.paragraphText),
+                          style: AppTextStyles.subtitleParagraph(
+                              screenHeight, AppColors.paragraphText),
                           children: [
                             TextSpan(
-                              text: "Terms of Use",
+                              text: "Terms and Conditions",
                               style: TextStyle(
                                 color: AppColors.primaryColor,
                                 fontWeight: FontWeight.bold,
@@ -144,41 +156,36 @@ class _CreateAccountState extends State<CreateAccount> {
                                   Navigator.pushNamed(context, "/terms");
                                 },
                             ),
-                            TextSpan(text: " and "),
-                            TextSpan(
-                              text: "Privacy Policy",
-                              style: TextStyle(
-                                color: AppColors.primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pushNamed(context, "/privacy");
-                                },
-                            ),
                           ],
                         ),
                       ),
                     ),
-                  
                   ],
                 ),
               ),
-              SizedBox(height: verticalSpacing,),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor),
-                  onPressed: isLoading ? null : createAccount,
-                  child: isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Center(
-                          child: Text(
-                            "Create Account",
-                            style: AppTextStyles.buttonText(
-                                screenHeight, AppColors.whiteText),
-                          ),
-                        )),
-                        SizedBox(height: verticalSpacing*2,)
+              SizedBox(
+                height: verticalSpacing,
+              ),
+              isLoading
+                  ? CircularProgressIndicator(color: AppColors.primaryColor)
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor),
+                      onPressed: (_emailController.text.isEmpty ||
+                              _nameController.text.isEmpty ||
+                              _passwordController.text.isEmpty || !termsAccepted)
+                          ? null
+                          : createAccount,
+                      child: Center(
+                        child: Text(
+                          "Create Account",
+                          style: AppTextStyles.buttonText(
+                              screenHeight, AppColors.whiteText),
+                        ),
+                      )),
+              SizedBox(
+                height: verticalSpacing * 2,
+              )
             ],
           ),
         ),
