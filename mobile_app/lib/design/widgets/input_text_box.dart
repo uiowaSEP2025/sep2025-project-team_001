@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/app_colors.dart';
 import 'package:mobile_app/design/app_text_styles.dart';
@@ -43,6 +42,7 @@ class InputTextBox extends StatelessWidget {
             controller: controller,
             cursorColor: AppColors.primaryColor,
             decoration: InputDecoration(
+                contentPadding: EdgeInsets.only(left: screenWidth * 0.025),
                 filled: true,
                 fillColor: AppColors.whiteText,
                 border: OutlineInputBorder(),

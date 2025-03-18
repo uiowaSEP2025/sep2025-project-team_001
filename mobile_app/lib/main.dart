@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/authentication/authentication_screen.dart';
 import 'package:mobile_app/authentication/create_account.dart';
+import 'package:mobile_app/authentication/terms_conditions_screen.dart';
 import 'package:mobile_app/home/bar_selection_screen.dart';
 
 void main() {
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => AuthenticationPage(), 
         '/home' : (context) => BarSelectionScreen(),
         '/register' : (context) => CreateAccount(),
+        '/terms' : (context) => TermsAndConditionsScreen(),
         }
       
     );

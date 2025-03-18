@@ -10,6 +10,8 @@ import 'package:mobile_app/design/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/input_text_box.dart';
 import 'dart:ui';
 
+import 'package:mobile_app/design/widgets/password_text_box.dart';
+
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
 
@@ -54,7 +56,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           statusBarColor: Colors.white, statusBarBrightness: Brightness.dark),
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: AppBar(title: StreamlineLogo(screenHeight: screenHeight, color: Colors.white,), backgroundColor: Colors.transparent, scrolledUnderElevation: 0,),
+        appBar: AppBar(
+          title: StreamlineLogo(
+            screenHeight: screenHeight,
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+        ),
         backgroundColor: Colors.white,
         body: GestureDetector(
           onTap: () {
@@ -130,9 +139,9 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                               padding: EdgeInsets.only(
                                   left: horizontalSpacing,
                                   right: horizontalSpacing),
-                              child: InputTextBox(
+                              child: PasswordTextBox(
                                 label: "Password",
-                                hintText: "********",
+                                hintText: "password",
                                 screenWidth: screenWidth,
                                 screenHeight: screenHeight,
                                 controller: _passwordController,
@@ -309,9 +318,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter email and password")),
+        SnackBar(
+          content: Text("Please enter a valid email and password"),
+          backgroundColor: AppColors.warning,
+        ),
       );
       return;
     }
