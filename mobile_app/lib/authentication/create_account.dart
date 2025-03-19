@@ -1,8 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
@@ -78,7 +76,7 @@ class _CreateAccountState extends State<CreateAccount> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Padding(
                   padding: EdgeInsets.only(
                       top: verticalSpacing,
@@ -97,6 +95,9 @@ class _CreateAccountState extends State<CreateAccount> {
                         height: verticalSpacing,
                       ),
                       InputTextBox(
+                          onChanged: () {
+                            setState(() {});
+                          },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Name",
@@ -107,6 +108,9 @@ class _CreateAccountState extends State<CreateAccount> {
                         height: verticalSpacing,
                       ),
                       InputTextBox(
+                          onChanged: () {
+                            setState() {}
+                          },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Email",
@@ -126,6 +130,9 @@ class _CreateAccountState extends State<CreateAccount> {
                         height: verticalSpacing,
                       ),
                       InputTextBox(
+                          onChanged: () {
+                            setState() {}
+                          },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Password",
@@ -136,13 +143,15 @@ class _CreateAccountState extends State<CreateAccount> {
                         height: verticalSpacing,
                       ),
                       InputTextBox(
+                          onChanged: () {
+                            setState() {}
+                          },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Confirm Password",
                           hintText: "********",
                           controller: _confirmPasswordController,
                           onSubmitted: onTextFieldSubmitted),
-                      // Spacer(),
                     ],
                   ),
                 ),
@@ -168,7 +177,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       height: 20,
                       child: Checkbox(
                         value: termsAccepted,
@@ -180,8 +189,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         activeColor: AppColors.primaryColor,
                       ),
                     ),
-                    Spacer(),
-                    Container(
+                    const Spacer(),
+                    SizedBox(
                       width: screenWidth * 0.77,
                       child: RichText(
                         text: TextSpan(
@@ -191,7 +200,7 @@ class _CreateAccountState extends State<CreateAccount> {
                           children: [
                             TextSpan(
                               text: "Terms and Conditions",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: AppColors.primaryColor,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -211,13 +220,15 @@ class _CreateAccountState extends State<CreateAccount> {
                 height: verticalSpacing,
               ),
               isLoading
-                  ? CircularProgressIndicator(color: AppColors.primaryColor)
+                  ? const CircularProgressIndicator(
+                      color: AppColors.primaryColor)
                   : ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor),
                       onPressed: (_emailController.text.isEmpty ||
                               _nameController.text.isEmpty ||
                               _passwordController.text.isEmpty ||
+                              _birthdateController.text.isEmpty ||
                               !termsAccepted)
                           ? null
                           : createAccount,

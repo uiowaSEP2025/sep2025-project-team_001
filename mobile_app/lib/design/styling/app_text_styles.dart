@@ -39,4 +39,11 @@ class AppTextStyles {
     return GoogleFonts.aboreto(
         fontSize: screenHeight * 0.027, fontWeight: FontWeight.w800, color: color);
   }
+
+  static TextStyle smallFooters(double screenHeight, Color color) {
+    return GoogleFonts.roboto(
+        fontWeight: FontWeight.w400,
+        fontSize: screenHeight * 0.016,
+        color: color);
+  }
 }

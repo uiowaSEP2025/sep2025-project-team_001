@@ -5,6 +5,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 class InputTextBox extends StatelessWidget {
   const InputTextBox(
       {super.key,
+      required this.onChanged,
       required this.screenWidth,
       required this.screenHeight,
       required this.label,
@@ -18,11 +19,13 @@ class InputTextBox extends StatelessWidget {
   final String hintText;
   final TextEditingController controller;
   final VoidCallback onSubmitted;
+  final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        (label != "") ?
         Row(
           children: [
             Text(
@@ -31,10 +34,13 @@ class InputTextBox extends StatelessWidget {
                   screenHeight, AppColors.paragraphText),
             ),
           ],
-        ),
+        ) : Container(),
         Container(
           height: screenWidth * 0.12,
           child: TextField(
+            onChanged:(value) {
+              onChanged();
+            },
             maxLines: 1,
             onSubmitted: (value) {
               onSubmitted();

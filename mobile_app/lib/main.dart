@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/authentication/authentication_screen.dart';
 import 'package:mobile_app/authentication/create_account.dart';
+import 'package:mobile_app/authentication/recover_email/recover_password.dart';
 import 'package:mobile_app/authentication/terms_conditions_screen.dart';
 import 'package:mobile_app/home/bar_selection_screen.dart';
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
         '/home' : (context) => BarSelectionScreen(),
         '/register' : (context) => CreateAccount(),
         '/terms' : (context) => TermsAndConditionsScreen(),
+        '/recoverPassword' : (context) => RecoverPasswordScreen(),
         }
       
     );

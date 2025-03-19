@@ -30,6 +30,19 @@ class _DateInputBoxState extends State<DateInputBox> {
       initialDate: DateTime(2000, 1, 1),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+      return Theme(
+        data: ThemeData(
+          colorScheme: ColorScheme.light(
+            primary: AppColors.primaryColor,
+            onPrimary: Colors.white,
+            onSurface: Colors.black,
+          ),
+          dialogBackgroundColor: Colors.white,
+        ),
+        child: child!,
+      );
+    },
     );
 
     if (pickedDate != null) {
