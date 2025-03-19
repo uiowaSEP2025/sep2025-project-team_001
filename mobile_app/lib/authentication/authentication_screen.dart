@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -52,7 +54,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     double verticalSpacing = screenHeight * 0.025;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
           statusBarColor: Colors.white, statusBarBrightness: Brightness.dark),
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -93,7 +95,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             ),
             Positioned.fill(
               child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
                     SizedBox(
@@ -124,6 +126,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                   left: horizontalSpacing,
                                   right: horizontalSpacing),
                               child: InputTextBox(
+                                                        onChanged: (){setState(){}},
+
                                 label: "Email",
                                 hintText: "johndoe@gmail.com",
                                 screenWidth: screenWidth,
@@ -149,9 +153,31 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                               ),
                             ),
                             SizedBox(
+                              height: verticalSpacing * 0.4,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                          context, "/recoverPassword");
+                                    },
+                                    child: Text(
+                                      "Forgot Password?",
+                                      style: AppTextStyles.smallFooters(
+                                          screenHeight,
+                                          AppColors.paragraphText),
+                                    )),
+                                SizedBox(
+                                  width: horizontalSpacing,
+                                )
+                              ],
+                            ),
+                            SizedBox(
                               height: verticalSpacing,
                             ),
-                            Container(
+                            SizedBox(
                               height: screenWidth * 0.12,
                               width: screenWidth - horizontalSpacing * 2,
                               child: ElevatedButton(
@@ -159,7 +185,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                       backgroundColor: AppColors.primaryColor),
                                   onPressed: isLoading ? null : authenticate,
                                   child: isLoading
-                                      ? CircularProgressIndicator(
+                                      ? const CircularProgressIndicator(
                                           color: Colors.white)
                                       : Center(
                                           child: Text(
@@ -204,16 +230,16 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                               height: verticalSpacing,
                             ),
                             Platform.isIOS
-                                ? Container(
+                                ? SizedBox(
                                     height: screenWidth * 0.12,
                                     width: screenWidth - horizontalSpacing * 2,
                                     child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.black),
                                         onPressed:
-                                            isLoading ? null : authenticate,
+                                            isLoading ? null : signInWithApple,
                                         child: isLoading
-                                            ? CircularProgressIndicator(
+                                            ? const CircularProgressIndicator(
                                                 color: Colors.white)
                                             : Center(
                                                 child: Row(
@@ -231,7 +257,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                                           horizontalSpacing / 2,
                                                     ),
                                                     Text(
-                                                      "Sign Up with Apple",
+                                                      "Sign In with Apple",
                                                       style: AppTextStyles
                                                           .buttonText(
                                                               screenHeight,
@@ -248,20 +274,21 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                     height: verticalSpacing,
                                   )
                                 : Container(),
-                            Container(
+                            SizedBox(
                                 height: screenWidth * 0.12,
                                 width: screenWidth - horizontalSpacing * 2,
                                 child: OutlinedButton(
-                                  onPressed: isLoading ? null : authenticate,
+                                  onPressed:
+                                      isLoading ? null : signInWithGoogle,
                                   child: isLoading
-                                      ? CircularProgressIndicator(
+                                      ? const CircularProgressIndicator(
                                           color: Colors.white)
                                       : Center(
                                           child: Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
-                                              Container(
+                                              SizedBox(
                                                   height: screenWidth * 0.1,
                                                   width: screenWidth * 0.1,
                                                   child: Image.asset(
@@ -270,7 +297,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                                 width: horizontalSpacing / 2,
                                               ),
                                               Text(
-                                                "Sign Up with Google",
+                                                "Sign In with Google",
                                                 style: AppTextStyles.buttonText(
                                                     screenHeight, Colors.black),
                                               ),
@@ -314,6 +341,14 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     );
   }
 
+  void signInWithApple() async {
+    print("sign in with apple");
+  }
+
+  void signInWithGoogle() async {
+    print("sign in with google");
+  }
+
   void authenticate() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -322,7 +357,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Please enter a valid email and password"),
           backgroundColor: AppColors.warning,
         ),
