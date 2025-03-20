@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 
 class FourDigitCodeField extends StatefulWidget {
-  final Function(String) onCompleted;
+  final Function(String) onChanged;
+  final double screenWidth;
+  final double screenHeight;
 
-  const FourDigitCodeField({Key? key, required this.onCompleted})
+  const FourDigitCodeField({Key? key, required this.onChanged, required this.screenHeight, required this.screenWidth})
       : super(key: key);
 
   @override
@@ -34,9 +38,9 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
     }
 
     String enteredCode = _controllers.map((e) => e.text).join();
-    if (enteredCode.length == 4) {
-      widget.onCompleted(enteredCode);
-    }
+
+    widget.onChanged(enteredCode);
+
   }
 
   void _onBackspace(String value, int index) {
@@ -52,18 +56,19 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(4, (index) {
         return Container(
-          width: 50,
-          height: 50,
-          margin: EdgeInsets.symmetric(horizontal: 5),
+          width: widget.screenWidth*0.12,
+          height: widget.screenWidth*0.12,
+          margin: EdgeInsets.symmetric(horizontal: widget.screenWidth*0.02),
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
             maxLength: 1,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            cursorColor: Colors.blue,
+            style: AppTextStyles.appBarText(widget.screenHeight, Colors.black),
+            cursorColor: AppColors.primaryColor,
             decoration: InputDecoration(
+              contentPadding: EdgeInsets.all(0),
               counterText: "",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -71,13 +76,13 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
               ),
             ),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: (value) => _onChanged(value, index),
             onSubmitted: (_) =>
-                widget.onCompleted(_controllers.map((e) => e.text).join()),
+                widget.onChanged(_controllers.map((e) => e.text).join()),
             onEditingComplete: () =>
                 _onBackspace(_controllers[index].text, index),
           ),

@@ -6,8 +6,10 @@ import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 
 class EnterRecoveryEmail extends StatefulWidget {
   final VoidCallback onNext;
+  final Function(String) enterEmail;
 
-  const EnterRecoveryEmail({super.key, required this.onNext});
+  const EnterRecoveryEmail(
+      {super.key, required this.onNext, required this.enterEmail});
 
   @override
   State<EnterRecoveryEmail> createState() => _EnterRecoveryEmailState();
@@ -16,6 +18,7 @@ class EnterRecoveryEmail extends StatefulWidget {
 class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
   late TextEditingController _recoveryEmailController;
   bool isLoading = false;
+  bool invalidEmail = false;
 
   @override
   void dispose() {
@@ -29,14 +32,28 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
     super.initState();
   }
 
+  bool validateEmail(String email) {
+    final RegExp emailRegex = RegExp(
+      r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    );
+    return !emailRegex.hasMatch(email);
+  }
+
+  void sendEmailApiCall() {
+    //todo call api to send email
+  }
+
   void enterRecoveryEmail() async {
     setState(() {
+      invalidEmail = validateEmail(_recoveryEmailController.text);
+      widget.enterEmail(_recoveryEmailController.text);
       isLoading = true;
     });
 
-//call api to send email
-
-    widget.onNext();
+    if (!invalidEmail) {
+      sendEmailApiCall();
+      widget.onNext();
+    }
 
     setState(() {
       isLoading = false;
@@ -77,6 +94,16 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
               hintText: "Email",
               controller: _recoveryEmailController,
               onSubmitted: enterRecoveryEmail),
+          SizedBox(
+            height: verticalSpacing / 2,
+          ),
+          invalidEmail
+              ? Text(
+                  "Enter a valid email",
+                  style: AppTextStyles.subtitleParagraph(
+                      screenHeight, AppColors.warning),
+                )
+              : Container(),
           Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
@@ -99,6 +126,5 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
         ],
       ),
     );
-  
   }
 }

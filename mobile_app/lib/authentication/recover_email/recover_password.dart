@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/authentication/recover_email/widgets/enter_new_password.dart';
 import 'package:mobile_app/authentication/recover_email/widgets/enter_recovery_code.dart';
 import 'package:mobile_app/authentication/recover_email/widgets/enter_recovery_email.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 
 class RecoverPasswordScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class RecoverPasswordScreen extends StatefulWidget {
 class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
+  String email = "";
 
   void _goToNextStep() {
     if (_currentStep < 2) {
@@ -41,6 +43,12 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     } else {
       Navigator.pop(context);
     }
+  }
+
+    void _setEmail(String newEmail) {
+    setState(() {
+      email = newEmail;
+    });
   }
 
   @override
@@ -74,6 +82,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           }
         },
         child: Scaffold(
+          backgroundColor: AppColors.backgroundColor,
           appBar: AppBar(
             title: Text('Recover Password',
                 style: AppTextStyles.appBarText(screenHeight, Colors.black)),
@@ -82,9 +91,9 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
             physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
-              EnterRecoveryEmail(onNext: _goToNextStep),
-              EnterRecoveryCode(onNext: _goToNextStep),
-              EnterNewPassword(onNext: () => Navigator.pop(context)),
+              EnterRecoveryEmail(onNext: _goToNextStep, enterEmail: _setEmail),
+              EnterRecoveryCode(onNext: _goToNextStep, enteredEmail: email),
+              EnterNewPassword(onNext: () => Navigator.pop(context), enteredEmail: email),
             ],
           ),
         ),

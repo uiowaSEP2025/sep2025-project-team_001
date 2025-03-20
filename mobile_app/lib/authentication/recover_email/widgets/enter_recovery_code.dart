@@ -7,8 +7,10 @@ import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 
 class EnterRecoveryCode extends StatefulWidget {
   final VoidCallback onNext;
+  final String enteredEmail;
 
-  EnterRecoveryCode({super.key, required this.onNext});
+  EnterRecoveryCode(
+      {super.key, required this.onNext, required this.enteredEmail});
 
   @override
   State<EnterRecoveryCode> createState() => _EnterRecoveryCodeState();
@@ -16,8 +18,18 @@ class EnterRecoveryCode extends StatefulWidget {
 
 class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
   bool isLoading = false;
-  bool enteredCode = true;
+  bool enteredCode = false;
+  bool invalidCode = false;
   String code = "";
+
+  void sendCodeApiCall() {
+    //todo call api to send code and validate it
+    if (code == "0000") {
+      invalidCode = true;
+    } else {
+      invalidCode = false;
+    }
+  }
 
   void validateCode() async {
     setState(() {
@@ -25,8 +37,11 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
     });
 
 //call api to send email
+    sendCodeApiCall();
 
-    widget.onNext();
+    if (!invalidCode) {
+      widget.onNext();
+    }
 
     setState(() {
       isLoading = false;
@@ -49,30 +64,50 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
       child: Column(
         children: [
           Text(
-            "We send the code to ",
+            "We sent a validation code to ",
             textAlign: TextAlign.center,
             style: AppTextStyles.subtitleParagraph(
                 screenHeight, AppColors.paragraphText),
+          ),
+          Text(
+            widget.enteredEmail,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.subtitleParagraph(
+                screenHeight, AppColors.primaryColor),
           ),
           SizedBox(
             height: verticalSpacing,
           ),
           FourDigitCodeField(
-            onCompleted: (code) {
-              // setState(() {
-              //    this.code = code;
-              // print("Entered Code: $code");
-              // });
-             
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            onChanged: (code) {
+              setState(() {
+                this.code = code;
+                if (code.length == 4) {
+                  enteredCode = true;
+                  submitCode();
+                } else {
+                  enteredCode = false;
+                }
+              });
             },
           ),
+          SizedBox(
+            height: verticalSpacing / 2,
+          ),
+          invalidCode
+              ? Text("Invalid code",
+                  style: AppTextStyles.subtitleParagraph(
+                      screenHeight, AppColors.warning))
+              : Container(),
           Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor),
-                  onPressed: (code == "") ? null : validateCode,
+                  onPressed: (enteredCode) ? validateCode : null,
                   child: Center(
                     child: Text(
                       "VALIDATE CODE",
@@ -87,4 +122,6 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
       ),
     );
   }
+
+  void submitCode() {}
 }

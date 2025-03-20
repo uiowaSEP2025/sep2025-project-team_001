@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 
 class EnterNewPassword extends StatefulWidget {
-final VoidCallback onNext;
+  final VoidCallback onNext;
+  final String enteredEmail;
 
-  const EnterNewPassword({super.key, required this.onNext});
+  const EnterNewPassword(
+      {super.key, required this.onNext, required this.enteredEmail});
 
   @override
   State<EnterNewPassword> createState() => _EnterNewPasswordState();
