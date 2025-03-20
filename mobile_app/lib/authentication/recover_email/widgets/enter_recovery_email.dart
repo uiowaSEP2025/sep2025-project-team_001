@@ -7,9 +7,10 @@ import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 class EnterRecoveryEmail extends StatefulWidget {
   final VoidCallback onNext;
   final Function(String) enterEmail;
+  final String enteredEmail;
 
   const EnterRecoveryEmail(
-      {super.key, required this.onNext, required this.enterEmail});
+      {super.key, required this.onNext, required this.enterEmail, required this.enteredEmail});
 
   @override
   State<EnterRecoveryEmail> createState() => _EnterRecoveryEmailState();
@@ -28,7 +29,7 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
 
   @override
   void initState() {
-    _recoveryEmailController = TextEditingController();
+    _recoveryEmailController = TextEditingController(text: widget.enteredEmail);
     super.initState();
   }
 
