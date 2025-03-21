@@ -61,6 +61,15 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
     if (!invalidCode) {
       widget.onNext();
     }
+    else{
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid Code"),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+    }
 
     setState(() {
       isLoading = false;
@@ -157,14 +166,6 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
               SizedBox(width: horizontalSpacing*2,)
             ],
           ),
-          SizedBox(
-            height: verticalSpacing / 2,
-          ),
-          invalidCode
-              ? Text("Invalid code",
-                  style: AppTextStyles.subtitleParagraph(
-                      screenHeight, AppColors.warning))
-              : Container(),
           Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)

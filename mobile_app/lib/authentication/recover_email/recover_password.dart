@@ -61,6 +61,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
 
     return GestureDetector(
       onTap: () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         FocusScope.of(context).unfocus();
       },
       child: PopScope(
