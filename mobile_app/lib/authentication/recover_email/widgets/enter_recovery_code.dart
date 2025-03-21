@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
@@ -21,9 +23,26 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
   bool enteredCode = false;
   bool invalidCode = false;
   String code = "";
+  int _start = 30;
+  Timer? _timer;
+  bool canResend = false;
 
-  void sendCodeApiCall() {
-    //todo call api to send code and validate it
+  @override
+  void initState() {
+    startTimer();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void sendCode() {} //todo call api to send code to the email 
+
+  void validateCodeApiCall() {
+    //todo call api to send code and validate it for now just to design front end invalid code is 0000
     if (code == "0000") {
       invalidCode = true;
     } else {
@@ -37,7 +56,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
     });
 
 //call api to send email
-    sendCodeApiCall();
+    validateCodeApiCall();
 
     if (!invalidCode) {
       widget.onNext();
@@ -45,6 +64,28 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
 
     setState(() {
       isLoading = false;
+    });
+  }
+
+  void startTimer() {
+    setState(() {
+      canResend = false;
+      _start = 30;
+    });
+
+    _timer?.cancel();
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_start == 0) {
+        setState(() {
+          canResend = true;
+        });
+        timer.cancel();
+      } else {
+        setState(() {
+          _start--;
+        });
+      }
     });
   }
 
@@ -92,6 +133,29 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
                 }
               });
             },
+          ),
+          SizedBox(
+            height: verticalSpacing / 2,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: canResend
+                    ? () {
+                        sendCode();
+                        startTimer();
+                      }
+                    : null,
+                child: Text(
+                  canResend ? "Resend Code" : "Resend in $_start s",
+                  style: TextStyle(
+                    color: canResend ? Colors.blue : Colors.grey,
+                  ),
+                ),
+              ),
+              SizedBox(width: horizontalSpacing*2,)
+            ],
           ),
           SizedBox(
             height: verticalSpacing / 2,

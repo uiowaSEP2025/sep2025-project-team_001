@@ -10,7 +10,10 @@ class EnterRecoveryEmail extends StatefulWidget {
   final String enteredEmail;
 
   const EnterRecoveryEmail(
-      {super.key, required this.onNext, required this.enterEmail, required this.enteredEmail});
+      {super.key,
+      required this.onNext,
+      required this.enterEmail,
+      required this.enteredEmail});
 
   @override
   State<EnterRecoveryEmail> createState() => _EnterRecoveryEmailState();
@@ -100,7 +103,7 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
           ),
           invalidEmail
               ? Text(
-                  "Enter a valid email",
+                  "Please enter a valid email address",
                   style: AppTextStyles.subtitleParagraph(
                       screenHeight, AppColors.warning),
                 )
