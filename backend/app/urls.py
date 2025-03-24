@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from app.views import login_user, register_user
+from app.views.auth_views import login_user, register_user
 from app.views.orders_views import CurrentItemsList
 
 urlpatterns = [
