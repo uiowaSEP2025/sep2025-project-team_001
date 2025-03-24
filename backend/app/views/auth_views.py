@@ -57,4 +57,4 @@ def login_user(request):
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 
-    return JsonResponse({"error": "Invalid req
+    return JsonResponse({"error": "Invalid request"}, status=400)
