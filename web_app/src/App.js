@@ -6,6 +6,7 @@ import Registration from './pages/Registration';
 import Login from './pages/Login';
 import "./auth";
 import Dashboard from './pages/Dashboard';
+import OrdersPage from "./pages/OrdersPage";
 //import PrivateRoute from "./PrivateRoute";
 
 function AppRoutes() {
@@ -15,6 +16,7 @@ function AppRoutes() {
       <Route path="/register" element={<Registration />} />
       <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/orders" element={<OrdersPage />} />
     </Routes>
   );
 }
