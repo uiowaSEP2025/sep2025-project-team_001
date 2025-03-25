@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser
+from app.models.customer_models import CustomUser
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
