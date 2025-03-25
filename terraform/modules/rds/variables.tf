@@ -10,12 +10,6 @@ variable "subnet_ids" {
   description = "List of subnets for the DB Subnet Group"
 }
 
-variable "allowed_cidr_blocks" {
-  type        = list(string)
-  description = "CIDR blocks allowed for Postgres access"
-  default     = ["0.0.0.0/0"]
-}
-
 variable "db_identifier" {
   type        = string
   description = "Name of the RDS instance"
@@ -69,4 +63,9 @@ variable "publicly_accessible" {
 variable "skip_final_snapshot" {
   type    = bool
   default = true
+}
+
+variable "backend_sg_id" {
+  type        = string
+  description = "Security Group ID of the backend EC2 instance"
 }

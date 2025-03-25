@@ -46,7 +46,7 @@ function Registration() {
     event.preventDefault();
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}register/`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, {
         name: formData.name,
         username: formData.username,
         password: formData.password,
@@ -55,19 +55,21 @@ function Registration() {
         business_name: formData.business_name,
         business_address: formData.business_address,
       });
-
+  
       console.log("Registration successful:", response.data);
       const { access, refresh } = response.data.tokens;
-
+  
+      // Store tokens in localStorage
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
-
-      navigate("/"); // Redirect after successful registration
+  
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (error) {
       console.error("Registration failed:", error.response?.data || error.message);
       alert("Registration failed: " + (error.response?.data || error.message));
     }
-  };
+  };  
 
   return (
     <div className="page-container">

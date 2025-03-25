@@ -13,7 +13,7 @@ variable "vpc_id" {
 
 variable "subnet_id" {
   type        = string
-  description = "Public subnet ID"
+  description = "Private subnet ID"
 }
 
 variable "key_pair_name" {
@@ -35,7 +35,7 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "GitHub branch"
-  default     = "moving-to-aws"
+  default     = "main"
 }
 
 variable "db_host" {
@@ -70,4 +70,26 @@ variable "dj_secret_key" {
   type      = string
   sensitive = true
   default   = "mysecretkey"
+}
+
+variable "frontend_sg_id" {
+  type        = string
+  description = "Security Group ID of the frontend EC2 instance"
+}
+
+variable "nginx_sg_id" {
+  type        = string
+  description = "Security Group ID of the NGINX EC2 instance"
+}
+
+variable "mobile_cidr_blocks" {
+  type        = list(string)
+  description = "Allowed CIDR blocks for mobile clients"
+  default     = ["0.0.0.0/0"]  # Replace with specific IP ranges if possible
+}
+
+variable "admin_ip" {
+  type        = string
+  description = "Allowed IP address for SSH access"
+  default     = "0.0.0.0/0"
 }

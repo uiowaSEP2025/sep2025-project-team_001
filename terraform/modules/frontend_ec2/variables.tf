@@ -34,10 +34,16 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "Git branch to clone for the frontend application"
-  default     = "moving-to-aws"
+  default     = "main"
 }
 
-variable "backend_api_url" {
+variable "admin_ip" {
   type        = string
-  description = "The URL of the backend API that the frontend will call (e.g., http://api.yourcompany.com:8000)"
+  description = "Your IP address for SSH access"
+  default     = "0.0.0.0/0"
+}
+
+variable "nginx_sg_id" {
+  description = "Security Group ID of the NGINX instance"
+  type        = string
 }
