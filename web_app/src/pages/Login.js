@@ -31,7 +31,7 @@ function Login() {
       localStorage.setItem("refreshToken", refresh);
   
       // Redirect user to dashboard
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
       alert("Invalid username or password. Please try again.");

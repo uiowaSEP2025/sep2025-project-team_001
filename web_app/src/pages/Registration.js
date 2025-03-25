@@ -51,7 +51,7 @@ function Registration() {
       localStorage.setItem("refreshToken", refresh);
   
       // Redirect to dashboard
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Registration failed:", error.response?.data || error.message);
       alert("Registration failed: " + (error.response?.data || error.message));
