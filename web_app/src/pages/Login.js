@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
+import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../index.css';
+import './styles/Login.css';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
   const navigate = useNavigate();
@@ -34,39 +36,55 @@ function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
-      alert("Invalid username or password. Please try again.");
+      toast.error("Invalid username or password. Please try again.");
     }
   };    
 
   return (
-    <Container className="page-container">
-      <h1>Login</h1>
-      <Form onSubmit={handleLogin} className="form-container">
-        <Form.Group controlId="username" className="form-group-spacing">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter username"
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </Form.Group>
-        <Form.Group controlId="password" className="form-group-spacing">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Login
-        </Button>
-      </Form>
-    </Container>
+    <div className="page-container">
+      <Modal show backdrop="static" keyboard={false}>
+        <Modal.Header>
+          <Modal.Title>Login</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleLogin}>
+            <Form.Group controlId="username">
+              <Form.Control
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group controlId="password">
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit" className="mt-3 w-100">
+              Login
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar
+        closeButton={false}
+        toastStyle={{
+          textAlign: "center",
+          fontSize: "16px",
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        }}
+      />
+    </div>
   );
 }
 

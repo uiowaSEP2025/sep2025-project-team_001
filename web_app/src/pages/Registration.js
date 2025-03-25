@@ -6,6 +6,9 @@ import Form from "react-bootstrap/Form";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./styles/Registration.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function Registration() {
   const navigate = useNavigate();
@@ -28,11 +31,15 @@ function Registration() {
 
   const handleContinue = () => {
     if (!formData.name || !formData.username || !formData.password || !formData.confirmPassword) {
-      alert("Please fill out all fields.");
+      toast.error("Please fill out all fields.");
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
       return;
     }
     setStep(2); // Move to the next step
@@ -44,6 +51,24 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
+
+    // Validate step 2 fields before sending
+    if (!formData.email || !formData.phone || !formData.business_name || !formData.business_address) {
+      toast.error("Please fill out all fields in Step 2.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("Phone number must be exactly 10 digits.");
+      return;
+    }
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, {
@@ -67,16 +92,14 @@ function Registration() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Registration failed:", error.response?.data || error.message);
-      alert("Registration failed: " + (error.response?.data || error.message));
+      toast.error("Registration failed: " + (error.response?.data || error.message));
     }
   };  
 
   return (
     <div className="page-container">
-      {/* Title Always Visible at the Very Top */}
       <h1 className="page-title">Online Manager Registration</h1>
 
-      {/* Step 1 - First Modal */}
       <Modal show={step === 1} backdrop="static" keyboard={false}>
         <Modal.Header>
           <Modal.Title>Step 1: Basic Information</Modal.Title>
@@ -84,40 +107,36 @@ function Registration() {
         <Modal.Body>
           <Form>
             <Form.Group controlId="name">
-              <Form.Label>First & Last Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter full name"
+                placeholder="First & Last Name"
                 required
                 value={formData.name}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="username">
-              <Form.Label>Desired Username</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter username"
+                placeholder="Desired Username"
                 required
                 value={formData.username}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="password">
-              <Form.Label>Desired Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Enter password"
+                placeholder="Desired Password"
                 required
                 value={formData.password}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="confirmPassword">
-              <Form.Label>Confirm Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Confirm password"
+                placeholder="Confirm Password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -132,7 +151,6 @@ function Registration() {
         </Modal.Footer>
       </Modal>
 
-      {/* Step 2 - Second Modal */}
       <Modal show={step === 2} backdrop="static" keyboard={false}>
         <Modal.Header>
           <Modal.Title>Step 2: Contact & Business Info</Modal.Title>
@@ -140,40 +158,36 @@ function Registration() {
         <Modal.Body>
           <Form onSubmit={handleRegister}>
             <Form.Group controlId="email">
-              <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="Enter email"
+                placeholder="Email"
                 required
                 value={formData.email}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="phone">
-              <Form.Label>Phone Number</Form.Label>
               <Form.Control
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder="Phone Number"
                 required
                 value={formData.phone}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="business_name">
-              <Form.Label>Business Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter business name"
+                placeholder="Business Name"
                 required
                 value={formData.business_name}
                 onChange={handleChange}
               />
             </Form.Group>
             <Form.Group controlId="business_address">
-              <Form.Label>Business Address</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter business address"
+                placeholder="Business Address"
                 required
                 value={formData.business_address}
                 onChange={handleChange}
@@ -190,6 +204,20 @@ function Registration() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar
+        closeButton={false}
+        toastStyle={{
+          textAlign: "center",
+          fontSize: "16px",
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        }}
+      />
     </div>
   );
 }
