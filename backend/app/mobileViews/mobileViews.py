@@ -3,35 +3,48 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from app.views import get_tokens_for_user
-from ..models import Customer
+from ..models import CustomUser, Customer
+
 
 @csrf_exempt
 def register_customer(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
 
-        if Customer.objects.filter(username=data["username"]).exists():
-            return JsonResponse({"message": "Username already taken"}, status=400)
+            email = data.get("email")
+            password = data.get("password")
+            name = data.get("name")
 
-        if Customer.objects.filter(email=data["email"]).exists():
-            return JsonResponse({"message": "Email already registered"}, status=400)
+            if CustomUser.objects.filter(username=email).exists():
+                return JsonResponse({"message": "Email already in use"}, status=400)
 
-        user = Customer.objects.create_user(
-            username=data["email"],
-            email=data["email"],
-            password=data["password"],
-            first_name=data["name"],
-        )
+            user = CustomUser.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                first_name=name
+            )
 
-        user.save()
-        tokens = get_tokens_for_user(user)
+            customer = Customer.objects.create(user=user)
 
-        return JsonResponse(
-            {"message": "User registered successfully", "tokens": tokens}, status=201
-        )
+            tokens = get_tokens_for_user(user)
+
+            return JsonResponse(
+                {
+                    "message": "User registered successfully",
+                    "tokens": tokens
+                },
+                status=201
+            )
+
+        except Exception as e:
+            return JsonResponse(
+                {"message": "Registration failed", "error": str(e)},
+                status=500
+            )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 @csrf_exempt
 def login_customer(request):

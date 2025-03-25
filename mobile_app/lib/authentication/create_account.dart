@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
@@ -251,5 +253,69 @@ class _CreateAccountState extends State<CreateAccount> {
 
   void onTextFieldSubmitted() {}
 
-  void createAccount() {}
-}
+  void createAccount() async {
+    String name = _nameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
+    final String endpoint = "${ApiConfig.baseUrl}/mobile/register/";
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Passwords do not match"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final dio = Dio();
+      final response = await dio.post(
+        endpoint,
+        data: {
+          "name": name,
+          "email": email,
+          "password": password,
+        },
+        options: Options(headers: {"Content-Type": "application/json"}),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Account created successfully!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacementNamed(context, "/home"); // or wherever you want
+    } on DioException catch (e) {
+      String errorMessage = "Something went wrong";
+
+      print("Dio error: ${e.response?.data}");
+      print("Status code: ${e.response?.statusCode}");
+
+      if (e.response?.data is Map && e.response?.data['message'] != null) {
+        errorMessage = e.response!.data['message'];
+      } else if (e.response?.data is Map && e.response?.data['error'] != null) {
+        errorMessage = e.response!.data['error'];
+      } else if (e.response?.data is Map) {
+        errorMessage = e.response!.data.toString(); // fallback for debugging
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+}//todo make sure passwords match
+//todo add the birtdate to the backend customer model
+//todo make sure the text fields go up so that the user can see them even when the keyboard is open

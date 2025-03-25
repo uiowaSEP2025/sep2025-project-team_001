@@ -9,5 +9,5 @@ urlpatterns = [
     path('register/', register_user, name='register'),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path('mobile/register/', register_customer, name='customerRegister'),
-    path('mobile/login', login_customer, name='customerLogin')
+    path('mobile/login/', login_customer, name='customerLogin')
 ]
