@@ -17,7 +17,7 @@ def register_customer(request):
             return JsonResponse({"message": "Email already registered"}, status=400)
 
         user = Customer.objects.create_user(
-            username=data["username"],
+            username=data["email"],
             email=data["email"],
             password=data["password"],
             first_name=data["name"],
