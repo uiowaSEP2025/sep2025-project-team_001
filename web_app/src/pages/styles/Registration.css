@@ -1,62 +1,56 @@
-/* Make the whole page scrollable */
 html, body {
     margin: 0;
     padding: 0;
-    height: auto; /* Allow natural page expansion */
+    height: auto;
     width: 100vw;
     background: #1e3c72;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    overflow-y: auto; /* Enable full-page scrolling */
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-/* Main container */
-.page-container {
+  }
+  
+  .page-container {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding-top: 20px; /* Space for the title */
-}
-
-/* Title styling */
-.page-title {
+    padding-top: 20px;
+  }
+  
+  .page-title {
     font-size: 36px;
     font-weight: 600;
-    color: #E0E0E0;
+    color: #FFFFFF !important;
     text-align: center;
     width: 100%;
-    margin-bottom: 20px; /* Space before modal */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Modal container */
-.modal {
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  
+  .modal {
     position: relative;
     width: 100%;
     display: flex;
-    justify-content: center; /* Centers modal horizontally */
-}
-
-/* Ensure the modal appears just below the title */
-.modal-dialog {
+    justify-content: center;
+  }
+  
+  .modal-dialog {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 10px auto; /* Keeps it centered */
+    margin: 10px auto;
     width: 90%;
-    max-width: 600px; /* Restricts modal width */
-}
-
-/* Modal content box */
-.modal-content {
+    max-width: 600px;
+  }
+  
+  .modal-content {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centers content horizontally */
+    align-items: center;
     justify-content: center;
     text-align: center;
     background: rgba(255, 255, 255, 0.1);
@@ -67,36 +61,33 @@ html, body {
     width: 100%;
     max-width: 800px;
     overflow: visible;
-}
-
-/* Center the modal title */
-.modal-title {
+  }
+  
+  .modal-title {
     width: 100%;
     text-align: center;
     font-size: 24px;
     font-weight: bold;
-    color: #E0E0E0;
+    color: #FFFFFF;
     margin-bottom: 15px;
-}
-
-/* Center the form */
-.modal-body {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-body {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-}
-
-/* Center form fields */
-.form-group {
+  }
+  
+  .form-group {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-}
-
-/* Center the form inputs */
-.form-control {
+  }
+  
+  .form-control {
     width: 100%;
     max-width: 400px;
     border-radius: 8px;
@@ -104,27 +95,25 @@ html, body {
     font-size: 16px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     background: rgba(255, 255, 255, 0.05);
-    color: #E0E0E0;
+    color: #FFFFFF;
     transition: border-color 0.3s ease-in-out;
     text-align: center;
-}
-
-/* Center placeholders */
-.form-control::placeholder {
+    margin-bottom: 15px;
+  }
+  
+  .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5);
     text-align: center;
-}
-
-/* Center the buttons */
-.modal-footer {
+  }
+  
+  .modal-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-}
-
-/* Centered buttons */
-button {
+  }
+  
+  button {
     width: 100%;
     max-width: 400px;
     padding: 14px;
@@ -137,27 +126,27 @@ button {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     text-align: center;
-    margin: 5px 0; /* Adds spacing between buttons */
-}
-
-button:hover {
+    margin: 5px 0;
+  }
+  
+  button:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
+  }
+  
+  @media (max-width: 768px) {
     .page-title {
-        font-size: 30px;
-        margin-bottom: 15px;
+      font-size: 30px;
+      margin-bottom: 15px;
     }
-
+  
     .modal-dialog {
-        margin-top: 15px;
-        max-width: 90%;
+      margin-top: 15px;
+      max-width: 90%;
     }
-
+  
     .form-control, button {
-        max-width: 90%;
+      max-width: 90%;
     }
-}
+  }
+  
