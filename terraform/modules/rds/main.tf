@@ -9,11 +9,11 @@ resource "aws_security_group" "rds_security_group" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow Postgres"
+    description = "Allow Postgres from Backend EC2"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = var.allowed_cidr_blocks
+    security_groups = [var.backend_sg_id]
   }
 
   egress {
@@ -23,6 +23,7 @@ resource "aws_security_group" "rds_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
 ######################################
 # DB Subnet Group

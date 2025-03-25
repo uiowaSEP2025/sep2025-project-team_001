@@ -46,5 +46,18 @@ variable "repo_url" {
 variable "repo_branch" {
   type        = string
   description = "Git repo branch"
-  default     = "moving-to-aws"
+  default     = "main"
+}
+
+
+variable "mobile_cidr_blocks" {
+  type        = list(string)
+  description = "Allowed CIDR blocks for mobile clients"
+  default     = ["0.0.0.0/0"]
+}
+
+variable "admin_ip" {
+  type        = string
+  description = "Allowed IP address for SSH access"
+  default     = "0.0.0.0/0"
 }

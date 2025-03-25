@@ -1,11 +1,16 @@
 import json
-
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework_simplejwt.tokens import RefreshToken
+from app.models.customer_models import CustomUser
 
-from .models import CustomUser
-
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
 
 @csrf_exempt
 def register_user(request):
@@ -18,7 +23,6 @@ def register_user(request):
         if CustomUser.objects.filter(email=data["email"]).exists():
             return JsonResponse({"message": "Email already registered"}, status=400)
 
-        # Create a new user with the extended fields
         user = CustomUser.objects.create_user(
             username=data["username"],
             email=data["email"],
@@ -30,8 +34,11 @@ def register_user(request):
         )
 
         user.save()
+        tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        return JsonResponse({"message": "User registered successfully"}, status=201)
+        return JsonResponse(
+            {"message": "User registered successfully", "tokens": tokens}, status=201
+        )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
@@ -45,8 +52,8 @@ def login_user(request):
 
         user = authenticate(username=username, password=password)
         if user is not None:
-            login(request, user)
-            return JsonResponse({"message": "Login successful"}, status=200)
+            tokens = get_tokens_for_user(user)  # Generate JWT tokens
+            return JsonResponse({"message": "Login successful", "tokens": tokens}, status=200)
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 
