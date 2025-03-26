@@ -3,7 +3,8 @@ import 'package:mobile_app/authentication/authentication_screen.dart';
 import 'package:mobile_app/authentication/create_account.dart';
 import 'package:mobile_app/authentication/recover_email/recover_password.dart';
 import 'package:mobile_app/authentication/terms_conditions_screen.dart';
-import 'package:mobile_app/home/bar_selection_screen.dart';
+import 'package:mobile_app/home/restaurant_addition_screen.dart';
+import 'package:mobile_app/home/restaurant_selection_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,11 +21,12 @@ class MyApp extends StatelessWidget {
       title: 'Streamline',
       initialRoute: '/',
       routes: {
-        '/': (context) => AuthenticationPage(), 
-        '/home' : (context) => BarSelectionScreen(),
-        '/register' : (context) => CreateAccount(),
-        '/terms' : (context) => TermsAndConditionsScreen(),
-        '/recoverPassword' : (context) => RecoverPasswordScreen(),
+        '/': (context) => const AuthenticationPage(), 
+        '/home' : (context) => const RestaurantSelectionScreen(),
+        '/register' : (context) => const CreateAccount(),
+        '/terms' : (context) => const TermsAndConditionsScreen(),
+        '/recover_password' : (context) => const RecoverPasswordScreen(),
+        '/add_restaurant' : (context) => const RestaurantAdditionScreen()
         // '/settings' : (context) => 
         }
       
