@@ -25,6 +25,9 @@ class _CreateAccountState extends State<CreateAccount> {
   bool termsAccepted = false;
   bool isLoading = false;
   bool fieldsFilled = false;
+  bool isValidPassword = false;
+  bool isPasswordMatch = false;
+  bool isEmailValid = false;
 
   @override
   void dispose() {
@@ -45,6 +48,27 @@ class _CreateAccountState extends State<CreateAccount> {
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
     super.initState();
+  }
+
+  bool validatePassword(String password) {
+    if (password.length < 8) return false;
+    if (!password.contains(RegExp(r'[A-Z]'))) return false;
+    if (!password.contains(RegExp(r'[a-z]'))) return false;
+    if (!password.contains(RegExp(r'[0-9]'))) return false;
+    if (!password.contains(RegExp(r'[!@#\$&*~%^()\-\+=]'))) return false;
+    return true;
+  }
+
+  bool matchPasswords(String newPassword, String confirmationPassword) {
+    if (newPassword == confirmationPassword) return true;
+    return false;
+  }
+
+  bool validateEmail(String email) {
+    final RegExp emailRegex = RegExp(
+      r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    );
+    return !emailRegex.hasMatch(email);
   }
 
   @override
@@ -111,12 +135,15 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       InputTextBox(
                           onChanged: () {
-                            setState() {}
+                            setState() {
+                              isEmailValid =
+                                  validateEmail(_emailController.text);
+                            }
                           },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Email",
-                          hintText: "Email",
+                          hintText: "example@gmail.com",
                           controller: _emailController,
                           onSubmitted: onTextFieldSubmitted),
                       SizedBox(
@@ -126,14 +153,20 @@ class _CreateAccountState extends State<CreateAccount> {
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
                           label: "Birthdate",
-                          hintText: "Birthdate",
+                          hintText: "YYYY-MM-DD",
                           controller: _birthdateController),
                       SizedBox(
                         height: verticalSpacing,
                       ),
                       InputTextBox(
                           onChanged: () {
-                            setState() {}
+                            setState(() {
+                              isValidPassword =
+                                  validatePassword(_passwordController.text);
+                              isPasswordMatch = matchPasswords(
+                                  _passwordController.text,
+                                  _confirmPasswordController.text);
+                            });
                           },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
@@ -142,11 +175,38 @@ class _CreateAccountState extends State<CreateAccount> {
                           controller: _passwordController,
                           onSubmitted: onTextFieldSubmitted),
                       SizedBox(
+                        height: verticalSpacing / 2,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          isValidPassword
+                              ? Text(
+                                  "Valid password ✅",
+                                  style: AppTextStyles.smallFooters(
+                                      screenHeight, AppColors.validGreen),
+                                )
+                              : Container(
+                                  width: screenWidth - horizontalSpacing * 2,
+                                  child: Text(
+                                    "At least 8 characters, including uppercase, lowercase, number, and special character",
+                                    style: AppTextStyles.smallFooters(
+                                        screenHeight, AppColors.warning),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                        ],
+                      ),
+                      SizedBox(
                         height: verticalSpacing,
                       ),
                       InputTextBox(
                           onChanged: () {
-                            setState() {}
+                            setState(() {
+                              isPasswordMatch = matchPasswords(
+                                  _passwordController.text,
+                                  _confirmPasswordController.text);
+                            });
                           },
                           screenWidth: screenWidth,
                           screenHeight: screenHeight,
@@ -154,6 +214,31 @@ class _CreateAccountState extends State<CreateAccount> {
                           hintText: "********",
                           controller: _confirmPasswordController,
                           onSubmitted: onTextFieldSubmitted),
+                      SizedBox(
+                        height: verticalSpacing / 2,
+                      ),
+                      _confirmPasswordController.text.isNotEmpty
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                isPasswordMatch
+                                    ? Text(
+                                        "Passwords match ✅",
+                                        style: AppTextStyles.smallFooters(
+                                            screenHeight, AppColors.validGreen),
+                                      )
+                                    : Text(
+                                        "Passwords do not match",
+                                        style: AppTextStyles.smallFooters(
+                                            screenHeight, AppColors.warning),
+                                        textAlign: TextAlign.left,
+                                      )
+                              ],
+                            )
+                          : Container(),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
                     ],
                   ),
                 ),
@@ -165,7 +250,7 @@ class _CreateAccountState extends State<CreateAccount> {
           padding: EdgeInsets.only(
               left: horizontalSpacing,
               right: horizontalSpacing,
-              top: verticalSpacing),
+              top: verticalSpacing / 2),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -219,7 +304,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 ),
               ),
               SizedBox(
-                height: verticalSpacing,
+                height: verticalSpacing / 2,
               ),
               isLoading
                   ? const CircularProgressIndicator(
@@ -231,7 +316,7 @@ class _CreateAccountState extends State<CreateAccount> {
                               _nameController.text.isEmpty ||
                               _passwordController.text.isEmpty ||
                               _birthdateController.text.isEmpty ||
-                              !termsAccepted)
+                              !termsAccepted || !isPasswordMatch || !isValidPassword)
                           ? null
                           : createAccount,
                       child: Center(
@@ -264,7 +349,17 @@ class _CreateAccountState extends State<CreateAccount> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Passwords do not match"),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    if (!isEmailValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid email address"),
+          backgroundColor: AppColors.warning,
         ),
       );
       return;
@@ -291,7 +386,7 @@ class _CreateAccountState extends State<CreateAccount> {
         ),
       );
 
-      Navigator.pushReplacementNamed(context, "/home"); // or wherever you want
+      Navigator.pushReplacementNamed(context, "/home");
     } on DioException catch (e) {
       String errorMessage = "Something went wrong";
 
@@ -303,13 +398,13 @@ class _CreateAccountState extends State<CreateAccount> {
       } else if (e.response?.data is Map && e.response?.data['error'] != null) {
         errorMessage = e.response!.data['error'];
       } else if (e.response?.data is Map) {
-        errorMessage = e.response!.data.toString(); // fallback for debugging
+        errorMessage = e.response!.data.toString();
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.warning,
         ),
       );
     } finally {

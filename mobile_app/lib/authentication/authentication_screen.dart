@@ -129,7 +129,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                                         onChanged: (){setState(){}},
 
                                 label: "Email",
-                                hintText: "johndoe@gmail.com",
+                                hintText: "example@gmail.com",
                                 screenWidth: screenWidth,
                                 screenHeight: screenHeight,
                                 controller: _emailController,
