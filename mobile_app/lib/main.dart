@@ -6,6 +6,7 @@ import 'package:mobile_app/authentication/terms_conditions_screen.dart';
 import 'package:mobile_app/home/bar_selection_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Streamline',
       initialRoute: '/',
       routes: {
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/register' : (context) => CreateAccount(),
         '/terms' : (context) => TermsAndConditionsScreen(),
         '/recoverPassword' : (context) => RecoverPasswordScreen(),
+        // '/settings' : (context) => 
         }
       
     );

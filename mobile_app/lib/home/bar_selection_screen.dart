@@ -74,12 +74,23 @@ class _BarSelectionScreenState extends State<BarSelectionScreen> {
           style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () {
-              print("Profile clicked");
-            },
-          ),
+          PopupMenuButton<String>(
+  icon: const Icon(Icons.person),
+  onSelected: (value) {
+    if (value == 'logout') {
+      // Do logout logic here
+      print("Logging out...");
+      Navigator.pushReplacementNamed(context, "/");
+    }
+  },
+  itemBuilder: (BuildContext context) => [
+    const PopupMenuItem<String>(
+      value: 'logout',
+      child: Text('Logout'),
+    ),
+  ],
+),
+
         ],
       ),
       body: GestureDetector(
