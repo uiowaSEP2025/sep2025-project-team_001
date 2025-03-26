@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'dart:ui';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
 
 class AuthenticationPage extends StatefulWidget {
@@ -349,48 +350,78 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     print("sign in with google");
   }
 
-  void authenticate() async {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+void authenticate() async {
+  final String email = _emailController.text.trim();
+  final String password = _passwordController.text.trim();
+  const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+print(email);
+print(password);
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter a valid email and password"),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please enter email and password"),
+        backgroundColor: AppColors.warning,
+      ),
+    );
+    return;
+  }
+
+  setState(() => isLoading = true);
+
+  try {
+    final dio = Dio();
+    final response = await dio.post(
+      endpoint,
+      data: {
+        "username": email,
+        "password": password,
+      },
+      options: Options(headers: {"Content-Type": "application/json"}),
+    );
+
+    final tokens = response.data['tokens'];
+    final access = tokens['access'];
+    final refresh = tokens['refresh'];
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', access);
+    await prefs.setString('refresh_token', refresh);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Login successful!"),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.pushReplacementNamed(context, "/home");
+
+  } on DioException catch (e) {
+    String errorMessage = "Your password is incorrect";
+
+    print("Login error: ${e.response?.data}");
+    print("Status code: ${e.response?.statusCode}");
+
+    if (e.response?.data is Map && e.response?.data['error'] != null) {
+      errorMessage = e.response!.data['error'];
+    } else if (e.response?.data is Map) {
+      errorMessage = e.response!.data.toString();
     }
 
-    setState(() => isLoading = true);
-
-    try {
-      Response response = await _dio.post(
-        apiUrl,
-        data: {"username": email, "password": password},
-        options: Options(headers: {"Content-Type": "application/json"}),
-      );
-
-      print("Login successful: ${response.data}"); //
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login Successful!")),
-      );
-
-      Navigator.pushReplacementNamed(context, "/home");
-    } catch (error) {
-      print("Login error: $error");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Invalid email or password")),
-      );
-    }
-
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: AppColors.warning,
+      ),
+    );
+  } finally {
     setState(() => isLoading = false);
   }
+}
+
 }
 
 class StreamlineLogo extends StatelessWidget {

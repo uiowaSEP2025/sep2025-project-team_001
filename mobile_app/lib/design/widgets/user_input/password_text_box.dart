@@ -64,6 +64,7 @@ class _PasswordTextBoxState extends State<PasswordTextBox> {
                 filled: true,
               ),
               keyboardType: TextInputType.visiblePassword,
+              controller: widget.controller,
               textInputAction: TextInputAction.done,
             )),
       ],
