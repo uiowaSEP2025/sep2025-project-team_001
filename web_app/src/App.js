@@ -5,7 +5,9 @@ import Home from "./pages/Home";
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import "./auth";
-//import PrivateRoute from "./PrivateRoute";
+import Dashboard from './pages/Dashboard';
+import OrdersPage from "./pages/OrdersPage";
+import PrivateRoute from "./PrivateRoute";
 
 function AppRoutes() {
   return (
@@ -13,9 +15,12 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Registration />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
     </Routes>
   );
 }
+
 
 function App() {
   return (
