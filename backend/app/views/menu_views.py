@@ -4,7 +4,7 @@ from app.models.restaurant_models import Restaurant, Item
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 
-class MenuPageView(LoginRequiredMixin, View):
+class MenuPageView(View):
     template_name = "menu_list.html"
 
     def get(self, request, *args, **kwargs):
