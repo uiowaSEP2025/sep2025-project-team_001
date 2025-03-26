@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Streamline',
-      initialRoute: '/home',
+      initialRoute: '/',
       routes: {
         '/': (context) => AuthenticationPage(), 
         '/home' : (context) => BarSelectionScreen(),
