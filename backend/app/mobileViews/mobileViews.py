@@ -2,7 +2,7 @@ import json
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from app.views import get_tokens_for_user
+from app.views.auth_views import get_tokens_for_user
 from ..models import CustomUser, Customer
 
 
