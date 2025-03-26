@@ -10,6 +10,6 @@ urlpatterns = [
     path('register/', register_user, name='register'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('bartender_view/', CurrentItemsList.as_view(), name='bartender_view'),
-     path('api/menu-items/', menu_items_api, name='menu_items_api'),
-     path('menu/', MenuPageView.as_view(), name='menu-page'),
+    path('api/menu-items/', menu_items_api, name='menu_items_api'),
+    path('menu/', MenuPageView.as_view(), name='menu_page'),
 ]

@@ -4,7 +4,7 @@ from app.models.restaurant_models import Restaurant, Item
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 
-class MenuListCreateView(View, LoginRequiredMixin):
+class MenuPageView(LoginRequiredMixin, View):
     template_name = "menu_list.html"
 
     def get(self, request, *args, **kwargs):
@@ -14,7 +14,7 @@ class MenuListCreateView(View, LoginRequiredMixin):
         items = restaurant.items.all() if restaurant else []
 
         return render(request, self.template_name, {
-            'restairant': restaurant,
+            'restaurant': restaurant,
             'items': items
             })
     def post(self, request, *args, **kwargs):
@@ -22,7 +22,7 @@ class MenuListCreateView(View, LoginRequiredMixin):
         item_id = request.POST.get('item_id', None)
         restaurant = Restaurant.objects.first()
         if not restaurant:
-            return redirect('menu_list')
+            return redirect('menu_page')
         
         if action == 'create':
             name = request.POST.get('name')
@@ -54,14 +54,15 @@ class MenuListCreateView(View, LoginRequiredMixin):
             item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
             item.delete()
 
-        return redirect('menu_list')
-    def menu_items_api(request):
-        if request.method == 'GET':
-            restaurant = Restaurant.objects.first()
-            if not restaurant:
-                return JsonResponse({'error': 'Restaurant not found'}, status=404)
-            items = list(restaurant.items.values())
-            return JsonResponse({'items': items}, status=200)
+        return redirect('menu_page')
+    
+def menu_items_api(request):
+    if request.method == 'GET':
+        restaurant = Restaurant.objects.first()
+        if not restaurant:
+            return JsonResponse({'error': 'Restaurant not found'}, status=404)
+        items = list(restaurant.items.values())
+        return JsonResponse({'items': items}, status=200)
 
         
 
