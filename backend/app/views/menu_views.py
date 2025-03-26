@@ -1,71 +1,68 @@
-from django.views import View
-from django.shortcuts import render, redirect, get_object_or_404
-from app.models.restaurant_models import Restaurant, Item
-from django.contrib.auth.mixins import LoginRequiredMixin
+import json
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from app.models.restaurant_models import Restaurant, Item
 
-class MenuPageView(View):
-    template_name = "menu_list.html"
-
-    def get(self, request, *args, **kwargs):
-        # Logic to retrieve and display the menu items
-
-        restaurant = Restaurant.objects.first()
-        items = restaurant.items.all() if restaurant else []
-
-        return render(request, self.template_name, {
-            'restaurant': restaurant,
-            'items': items
-            })
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get('action', '')
-        item_id = request.POST.get('item_id', None)
-        restaurant = Restaurant.objects.first()
-        if not restaurant:
-            return redirect('menu_page')
-        
-        if action == 'create':
-            name = request.POST.get('name')
-            description = request.POST.get('description', '')
-            price = float(request.POST.get('price', 0.0))
-            category = request.POST.get('category', '')
-            stock = int(request.POST.get('stock', 0))
-            available = request.POST.get('available', 'false') == 'true'
-
-            Item.objects.create(
-                restaurant=restaurant,
-                name=name,
-                description=description,
-                price=price,
-                category=category,
-                stock=stock,
-                available=available
-            )
-        elif action == 'update' and item_id:
-            item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
-            item.name = request.POST.get('name', item.name)
-            item.description = request.POST.get('description', item.description)
-            item.price = float(request.POST.get('price', item.price))
-            item.category = request.POST.get('category', item.category)
-            item.stock = int(request.POST.get('stock', item.stock))
-            item.available = request.POST.get('available', 'false') == 'true'
-            item.save()
-        elif action == 'delete' and item_id:
-            item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
-            item.delete()
-
-        return redirect('menu_page')
-    
+@csrf_exempt
 def menu_items_api(request):
     if request.method == 'GET':
         restaurant = Restaurant.objects.first()
         if not restaurant:
             return JsonResponse({'error': 'Restaurant not found'}, status=404)
+
         items = list(restaurant.items.values())
         return JsonResponse({'items': items}, status=200)
 
-        
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-        
 
-    
+@csrf_exempt
+def manage_menu_item(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        action = data.get('action')
+        item_id = data.get('item_id')
+        restaurant = Restaurant.objects.first()
+
+        if not restaurant:
+            return JsonResponse({'error': 'Restaurant not found'}, status=404)
+
+        if action == 'create':
+            required_fields = ['name', 'price', 'category', 'stock']
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    return JsonResponse({'error': f"{field} is required"}, status=400)
+
+            item = Item.objects.create(
+                restaurant=restaurant,
+                name=data['name'],
+                description=data.get('description', ''),
+                price=float(data['price']),
+                category=data['category'],
+                stock=int(data['stock']),
+                available=data.get('available', False),
+            )
+            return JsonResponse({'message': 'Item created successfully', 'item_id': item.id}, status=201)
+
+        elif action == 'update' and item_id:
+            item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
+
+            item.name = data.get('name', item.name)
+            item.description = data.get('description', item.description)
+            item.price = float(data.get('price', item.price))
+            item.category = data.get('category', item.category)
+            item.stock = int(data.get('stock', item.stock))
+            item.available = data.get('available', item.available)
+            item.save()
+
+            return JsonResponse({'message': 'Item updated successfully'}, status=200)
+
+        elif action == 'delete' and item_id:
+            item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
+            item.delete()
+            return JsonResponse({'message': 'Item deleted successfully'}, status=200)
+
+        return JsonResponse({'error': 'Invalid action or missing item_id'}, status=400)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
