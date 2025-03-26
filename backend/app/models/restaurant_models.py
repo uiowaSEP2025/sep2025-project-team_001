@@ -21,6 +21,7 @@ class Item(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=50, blank=True)  # e.g., drink or food'
+    stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
 
     def __str__(self):
