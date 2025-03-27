@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/MenuPage.css';
-import '../components/ItemCard.js'; 
+import '../pages/styles/MenuPage.css';
+import ItemCard from '../components/ItemCard.js'; 
 const MenuPage = () => {
     const [items, setItems] = useState([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -77,7 +77,6 @@ const MenuPage = () => {
     };
 
     const toggleAvailability = (item) => {
-        const newAvailability = !item.available;
         const updatedItem = {
             ...item,
             available: !item.available,
@@ -253,19 +252,18 @@ const MenuPage = () => {
 
             {/* Delete Modal */}
             {showDeleteModal && (
-                <div className="modal-overlay">
+                    <div className="modal-overlay">
                     <div className="modal-content">
                         <h3>Confirm Delete</h3>
                         <p>Are you sure you want to delete this item?</p>
                         <button onClick={handleDeleteConfirm}>Yes</button>
-                        <button className="cancel-btn" onClick={handleDeleteCancel}>
-                            Cancel
+                        <button className="cancel-button" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
                         </button>
                     </div>
-                </div>
+                    </div>
             )}
         </div>
     );
 };
-
 export default MenuPage;
