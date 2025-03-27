@@ -1,10 +1,12 @@
 from django.db import models
 from .customer_models import Customer
+from app.models.customer_models import Manager
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=50, blank=True)
+    managers = models.ManyToManyField(Manager, related_name="restaurants")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
