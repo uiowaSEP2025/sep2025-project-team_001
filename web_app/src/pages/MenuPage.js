@@ -117,6 +117,47 @@ const MenuPage = () => {
 
             <div className = "sub-section-header">Beverages</div>
             {unavailableBeverages.length == 0 && <p>No unavailable beverages</p>}
+            {unavailableBeverages.map(item => (
+                <div key={item.id} className="item-container">
+                    <div className="item-card">
+                        <h3>{item.name}</h3>
+                        {item.description}<br />
+                        Price: ${item.price}<br />
+                        Stock: {item.stock}<br />
+                        Available: {' '}
+                    </div>
+                    <input
+                        type="checkbox"
+                        checked={item.available}
+                        onChange={() => toggleAvailability(item)}
+                    />
+                    <br />
+                    <button onClick={() => confirmDelete(item.id)}>Delete</button>
+                </div>
+            ))}
+            <div className = "sub-section-header">Food</div>
+            {unavailableFood.length == 0 && <p>No unavailable food items</p>}
+            {unavailableFood.map(item => (
+                <div key={item.id} className="item-container">
+                    <div className="item-card">
+                        <h3>{item.name}</h3>
+                        {item.description}<br />
+                        Price: ${item.price}<br />
+                        Stock: {item.stock}<br />
+                        Available: {' '}
+                    </div>
+                    <input
+                        type="checkbox"
+                        checked={item.available}
+                        onChange={() => toggleAvailability(item)}
+                    />
+                    <br />
+                    <button onClick={() => confirmDelete(item.id)}>Delete</button>
+                </div>
+            ))}
+
+            {/* Create Modal */}
+            {showCreateModal }
         </div>
     )
     
