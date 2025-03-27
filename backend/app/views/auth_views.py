@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
-from app.models.customer_models import CustomUser
+from app.models.customer_models import CustomUser, Manager
+from app.models.restaurant_models import Restaurant
 import re
 
 def get_tokens_for_user(user):
@@ -47,22 +48,35 @@ def register_user(request):
         if len(data["password"]) < 6:
             return JsonResponse({"message": "Password must be at least 6 characters long."}, status=400)
 
+        # Create custom user for username, email, password, and name
         user = CustomUser.objects.create_user(
             username=data["username"],
             email=data["email"],
             password=data["password"],
             first_name=data["name"],
-            phone=data["phone"],
-            business_name=data["business_name"],
-            business_address=data["business_address"],
         )
 
-        user.save()
+        # Create Manager profile
+        manager = Manager.objects.create(user=user)
+
+        # Create Restaurant and add manager to the resturant
+        restaurant = Restaurant.objects.create(
+            name=data["business_name"],
+            address=data["business_address"],
+            phone=data["phone"]
+        )
+        restaurant.managers.add(manager)  # Link manager to restaurant
+
         tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        return JsonResponse(
-            {"message": "User registered successfully", "tokens": tokens}, status=201
-        )
+        #sanity check to see if all models were created correctly
+        return JsonResponse({
+            "message": "User registered successfully",
+            "tokens": tokens,
+            "manager": manager.user.username,
+            "restaurant": restaurant.name,
+            "restaurant_managers": [m.user.username for m in restaurant.managers.all()]
+        }, status=201)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 

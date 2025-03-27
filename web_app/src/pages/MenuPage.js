@@ -21,7 +21,11 @@ const MenuPage = () => {
     }, []);
 
     const fetchItems = () => {
-        fetch('/api/menu-items/')
+        fetch('/api/menu-items/', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 setItems(data.items || []);
@@ -59,7 +63,10 @@ const MenuPage = () => {
         e.preventDefault();
         fetch('/api/manage-item/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+            },
             body: JSON.stringify({
                 action: 'create',
                 ...formData,
@@ -85,7 +92,11 @@ const MenuPage = () => {
 
         fetch('/api/manage-item', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+
+             },
             body: JSON.stringify(updatedItem)
         })
             .then(() => {
@@ -104,7 +115,11 @@ const MenuPage = () => {
     const handleDeleteConfirm = () => {
         fetch('/api/manage-item', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+
+             },
             body: JSON.stringify({
                 action: 'delete',
                 id: deleteItemId

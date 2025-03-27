@@ -9,10 +9,9 @@ import "./styles/Registration.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 function Registration() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // Step 1 or Step 2
+  const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -30,176 +29,181 @@ function Registration() {
   };
 
   const handleContinue = () => {
-    if (!formData.name || !formData.username || !formData.password || !formData.confirmPassword) {
+    const { name, username, password, confirmPassword } = formData;
+    if (!name || !username || !password || !confirmPassword) {
       toast.error("Please fill out all fields.");
       return;
     }
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
-    if (formData.password.length < 6) {
+    if (password.length < 6) {
       toast.error("Password must be at least 6 characters long.");
       return;
     }
-    setStep(2); // Move to the next step
+    setStep(2);
   };
 
-  const handleBack = () => {
-    setStep(1); // Go back to the first step
-  };
+  const handleBack = () => setStep(1);
 
   const handleRegister = async (event) => {
     event.preventDefault();
+    const { email, phone, business_name, business_address } = formData;
 
-    // Validate step 2 fields before sending
-    if (!formData.email || !formData.phone || !formData.business_name || !formData.business_address) {
+    if (!email || !phone || !business_name || !business_address) {
       toast.error("Please fill out all fields in Step 2.");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    const phoneRegex = /^\d{10}$/;
+
+    if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address.");
       return;
     }
 
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    if (!phoneRegex.test(phone)) {
       toast.error("Phone number must be exactly 10 digits.");
       return;
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, {
-        name: formData.name,
-        username: formData.username,
-        password: formData.password,
-        email: formData.email,
-        phone: formData.phone,
-        business_name: formData.business_name,
-        business_address: formData.business_address,
-      });
-  
-      console.log("Registration successful:", response.data);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, formData);
       const { access, refresh } = response.data.tokens;
-  
-      // Store tokens in localStorage
+
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
-  
-      // Redirect to dashboard
+
       navigate("/dashboard");
     } catch (error) {
-      console.error("Registration failed:", error.response?.data || error.message);
       toast.error("Registration failed: " + (error.response?.data || error.message));
     }
-  };  
+  };
 
   return (
-    <div className="page-container">
-      <h1 className="page-title">Online Manager Registration</h1>
-
-      <Modal show={step === 1} backdrop="static" keyboard={false}>
+    <div className="registration-page-container">
+      <Modal
+        show={step === 1}
+        centered
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="registration-modal-dialog"
+      >
         <Modal.Header>
-          <Modal.Title>Step 1: Basic Information</Modal.Title>
+          <Modal.Title className="modal-title">Manager Registration</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="registration-modal-body">
           <Form>
-            <Form.Group controlId="name">
+            <Form.Group controlId="name" className="registration-form-group">
               <Form.Control
                 type="text"
                 placeholder="First & Last Name"
                 required
                 value={formData.name}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="username">
+            <Form.Group controlId="username" className="registration-form-group">
               <Form.Control
                 type="text"
                 placeholder="Desired Username"
                 required
                 value={formData.username}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="password">
+            <Form.Group controlId="password" className="registration-form-group">
               <Form.Control
                 type="password"
                 placeholder="Desired Password"
                 required
                 value={formData.password}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="confirmPassword">
+            <Form.Group controlId="confirmPassword" className="registration-form-group">
               <Form.Control
                 type="password"
                 placeholder="Confirm Password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleContinue}>
+        <Modal.Footer className="registration-modal-footer">
+          <Button className="registration-button" variant="primary" onClick={handleContinue}>
             Continue
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={step === 2} backdrop="static" keyboard={false}>
+      <Modal
+        show={step === 2}
+        centered
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="registration-modal-dialog"
+      >
         <Modal.Header>
-          <Modal.Title>Step 2: Contact & Business Info</Modal.Title>
+          <Modal.Title className="modal-title">Manager Registration</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="registration-modal-body">
           <Form onSubmit={handleRegister}>
-            <Form.Group controlId="email">
+            <Form.Group controlId="email" className="registration-form-group">
               <Form.Control
                 type="email"
                 placeholder="Email"
                 required
                 value={formData.email}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="phone">
+            <Form.Group controlId="phone" className="registration-form-group">
               <Form.Control
                 type="tel"
                 placeholder="Phone Number"
                 required
                 value={formData.phone}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="business_name">
+            <Form.Group controlId="business_name" className="registration-form-group">
               <Form.Control
                 type="text"
                 placeholder="Business Name"
                 required
                 value={formData.business_name}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="business_address">
+            <Form.Group controlId="business_address" className="registration-form-group">
               <Form.Control
                 type="text"
                 placeholder="Business Address"
                 required
                 value={formData.business_address}
                 onChange={handleChange}
+                className="registration-form-control"
               />
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleBack}>
+        <Modal.Footer className="registration-modal-footer">
+          <Button className="registration-button" variant="secondary" onClick={handleBack}>
             Back
           </Button>
-          <Button variant="success" type="submit" onClick={handleRegister}>
+          <Button className="registration-button" variant="success" type="submit" onClick={handleRegister}>
             Register
           </Button>
         </Modal.Footer>
