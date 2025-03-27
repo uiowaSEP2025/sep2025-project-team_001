@@ -67,15 +67,16 @@ def register_user(request):
         )
         restaurant.managers.add(manager)  # Link manager to restaurant
 
-        print("Created manager:", manager.user.username)
-        print("Created restaurant:", restaurant.name)
-        print("Restaurant managers:", restaurant.managers.all())
-
         tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        return JsonResponse(
-            {"message": "User registered successfully", "tokens": tokens}, status=201
-        )
+        #sanity check to see if all models were created correctly
+        return JsonResponse({
+            "message": "User registered successfully",
+            "tokens": tokens,
+            "manager": manager.user.username,
+            "restaurant": restaurant.name,
+            "restaurant_managers": [m.user.username for m in restaurant.managers.all()]
+        }, status=201)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
