@@ -1,152 +1,124 @@
 html, body {
-    margin: 0;
-    padding: 0;
-    height: auto;
-    width: 100vw;
-    background: #1e3c72;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .page-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 20px;
-  }
-  
-  .page-title {
-    font-size: 36px;
-    font-weight: 600;
-    color: #FFFFFF !important;
-    text-align: center;
-    width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100vw;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.registration-page-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.registration-modal-dialog {
+  max-width: 600px;
+  width: 90%;
+}
+
+.modal-content {
+  background: rgba(25, 25, 25, 0.95);
+  border-radius: 14px;
+  padding: 30px;
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.registration-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.registration-form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.registration-form-control {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3); /* darker background for contrast */
+  color: #ffffff; /* force bright white */
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.registration-form-control:focus {
+  outline: none;
+  border-color: #6DD5FA;
+  background: rgba(255, 255, 255, 0.621);
+  box-shadow: 0 0 6px #6DD5FA;
+}
+
+.registration-form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.registration-modal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.registration-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  background: linear-gradient(to right, #6DD5FA, #2980B9);
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin: 5px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.registration-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to right, #4facfe, #00f2fe);
+}
+
+@media (max-width: 768px) {
+  .registration-page-title {
+    font-size: 28px;
     margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
   }
-  
-  .modal {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
+
+  .registration-form-control,
+  .registration-button {
+    max-width: 90%;
   }
-  
-  .modal-dialog {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px auto;
-    width: 90%;
-    max-width: 600px;
-  }
-  
-  .modal-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    padding: 30px;
-    width: 100%;
-    max-width: 800px;
-    overflow: visible;
-  }
-  
-  .modal-title {
-    width: 100%;
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: #FFFFFF;
-    margin-bottom: 15px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  }
-  
-  .modal-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .form-control {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 8px;
-    padding: 14px;
-    font-size: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-    color: #FFFFFF;
-    transition: border-color 0.3s ease-in-out;
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  
-  .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-  }
-  
-  .modal-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-  
-  button {
-    width: 100%;
-    max-width: 400px;
-    padding: 14px;
-    font-size: 18px;
-    border-radius: 8px;
-    background: linear-gradient(to right, #6DD5FA, #2980B9);
-    border: none;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    text-align: center;
-    margin: 5px 0;
-  }
-  
-  button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  }
-  
-  @media (max-width: 768px) {
-    .page-title {
-      font-size: 30px;
-      margin-bottom: 15px;
-    }
-  
-    .modal-dialog {
-      margin-top: 15px;
-      max-width: 90%;
-    }
-  
-    .form-control, button {
-      max-width: 90%;
-    }
-  }
-  
+}
+
+.modal-header {
+  justify-content: center !important;
+}
+
