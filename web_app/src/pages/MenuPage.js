@@ -19,12 +19,24 @@ const MenuPage = () => {
         available: true
     });
 
+    useEffect(() => {
+        fetchItems();
+    }, []);
+
+
     const fetchItems = () => {
         getMenuItems()
             .then(data => setItems(data))
             .catch(error => console.error('Error fetching menu items:', error));
     
         };
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
 
     const openCreateModal = () => {
         setFormData({
@@ -37,7 +49,13 @@ const MenuPage = () => {
         });
         setShowCreateModal(true);
     };
-
+    const closeCreateModal = () => {
+        setShowCreateModal(false);
+    };
+    const handleCreate = (e) => {
+        e.preventDefault();
+        const data = new FormData();
+        data.append('action', 'create')
     const toggleAvailability = (item) => {
         const newAvailability = !item.available;
         const data = new FormData();
