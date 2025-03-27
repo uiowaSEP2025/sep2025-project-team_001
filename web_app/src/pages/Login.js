@@ -11,60 +11,53 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
   const navigate = useNavigate();
-
-  // State to store form values
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (event) => {
     event.preventDefault();
-  
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/login/`, {
         username,
         password,
       });
-  
-      console.log("Login successful:", response.data);
+
       const { access, refresh } = response.data.tokens;
-  
-      // Store tokens in localStorage
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
-  
-      // Redirect user to dashboard
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error.response?.data || error.message);
       toast.error("Invalid username or password. Please try again.");
     }
-  };    
+  };
 
   return (
-    <div className="page-container">
-      <Modal show backdrop="static" keyboard={false}>
-        <Modal.Header>
-          <Modal.Title>Login</Modal.Title>
+    <div className="login-page-container">
+      <Modal show centered backdrop="static" keyboard={false} dialogClassName="login-modal-dialog">
+        <Modal.Header className="justify-content-center">
+          <Modal.Title className="login-modal-title">Login</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="login-modal-body">
           <Form onSubmit={handleLogin}>
-            <Form.Group controlId="username">
+            <Form.Group controlId="username" className="login-form-group">
               <Form.Control
                 type="text"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                className="login-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="password">
+            <Form.Group controlId="password" className="login-form-group">
               <Form.Control
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="login-form-control"
               />
             </Form.Group>
-            <Button variant="primary" type="submit" className="mt-3 w-100">
+            <Button variant="primary" type="submit" className="login-button">
               Login
             </Button>
           </Form>
