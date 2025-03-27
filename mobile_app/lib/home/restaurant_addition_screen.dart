@@ -127,11 +127,21 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Failed to load restaurants."),
-                          const SizedBox(height: 10),
+                          Text(
+                            "Failed to load restaurants.",
+                            style: AppTextStyles.subtitleParagraph(
+                                screenHeight, AppColors.paragraphText),
+                          ),
+                          SizedBox(height: verticalSpacing),
                           ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryColor),
                             onPressed: loadRestaurants,
-                            child: const Text("Try Again"),
+                            child: Text(
+                              "Try Again",
+                              style: AppTextStyles.buttonText(
+                                  screenHeight, Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -178,47 +188,6 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                         ],
                       ),
                     ),
-        ),
-      ),
-      // floatingActionButton: !isLoading && !errorFetching ? Container(
-      //   height: screenWidth * 0.12,
-      //   width: screenWidth - horizontalSpacing * 2,
-      //   child: ElevatedButton(
-      //       style: ElevatedButton.styleFrom(
-      //           backgroundColor: selectedRestaurantIndex != null
-      //               ? AppColors.primaryColor
-      //               : Colors.grey),
-      //       onPressed: () {
-      //         if (selectedRestaurantIndex != null) {
-      //           print("${restaurants[selectedRestaurantIndex!].name}");
-      //         } else {
-      //           print("No bar selected");
-      //         }
-      //       },
-      //       child: Center(
-      //         child: Text(
-      //           "ADD RESTAURANT",
-      //           style:
-      //               AppTextStyles.buttonText(screenHeight, AppColors.whiteText),
-      //         ),
-      //       )),
-      // )
-      // : null,
-      floatingActionButton: Container(
-        height: screenWidth * 0.12,
-        width: screenWidth - horizontalSpacing * 2,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryColor,
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, "/add_restaurant");
-          },
-          icon: const Icon(Icons.add),
-          label: Text(
-            "ADD NEW",
-            style: AppTextStyles.buttonText(screenHeight, AppColors.whiteText),
-          ),
         ),
       ),
     );

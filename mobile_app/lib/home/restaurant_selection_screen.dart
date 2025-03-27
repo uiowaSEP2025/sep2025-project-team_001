@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/classes/bar.dart';
 import 'package:mobile_app/utils/token_manager.dart';
@@ -27,17 +28,17 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
   void initState() {
     super.initState();
     isLoading = true;
-    loadRestaurants();
+    loadSavedRestaurants();
   }
 
-  void loadRestaurants() async {
+  void loadSavedRestaurants() async {
     setState(() {
       isLoading = true;
       errorFetching = false;
     });
 
     try {
-      final fetchedRestaurants = await fetchRestaurants();
+      final fetchedRestaurants = await fetchCustomerRestaurants();
       setState(() {
         restaurants = fetchedRestaurants;
       });
@@ -53,40 +54,16 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
     }
   }
 
-  Future<List<Restaurant>> fetchRestaurants() async {
-    final accessToken = await TokenManager.getAccessToken();
 
-    if (accessToken == null) {
-      throw Exception('Access token not found');
-    }
-
-    final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
-    const String endpoint = "${ApiConfig.baseUrl}/restaurants/list";
-
-    try {
-      final response = await dio.get(
-        endpoint,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $accessToken",
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-
-      final data = response.data as List<dynamic>;
-      return data.map((json) => Restaurant.fromJson(json)).toList();
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception("Access token expired or unauthorized");
-      }
-
-      print("Fetch restaurants error: ${e.response?.data}");
-      throw Exception("Failed to fetch restaurants: ${e.response?.statusCode}");
-    }
-  }
 
   void selectRestaurant(int i) {
+    //todo go to the menu page for that restaurant
+    Navigator.pushNamed(
+      context,
+      '/home/restaurant_menu',arguments: {
+        'restaurant' : restaurants[i].name
+      }
+     );
     setState(() {
       if (selectedRestaurantIndex == i) {
         selectedRestaurantIndex = null;
@@ -150,7 +127,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                           const Text("Failed to load restaurants."),
                           const SizedBox(height: 10),
                           ElevatedButton(
-                            onPressed: loadRestaurants,
+                            onPressed: loadSavedRestaurants,
                             child: const Text("Try Again"),
                           ),
                         ],
@@ -158,7 +135,9 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                     )
                   : SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
+                      child: 
+                      restaurants.isNotEmpty ? 
+                      Column(
                         children: [
                           SizedBox(
                             height: horizontalSpacing,
@@ -196,7 +175,8 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                             SizedBox(height: horizontalSpacing),
                           ]
                         ],
-                      ),
+                      ) : Padding(padding: EdgeInsets.only(left: horizontalSpacing, right: horizontalSpacing, top: verticalSpacing*10, bottom: verticalSpacing*10),
+                      child: Center(child: Text("You haven't saved any restaurants yet. Click below to add one 🔍",textAlign: TextAlign.center, style: AppTextStyles.subtitleParagraph(screenHeight, AppColors.paragraphText),))),
                     ),
         ),
       ),
@@ -224,7 +204,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
       //       )),
       // )
       // : null,
-      floatingActionButton: Container(
+      floatingActionButton: !isLoading && !errorFetching ? Container(
         height: screenWidth * 0.12,
         width: screenWidth - horizontalSpacing * 2,
         child: ElevatedButton.icon(
@@ -240,7 +220,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
             style: AppTextStyles.buttonText(screenHeight, AppColors.whiteText),
           ),
         ),
-      ),
+      ) : null,
     );
   }
 }
