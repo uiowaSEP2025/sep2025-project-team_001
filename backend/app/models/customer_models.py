@@ -3,10 +3,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# Has username, email, password, first_name, last_name
 class CustomUser(AbstractUser):
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    business_name = models.CharField(max_length=255, blank=True, null=True)
-    business_address = models.TextField(blank=True, null=True)
+    pass
+
+class Manager(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="manager")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    #create string rep of this object
+    def __str__(self):
+        return f"{self.user.username} (Manager)"
 
 
 class Customer(models.Model):
