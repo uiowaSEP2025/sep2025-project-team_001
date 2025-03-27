@@ -18,7 +18,7 @@ const MenuPage = () => {
         stock: '',
         available: true
     });
-    
+
     const fetchItems = () => {
         getMenuItems()
             .then(data => setItems(data))
@@ -88,9 +88,35 @@ const MenuPage = () => {
                             checked={item.available}
                             onChange={() => toggleAvailability(item)}
                         />
+                        <br />
+                        <button onClick={() => confirmDelete(item.id)}>Delete</button>
                     </div>
                 ))}
+
+            <div className = "sub-section-header">Food</div>
+            {availableFood.length == 0 && <p>No available food items</p>}
+            {availableFood.map(item => (
+                <div key={item.id} className="item-container">
+                    <div className="item-card">
+                        <h3>{item.name}</h3>
+                        {item.description}<br />
+                        Price: ${item.price}<br />
+                        Stock: {item.stock}<br />
+                        Available: {' '}
+                    </div>
+                    <input
+                        type="checkbox"
+                        checked={item.available}
+                        onChange={() => toggleAvailability(item)}
+                    />
+                    <br />
+                    <button onClick={() => confirmDelete(item.id)}>Delete</button>
+                </div>
+            ))}
             <div className = "section-header">Unavailable Items</div>
+
+            <div className = "sub-section-header">Beverages</div>
+            {unavailableBeverages.length == 0 && <p>No unavailable beverages</p>}
         </div>
     )
     
