@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/classes/menu_item.dart';
+import 'package:mobile_app/home/restaurant/cart_screen.dart';
+import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
 import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
 
@@ -18,6 +20,7 @@ bool isLoading = true;
   List<MenuItem> items = [];
   String selectedCategory = 'All';
   late String restaurantName;
+  Map<String , CartItem> cart = {};
 
   @override
   void didChangeDependencies() {
@@ -46,6 +49,16 @@ bool isLoading = true;
       });
     }
   }
+
+  void  _addToCart(MenuItem item) {
+  setState(() {
+    if (cart.containsKey(item.name)) {
+      cart[item.name]!.quantity += 1;
+    } else {
+      cart[item.name] = CartItem(item: item);
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -101,12 +114,27 @@ bool isLoading = true;
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
-                return MenuItemCard(item: item, screenHeight: screenHeight, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing,);
+                return MenuItemCard(item: item, screenHeight: screenHeight, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing, onAddToCart: _addToCart,);
               },
             ),
           ),
         ],
       ),
+      floatingActionButton: cart.isNotEmpty
+    ? FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CartScreen(cart: cart),
+            ),
+          );
+        },
+        label: Text('Cart (${cart.values.fold<int>(0, (sum, item) => sum + item.quantity)})'),
+        icon: Icon(Icons.shopping_cart),
+      )
+    : null,
+
     );
   }
 }

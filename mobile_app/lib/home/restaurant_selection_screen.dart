@@ -54,23 +54,11 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
     }
   }
 
-
-
   void selectRestaurant(int i) {
     //todo go to the menu page for that restaurant
-    Navigator.pushNamed(
-      context,
-      '/home/restaurant_menu',arguments: {
-        'restaurant' : restaurants[i].name
-      }
-     );
-    setState(() {
-      if (selectedRestaurantIndex == i) {
-        selectedRestaurantIndex = null;
-      } else {
-        selectedRestaurantIndex = i;
-      }
-    });
+    selectedRestaurantIndex = i;
+    Navigator.pushNamed(context, '/home/restaurant_menu',
+        arguments: {'restaurant': restaurants[i].name});
   }
 
   @override
@@ -135,48 +123,63 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                     )
                   : SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      child: 
-                      restaurants.isNotEmpty ? 
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: horizontalSpacing,
-                          ),
-                          for (int i = 0; i < restaurants.length; i += 2) ...[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      child: restaurants.isNotEmpty
+                          ? Column(
                               children: [
-                                GestureDetector(
-                                  onTap: () => selectRestaurant(i),
-                                  child: BarCard(
-                                    bar: restaurants[i],
-                                    screenHeight: screenHeight,
-                                    screenWidth: screenWidth,
-                                    isSelected: selectedRestaurantIndex == i,
-                                  ),
+                                SizedBox(
+                                  height: horizontalSpacing,
                                 ),
-                                if (i + 1 < restaurants.length) ...[
-                                  SizedBox(
-                                    width: horizontalSpacing * 1.5,
+                                for (int i = 0;
+                                    i < restaurants.length;
+                                    i += 2) ...[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => selectRestaurant(i),
+                                        child: BarCard(
+                                          bar: restaurants[i],
+                                          screenHeight: screenHeight,
+                                          screenWidth: screenWidth,
+                                          isSelected:
+                                              selectedRestaurantIndex == i,
+                                        ),
+                                      ),
+                                      if (i + 1 < restaurants.length) ...[
+                                        SizedBox(
+                                          width: horizontalSpacing * 1.5,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () => selectRestaurant(i + 1),
+                                          child: BarCard(
+                                            bar: restaurants[i + 1],
+                                            screenHeight: screenHeight,
+                                            screenWidth: screenWidth,
+                                            isSelected:
+                                                selectedRestaurantIndex ==
+                                                    i + 1,
+                                          ),
+                                        ),
+                                      ]
+                                    ],
                                   ),
-                                  GestureDetector(
-                                    onTap: () => selectRestaurant(i + 1),
-                                    child: BarCard(
-                                      bar: restaurants[i + 1],
-                                      screenHeight: screenHeight,
-                                      screenWidth: screenWidth,
-                                      isSelected:
-                                          selectedRestaurantIndex == i + 1,
-                                    ),
-                                  ),
+                                  SizedBox(height: horizontalSpacing),
                                 ]
                               ],
-                            ),
-                            SizedBox(height: horizontalSpacing),
-                          ]
-                        ],
-                      ) : Padding(padding: EdgeInsets.only(left: horizontalSpacing, right: horizontalSpacing, top: verticalSpacing*10, bottom: verticalSpacing*10),
-                      child: Center(child: Text("You haven't saved any restaurants yet. Click below to add one 🔍",textAlign: TextAlign.center, style: AppTextStyles.subtitleParagraph(screenHeight, AppColors.paragraphText),))),
+                            )
+                          : Padding(
+                              padding: EdgeInsets.only(
+                                  left: horizontalSpacing,
+                                  right: horizontalSpacing,
+                                  top: verticalSpacing * 10,
+                                  bottom: verticalSpacing * 10),
+                              child: Center(
+                                  child: Text(
+                                "You haven't saved any restaurants yet. Click below to add one 🔍",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.subtitleParagraph(
+                                    screenHeight, AppColors.paragraphText),
+                              ))),
                     ),
         ),
       ),
@@ -204,23 +207,26 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
       //       )),
       // )
       // : null,
-      floatingActionButton: !isLoading && !errorFetching ? Container(
-        height: screenWidth * 0.12,
-        width: screenWidth - horizontalSpacing * 2,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryColor,
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, "/add_restaurant");
-          },
-          icon: const Icon(Icons.add),
-          label: Text(
-            "ADD NEW",
-            style: AppTextStyles.buttonText(screenHeight, AppColors.whiteText),
-          ),
-        ),
-      ) : null,
+      floatingActionButton: !isLoading && !errorFetching
+          ? Container(
+              height: screenWidth * 0.12,
+              width: screenWidth - horizontalSpacing * 2,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, "/add_restaurant");
+                },
+                icon: const Icon(Icons.add),
+                label: Text(
+                  "ADD NEW",
+                  style: AppTextStyles.buttonText(
+                      screenHeight, AppColors.whiteText),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }

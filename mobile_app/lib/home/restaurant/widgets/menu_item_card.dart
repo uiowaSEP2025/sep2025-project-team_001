@@ -8,8 +8,9 @@ final double screenHeight;
 final double screenWidth;
 final double horizontalSpacing;
 final double verticalSpacing;
+final Function(MenuItem) onAddToCart;
 
-  const MenuItemCard({super.key, required this.item, required this.screenHeight, required this.screenWidth, required this.horizontalSpacing, required this.verticalSpacing});
+  const MenuItemCard({super.key, required this.item, required this.screenHeight, required this.screenWidth, required this.horizontalSpacing, required this.verticalSpacing, required this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,6 @@ final double verticalSpacing;
             ),
           ),
           const SizedBox(width: 12),
-          // 📋 Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +55,7 @@ final double verticalSpacing;
                     item.available
                         ? ElevatedButton(
                             onPressed: () {
-                              // Add to cart
+                              onAddToCart(item);
                             },
                             child: Text("Add"),
                             style: ElevatedButton.styleFrom(

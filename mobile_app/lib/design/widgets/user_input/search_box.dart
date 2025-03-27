@@ -23,11 +23,14 @@ class SearchBox extends StatelessWidget {
           hintText: hintText,
           prefixIcon: const Icon(Icons.search),
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: Colors.transparent,
           contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(
+      color: Colors.black,
+      width: 1.0,
+    ),
           ),
         ),
       ),
