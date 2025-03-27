@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/user_input/search_box.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/classes/bar.dart';
 import 'package:mobile_app/utils/token_manager.dart';
@@ -22,6 +23,7 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
   int? selectedRestaurantIndex;
   bool isLoading = true;
   bool errorFetching = false;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -104,90 +106,110 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
     double horizontalSpacing = screenWidth * 0.05;
     double verticalSpacing = screenHeight * 0.025;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Select restaurant to add',
-          style: AppTextStyles.appBarText(screenHeight, Colors.black),
+    return GestureDetector(
+      onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Select restaurant to add',
+            style: AppTextStyles.appBarText(screenHeight, Colors.black),
+          ),
         ),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedRestaurantIndex = null;
-          });
-        },
-        child: Padding(
-          padding: EdgeInsets.only(
-              left: horizontalSpacing, right: horizontalSpacing),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : errorFetching
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Failed to load restaurants.",
-                            style: AppTextStyles.subtitleParagraph(
-                                screenHeight, AppColors.paragraphText),
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryColor),
-                            onPressed: loadRestaurants,
-                            child: Text(
-                              "Try Again",
-                              style: AppTextStyles.buttonText(
-                                  screenHeight, Colors.white),
+        body: GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedRestaurantIndex = null;
+            });
+          },
+          child: Padding(
+            padding: EdgeInsets.only(
+                left: horizontalSpacing, right: horizontalSpacing),
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorFetching
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Failed to load restaurants.",
+                              style: AppTextStyles.subtitleParagraph(
+                                  screenHeight, AppColors.paragraphText),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: horizontalSpacing,
-                          ),
-                          for (int i = 0; i < restaurants.length; i += 2) ...[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => selectRestaurant(i),
-                                  child: BarCard(
-                                    bar: restaurants[i],
-                                    screenHeight: screenHeight,
-                                    screenWidth: screenWidth,
-                                    isSelected: selectedRestaurantIndex == i,
-                                  ),
-                                ),
-                                if (i + 1 < restaurants.length) ...[
-                                  SizedBox(
-                                    width: horizontalSpacing * 1.5,
-                                  ),
+                            SizedBox(height: verticalSpacing),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryColor),
+                              onPressed: loadRestaurants,
+                              child: Text(
+                                "Try Again",
+                                style: AppTextStyles.buttonText(
+                                    screenHeight, Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            SearchBox(
+                              screenHeight: screenHeight,
+                              hintText: "Search restaurants...",
+                              onChanged: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
+                                print("Searching for: $value");
+                              },
+                            ),
+                            SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            for (int i = 0; i < restaurants.length; i += 2) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
                                   GestureDetector(
-                                    onTap: () => selectRestaurant(i + 1),
+                                    onTap: () => selectRestaurant(i),
                                     child: BarCard(
-                                      bar: restaurants[i + 1],
+                                      bar: restaurants[i],
                                       screenHeight: screenHeight,
                                       screenWidth: screenWidth,
-                                      isSelected:
-                                          selectedRestaurantIndex == i + 1,
+                                      isSelected: selectedRestaurantIndex == i,
                                     ),
                                   ),
-                                ]
-                              ],
-                            ),
-                            SizedBox(height: horizontalSpacing),
-                          ]
-                        ],
+                                  if (i + 1 < restaurants.length) ...[
+                                    SizedBox(
+                                      width: horizontalSpacing * 1.5,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => selectRestaurant(i + 1),
+                                      child: BarCard(
+                                        bar: restaurants[i + 1],
+                                        screenHeight: screenHeight,
+                                        screenWidth: screenWidth,
+                                        isSelected:
+                                            selectedRestaurantIndex == i + 1,
+                                      ),
+                                    ),
+                                  ]
+                                ],
+                              ),
+                              SizedBox(height: horizontalSpacing),
+                            ],
+                            SizedBox(height: screenHeight*0.1*restaurants.length,)
+                            
+                          ],
+                        ),
                       ),
-                    ),
+          ),
         ),
       ),
     );
