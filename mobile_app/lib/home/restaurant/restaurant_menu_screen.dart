@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/classes/menu_item.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
+import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final String restaurantName;
@@ -100,24 +101,7 @@ bool isLoading = true;
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
-                return ListTile(
-                  title: Text(item.name),
-                  subtitle: Text(item.description),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('\$${item.price.toStringAsFixed(2)}'),
-                      if (item.available)
-                        ElevatedButton(
-                          onPressed: () {
-                          },
-                          child: Text("Add"),
-                        )
-                      else
-                        Text("Unavailable", style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                );
+                return MenuItemCard(item: item, screenHeight: screenHeight, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing,);
               },
             ),
           ),

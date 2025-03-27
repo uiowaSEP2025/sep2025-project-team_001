@@ -4,8 +4,12 @@ import 'package:mobile_app/classes/menu_item.dart';
 
 class MenuItemCard extends StatelessWidget {
 final MenuItem item; 
+final double screenHeight;
+final double screenWidth;
+final double horizontalSpacing;
+final double verticalSpacing;
 
-  const MenuItemCard({super.key, required this.item});
+  const MenuItemCard({super.key, required this.item, required this.screenHeight, required this.screenWidth, required this.horizontalSpacing, required this.verticalSpacing});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +27,8 @@ final MenuItem item;
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
               'https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2Fdrink.jpg?alt=media&token=5704bdff-9b69-4594-8c97-aa4e88025ef6', //todo use actual images for each of the menu items
-              width: 80,
-              height: 80,
+              width: screenWidth*0.25,
+              height: screenWidth*0.30,
               fit: BoxFit.cover,
             ),
           ),
