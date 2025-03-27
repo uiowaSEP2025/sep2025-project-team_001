@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/MenuPage.css';
-
+import '../components/ItemCard.js'; 
 const MenuPage = () => {
     const [items, setItems] = useState([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -57,15 +57,15 @@ const MenuPage = () => {
 
     const handleCreate = (e) => {
         e.preventDefault();
-        const data = new FormData();
-        data.append('action', 'create');
-        Object.entries(formData).forEach(([key, val]) => {
-            data.append(key, typeof val === 'boolean' ? (val ? 'true' : 'false') : val);
-        });
-
         fetch('/api/manage-item/', {
             method: 'POST',
-            body: data
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'create',
+                ...formData,
+                price: parseFloat(formData.price),
+                stock: parseInt(formData.stock)
+            }),
         })
             .then(() => {
                 setShowCreateModal(false);
@@ -78,19 +78,16 @@ const MenuPage = () => {
 
     const toggleAvailability = (item) => {
         const newAvailability = !item.available;
-        const data = new FormData();
-        data.append('action', 'update');
-        data.append('item_id', item.id);
-        data.append('name', item.name);
-        data.append('description', item.description);
-        data.append('price', item.price);
-        data.append('category', item.category);
-        data.append('stock', item.stock);
-        data.append('available', newAvailability ? 'true' : 'false');
+        const updatedItem = {
+            ...item,
+            available: !item.available,
+            action: 'update',
+        };
 
         fetch('/api/manage-item', {
             method: 'POST',
-            body: data
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedItem)
         })
             .then(() => {
                 fetchItems();
@@ -106,14 +103,13 @@ const MenuPage = () => {
     };
 
     const handleDeleteConfirm = () => {
-        if (!deleteItemId) return;
-        const data = new FormData();
-        data.append('action', 'delete');
-        data.append('item_id', deleteItemId);
-
         fetch('/api/manage-item', {
             method: 'POST',
-            body: data
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'delete',
+                id: deleteItemId
+            })
         })
             .then(() => {
                 setDeleteItemId(null);
@@ -123,11 +119,6 @@ const MenuPage = () => {
             .catch(error => {
                 console.error('Error deleting item:', error);
             });
-    };
-
-    const handleDeleteCancel = () => {
-        setShowDeleteModal(false);
-        setDeleteItemId(null);
     };
 
     const availableBeverages = items.filter(
@@ -153,92 +144,30 @@ const MenuPage = () => {
             </div>
 
             <div className="section-header">Available Items</div>
+                <div className="sub-section-header">Beverages</div>
+                    {availableBeverages.length === 0 && <p>No available beverages.</p>}
+                    {availableBeverages.map((item) => (
+                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                    ))}
 
-            <div className="sub-section-header">Beverages</div>
-            {availableBeverages.length === 0 && <p>No available beverages</p>}
-            {availableBeverages.map(item => (
-                <div key={item.id} className="item-container">
-                    <div className="item-card">
-                        <h3>{item.name}</h3>
-                        {item.description}<br />
-                        Price: ${item.price}<br />
-                        Stock: {item.stock}<br />
-                        Available: {' '}
-                        <input
-                            type="checkbox"
-                            checked={item.available}
-                            onChange={() => toggleAvailability(item)}
-                        />
-                        <br />
-                        <button onClick={() => confirmDelete(item.id)}>Delete</button>
-                    </div>
-                </div>
-            ))}
-
-            <div className="sub-section-header">Food</div>
-            {availableFood.length === 0 && <p>No available food items</p>}
-            {availableFood.map(item => (
-                <div key={item.id} className="item-container">
-                    <div className="item-card">
-                        <h3>{item.name}</h3>
-                        {item.description}<br />
-                        Price: ${item.price}<br />
-                        Stock: {item.stock}<br />
-                        Available: {' '}
-                        <input
-                            type="checkbox"
-                            checked={item.available}
-                            onChange={() => toggleAvailability(item)}
-                        />
-                        <br />
-                        <button onClick={() => confirmDelete(item.id)}>Delete</button>
-                    </div>
-                </div>
-            ))}
+                <div className="sub-section-header">Food</div>
+                {availableFood.length === 0 && <p>No available food items.</p>}
+                {availableFood.map((item) => (
+                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                    ))}
 
             <div className="section-header">Unavailable Items</div>
+                <div className="sub-section-header">Beverages</div>
+                    {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
+                    {unavailableBeverages.map((item) => (
+                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                    ))}
 
-            <div className="sub-section-header">Beverages</div>
-            {unavailableBeverages.length === 0 && <p>No unavailable beverages</p>}
-            {unavailableBeverages.map(item => (
-                <div key={item.id} className="item-container">
-                    <div className="item-card">
-                        <h3>{item.name}</h3>
-                        {item.description}<br />
-                        Price: ${item.price}<br />
-                        Stock: {item.stock}<br />
-                        Available: {' '}
-                        <input
-                            type="checkbox"
-                            checked={item.available}
-                            onChange={() => toggleAvailability(item)}
-                        />
-                        <br />
-                        <button onClick={() => confirmDelete(item.id)}>Delete</button>
-                    </div>
-                </div>
-            ))}
-
-            <div className="sub-section-header">Food</div>
-            {unavailableFood.length === 0 && <p>No unavailable food items</p>}
-            {unavailableFood.map(item => (
-                <div key={item.id} className="item-container">
-                    <div className="item-card">
-                        <h3>{item.name}</h3>
-                        {item.description}<br />
-                        Price: ${item.price}<br />
-                        Stock: {item.stock}<br />
-                        Available: {' '}
-                        <input
-                            type="checkbox"
-                            checked={item.available}
-                            onChange={() => toggleAvailability(item)}
-                        />
-                        <br />
-                        <button onClick={() => confirmDelete(item.id)}>Delete</button>
-                    </div>
-                </div>
-            ))}
+                <div className="sub-section-header">Food</div>
+                    {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
+                    {unavailableFood.map((item) => (
+                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                    ))}
 
             {/* Create Modal */}
             {showCreateModal && (

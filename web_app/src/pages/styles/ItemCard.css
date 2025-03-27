@@ -1,0 +1,10 @@
+.item-container {
+    margin-bottom: 15px;
+  }
+  
+  .item-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+  }
