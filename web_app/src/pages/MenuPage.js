@@ -157,8 +157,100 @@ const MenuPage = () => {
             ))}
 
             {/* Create Modal */}
-            {showCreateModal }
+            {showCreateModal && (
+                <div className = "modal-overlay">
+                    <div className = "model-content">
+                        <h3>Create New Menu Item</h3>
+                        <form onSunmit={handleCreate}>
+                            <div>
+                                <label>Item Name:</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Description:</label>
+                                <input
+                                    type="text"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div>
+                                <label>Price:</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    value={formData.price}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Category:</label>
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select Category</option>
+                                    <option value="beverage">Beverage</option>
+                                    <option value="food">Food</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Stock:</label>
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    value={formData.stock}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Available:</label>
+                                <input
+                                    type="checkbox"
+                                    name="available"
+                                    checked={formData.available}
+                                    onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                                />
+                            </div>
+                            <button type="submit">Create</button>
+                            <button
+                                type="button"
+                                className="cancel-button"
+                                onClick={closeCreateModal}
+                            >
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div className = "modal-overlay">
+                    <div className = "model-content">
+                        <h3>Confirm Delete</h3>
+                        <p>Are you sure you want to delete this item?</p>
+                        <button onClick={handleDeleteConfirm}>Yes</button>
+                        <button className = "cancel-btn" onClick={handleDeleteCancel}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-    )
+    );
     
 }
+
+export default MenuPage;
