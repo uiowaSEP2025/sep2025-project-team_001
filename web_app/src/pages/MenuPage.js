@@ -6,7 +6,7 @@ const MenuPage = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
-
+    const [imageBase64, setImageBase64] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -43,6 +43,19 @@ const MenuPage = () => {
         }));
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setImageBase64(reader.result);
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
     const openCreateModal = () => {
         setFormData({
             name: '',
@@ -52,6 +65,7 @@ const MenuPage = () => {
             stock: '',
             available: true
         });
+        setImageBase64('');
         setShowCreateModal(true);
     };
 
@@ -71,7 +85,8 @@ const MenuPage = () => {
                 action: 'create',
                 ...formData,
                 price: parseFloat(formData.price),
-                stock: parseInt(formData.stock)
+                stock: parseInt(formData.stock),
+                image: imageBase64
             }),
         })
             .then(() => {
@@ -152,41 +167,41 @@ const MenuPage = () => {
         <div>
             <div className="menu-page-container">
                 <h2>Menu Manager</h2>
-                <button className="create-button" onClick={openCreateModal}>
+                <button className="menu-create-button" onClick={openCreateModal}>
                     Create New Item
                 </button>
             </div>
-
-            <div className="section-header">Available Items</div>
-                <div className="sub-section-header">Beverages</div>
-                    {availableBeverages.length === 0 && <p>No available beverages.</p>}
-                    {availableBeverages.map((item) => (
-                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-                    ))}
-
-                <div className="sub-section-header">Food</div>
-                {availableFood.length === 0 && <p>No available food items.</p>}
-                {availableFood.map((item) => (
-                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-                    ))}
-
-            <div className="section-header">Unavailable Items</div>
-                <div className="sub-section-header">Beverages</div>
-                    {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
-                    {unavailableBeverages.map((item) => (
-                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-                    ))}
-
-                <div className="sub-section-header">Food</div>
-                    {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
-                    {unavailableFood.map((item) => (
-                        <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-                    ))}
-
+    
+            <div className="menu-section-header">Available Items</div>
+            <div className="menu-sub-section-header">Beverages</div>
+            {availableBeverages.length === 0 && <p>No available beverages.</p>}
+            {availableBeverages.map((item) => (
+                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+            ))}
+    
+            <div className="menu-sub-section-header">Food</div>
+            {availableFood.length === 0 && <p>No available food items.</p>}
+            {availableFood.map((item) => (
+                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+            ))}
+    
+            <div className="menu-section-header">Unavailable Items</div>
+            <div className="menu-sub-section-header">Beverages</div>
+            {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
+            {unavailableBeverages.map((item) => (
+                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+            ))}
+    
+            <div className="menu-sub-section-header">Food</div>
+            {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
+            {unavailableFood.map((item) => (
+                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+            ))}
+    
             {/* Create Modal */}
             {showCreateModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
+                <div className="menu-modal-overlay">
+                    <div className="menu-modal-content">
                         <h3>Create New Menu Item</h3>
                         <form onSubmit={handleCreate}>
                             <div>
@@ -252,6 +267,15 @@ const MenuPage = () => {
                                     }
                                 />
                             </div>
+                            <div>
+                                <label>Upload Image:</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    required
+                                />
+                            </div>
                             <button type="submit">Create</button>
                             <button
                                 type="button"
@@ -264,21 +288,21 @@ const MenuPage = () => {
                     </div>
                 </div>
             )}
-
+    
             {/* Delete Modal */}
             {showDeleteModal && (
-                    <div className="modal-overlay">
-                    <div className="modal-content">
+                <div className="menu-modal-overlay">
+                    <div className="menu-modal-content">
                         <h3>Confirm Delete</h3>
                         <p>Are you sure you want to delete this item?</p>
                         <button onClick={handleDeleteConfirm}>Yes</button>
                         <button className="cancel-button" onClick={() => setShowDeleteModal(false)}>
-                        Cancel
+                            Cancel
                         </button>
                     </div>
-                    </div>
+                </div>
             )}
         </div>
     );
-};
+}    
 export default MenuPage;

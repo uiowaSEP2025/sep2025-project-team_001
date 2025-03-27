@@ -25,6 +25,7 @@ class Item(models.Model):
     category = models.CharField(max_length=50, blank=True)  # e.g., drink or food'
     stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
+    base64_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
