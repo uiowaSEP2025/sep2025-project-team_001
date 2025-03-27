@@ -29,7 +29,7 @@ def manage_menu_item(request):
             return JsonResponse({'error': 'Restaurant not found'}, status=404)
 
         if action == 'create':
-            required_fields = ['name', 'price', 'category', 'stock']
+            required_fields = ['name', 'price', 'category', 'stock', 'image']
             for field in required_fields:
                 if field not in data or not data[field]:
                     return JsonResponse({'error': f"{field} is required"}, status=400)
@@ -42,8 +42,13 @@ def manage_menu_item(request):
                 category=data['category'],
                 stock=int(data['stock']),
                 available=data.get('available', False),
+                base64_image=data.get('image')
             )
-            return JsonResponse({'message': 'Item created successfully', 'item_id': item.id}, status=201)
+            return JsonResponse({
+                'message': 'Item created successfully',
+                'item_id': item.id,
+                'item_str': str(item)
+            }, status=201)
 
         elif action == 'update' and item_id:
             item = get_object_or_404(Item, pk=item_id, restaurant=restaurant)
@@ -54,6 +59,7 @@ def manage_menu_item(request):
             item.category = data.get('category', item.category)
             item.stock = int(data.get('stock', item.stock))
             item.available = data.get('available', item.available)
+            item.base64_image = data['image']
             item.save()
 
             return JsonResponse({'message': 'Item updated successfully'}, status=200)
