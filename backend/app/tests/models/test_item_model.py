@@ -43,3 +43,21 @@ def test_item_str_without_image(restaurant):
     )
     expected_str = "Salad (Image: No image)"
     assert str(item_instance) == expected_str
+
+
+@pytest.mark.django_db
+def test_item_relationship(restaurant):
+    """
+    Ensure that an Item is correctly linked to its Restaurant.
+    """
+    item_instance = Item.objects.create(
+        restaurant=restaurant,
+        name="Sandwich",
+        description="Tasty sandwich",
+        price=Decimal("6.50"),
+        category="Food",
+        stock=20,
+        available=True,
+        base64_image="dummyimage"
+    )
+    assert item_instance.restaurant == restaurant

@@ -5,16 +5,14 @@ User = get_user_model()
 
 
 @pytest.mark.django_db
-def test_create_custom_user():
+def test_custom_user_creation():
     """
-    Test that a CustomUser can be created successfully.
+    Ensure that a CustomUser can be created and stores basic fields correctly.
     """
     user = User.objects.create_user(
-        username="customuser",
-        email="custom@example.com",
-        password="testpass"
+        username="testuser",
+        email="testuser@example.com",
+        password="pass"
     )
-
-    # Verify the user attributes
-    assert user.username == "customuser"
-    assert user.email == "custom@example.com"
+    assert user.username == "testuser"
+    assert user.email == "testuser@example.com"
