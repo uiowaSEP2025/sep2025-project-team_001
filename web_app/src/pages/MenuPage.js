@@ -284,6 +284,12 @@ const MenuPage = () => {
                                     required
                                 />
                             </div>
+                            {imageBase64 && (
+                                <div className="menu-image-preview-container">
+                                    <p>Image Preview:</p>
+                                    <img src={imageBase64} alt="Preview" className="menu-image-preview" />
+                                </div>
+                            )}
                             <button type="submit">Create</button>
                             <button
                                 type="button"

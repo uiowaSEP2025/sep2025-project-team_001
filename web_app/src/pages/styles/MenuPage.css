@@ -118,3 +118,22 @@
 .menu-modal-content button.cancel-button:hover {
   background-color: #bcbcbc;
 }
+
+.menu-image-preview-container {
+  text-align: center;
+}
+
+.menu-image-preview-container p {
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.menu-image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  object-fit: cover;
+}
