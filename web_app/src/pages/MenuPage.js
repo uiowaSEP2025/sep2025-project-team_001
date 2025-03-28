@@ -174,145 +174,154 @@ const MenuPage = () => {
 
     return (
         <div>
-            <div className="menu-page-container">
-                {barName && <h2 className="bar-name-heading">Restaurant: {barName}</h2>}
-                <h2>Menu Manager</h2>
-                <button className="menu-create-button" onClick={openCreateModal}>
-                    Create New Item
-                </button>
-            </div>
-    
-            <div className="menu-section-header">Available Items</div>
-            <div className="menu-sub-section-header">Beverages</div>
-            {availableBeverages.length === 0 && <p>No available beverages.</p>}
-            {availableBeverages.map((item) => (
-                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-            ))}
-    
-            <div className="menu-sub-section-header">Food</div>
-            {availableFood.length === 0 && <p>No available food items.</p>}
-            {availableFood.map((item) => (
-                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-            ))}
-    
-            <div className="menu-section-header">Unavailable Items</div>
-            <div className="menu-sub-section-header">Beverages</div>
-            {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
-            {unavailableBeverages.map((item) => (
-                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-            ))}
-    
-            <div className="menu-sub-section-header">Food</div>
-            {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
-            {unavailableFood.map((item) => (
-                <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
-            ))}
-    
-            {/* Create Modal */}
-            {showCreateModal && (
-                <div className="menu-modal-overlay">
-                    <div className="menu-modal-content">
-                        <h3>Create New Menu Item</h3>
-                        <form onSubmit={handleCreate}>
-                            <div>
-                                <label>Item Name:</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Description:</label>
-                                <input
-                                    type="text"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div>
-                                <label>Price:</label>
-                                <input
-                                    type="number"
-                                    name="price"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Category:</label>
-                                <select
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleChange}
-                                    required
+            <div className = "menu-page">
+                <div className="menu-page-container">
+                    {barName && <h2> Restaurant: {barName} </h2>}
+                    <h2>Menu Manager</h2>
+                    <button className="menu-create-button" onClick={openCreateModal}>
+                        Create New Item
+                    </button>
+                </div>
+
+                <div className="menu-section-header">Available Items</div>
+                <div className="menu-sub-section-header">Beverages</div>
+                {availableBeverages.length === 0 && <p>No available beverages.</p>}
+                {availableBeverages.map((item) => (
+                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                ))}
+        
+                <div className="menu-sub-section-header">Food</div>
+                {availableFood.length === 0 && <p>No available food items.</p>}
+                {availableFood.map((item) => (
+                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                ))}
+        
+                <div className="menu-section-header">Unavailable Items</div>
+                <div className="menu-sub-section-header">Beverages</div>
+                {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
+                {unavailableBeverages.map((item) => (
+                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                ))}
+        
+                <div className="menu-sub-section-header">Food</div>
+                {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
+                {unavailableFood.map((item) => (
+                    <ItemCard key={item.id} item={item} onToggle={toggleAvailability} onDelete={confirmDelete} />
+                ))}
+        
+                {/* Create Modal */}
+                {showCreateModal && (
+                    <div className="menu-modal-overlay">
+                        <div className="menu-modal-content">
+                            <h3>Create New Menu Item</h3>
+                            <form onSubmit={handleCreate}>
+                                <div>
+                                    <label>Item Name:</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label>Description:</label>
+                                    <input
+                                        type="text"
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div>
+                                    <label>Price:</label>
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label>Category:</label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Select Category</option>
+                                        <option value="beverage">Beverage</option>
+                                        <option value="food">Food</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Stock:</label>
+                                    <input
+                                        type="number"
+                                        name="stock"
+                                        value={formData.stock}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label>Available:</label>
+                                    <input
+                                        type="checkbox"
+                                        name="available"
+                                        checked={formData.available}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, available: e.target.checked })
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <label>Upload Image:</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        required
+                                    />
+                                </div>
+                                {imageBase64 && (
+                                    <div className="menu-image-preview-container">
+                                        <p>Image Preview:</p>
+                                        <img src={imageBase64} alt="Preview" className="menu-image-preview" />
+                                    </div>
+                                )}
+                                <button type="submit">Create</button>
+                                <button
+                                    type="button"
+                                    className="cancel-button"
+                                    onClick={closeCreateModal}
                                 >
-                                    <option value="">Select Category</option>
-                                    <option value="beverage">Beverage</option>
-                                    <option value="food">Food</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Stock:</label>
-                                <input
-                                    type="number"
-                                    name="stock"
-                                    value={formData.stock}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Available:</label>
-                                <input
-                                    type="checkbox"
-                                    name="available"
-                                    checked={formData.available}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, available: e.target.checked })
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <label>Upload Image:</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    required
-                                />
-                            </div>
-                            <button type="submit">Create</button>
-                            <button
-                                type="button"
-                                className="cancel-button"
-                                onClick={closeCreateModal}
-                            >
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+    
+                {/* Delete Modal */}
+                {showDeleteModal && (
+                    <div className="menu-modal-overlay">
+                        <div className="menu-modal-content">
+                            <h3>Confirm Delete</h3>
+                            <p>Are you sure you want to delete this item?</p>
+                            <button onClick={handleDeleteConfirm}>Yes</button>
+                            <button className="cancel-button" onClick={() => setShowDeleteModal(false)}>
                                 Cancel
                             </button>
-                        </form>
+                        </div>
                     </div>
-                </div>
-            )}
-    
-            {/* Delete Modal */}
-            {showDeleteModal && (
-                <div className="menu-modal-overlay">
-                    <div className="menu-modal-content">
-                        <h3>Confirm Delete</h3>
-                        <p>Are you sure you want to delete this item?</p>
-                        <button onClick={handleDeleteConfirm}>Yes</button>
-                        <button className="cancel-button" onClick={() => setShowDeleteModal(false)}>
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }    
 export default MenuPage;
+

@@ -1,12 +1,4 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100vw;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
-  }
+
   
   .login-page-container {
     width: 100%;
