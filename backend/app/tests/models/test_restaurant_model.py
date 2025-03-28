@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.django_db
 def test_restaurant_str(restaurant):
     """
     Ensure Restaurant.__str__ returns the restaurant's name.

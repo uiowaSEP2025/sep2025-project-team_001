@@ -1,33 +1,39 @@
+from decimal import Decimal
+
 import pytest
 
+from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Item
-from app.models.restaurant_models import OrderItems
 
 
 @pytest.mark.django_db
-def test_order_items_str(customer, restaurant):
+def test_order_item_str(customer, restaurant):
     """
-    Ensure OrderItems.__str__ returns the correct description.
+    Ensure OrderItem.__str__ returns the correct description.
     """
-    # Create an item for the order
+    # Create an Order instance.
+    order = Order.objects.create(
+        customer=customer,
+        restaurant=restaurant,
+        status="pending",
+        total_price=Decimal("0.00")
+    )
+    # Create an Item instance.
     item_instance = Item.objects.create(
         restaurant=restaurant,
-        name="Burger",
-        description="Delicious burger",
-        price="9.99",
+        name="Pasta",
+        description="Yummy pasta",
+        price=Decimal("8.50"),
         category="Food",
         stock=10,
         available=True,
-        base64_image="samplebase64image"
+        base64_image="dummy"
     )
-    quantity = 3
-    cost = 29.97
-    order_item = OrderItems.objects.create(
-        customer=customer,
-        restaurant=restaurant,
+    # Create an OrderItem.
+    order_item = OrderItem.objects.create(
+        order=order,
         item=item_instance,
-        quantity=quantity,
-        cost=cost
+        quantity=2
     )
-    expected_str = f"{quantity} of {item_instance.name} from {restaurant.name}"
+    expected_str = f"2x {item_instance.name} (Order #{order.id})"
     assert str(order_item) == expected_str

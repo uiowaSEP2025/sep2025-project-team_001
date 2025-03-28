@@ -3,70 +3,31 @@ from django.contrib.auth import get_user_model
 
 from app.models.customer_models import Customer
 
-# For convenience, retrieve the CustomUser model
 User = get_user_model()
 
 
 @pytest.mark.django_db
-def test_create_customer():
+def test_customer_str_and_to_dict():
     """
-    Test that we can create a Customer and it is saved properly.
-    """
-    # Create a user
-    user = User.objects.create_user(
-        username="testuser",
-        email="test@example.com",
-        password="testpass"
-    )
-
-    # Create a Customer that references the user
-    customer = Customer.objects.create(user=user)
-
-    # Verify relationships
-    assert customer.user == user
-    assert customer.user.username == "testuser"
-    assert customer.user.email == "test@example.com"
-    # If you have a 'phone' field on CustomUser, you can set/check it similarly:
-    # user.phone = "1234567890"
-    # user.save()
-    # assert customer.user.phone == "1234567890"
-
-
-@pytest.mark.django_db
-def test_customer_str_representation():
-    """
-    Test that the __str__ method returns the expected string.
+    Ensure Customer.__str__ returns the expected string and to_dict returns a proper dictionary.
     """
     user = User.objects.create_user(
-        username="johndoe",
-        email="johndoe@example.com",
-        password="testpass"
+        username="customeruser",
+        email="customer@example.com",
+        password="pass"
     )
-    customer = Customer.objects.create(user=user)
-    assert str(customer) == "johndoe's Customer Profile"
+    # Optionally set a phone number if your CustomUser supports it.
+    user.phone = "555-555-5555"
+    user.save()
 
+    customer_instance = Customer.objects.create(user=user)
+    expected_str = f"{user.username}'s Customer Profile"
+    assert str(customer_instance) == expected_str
 
-@pytest.mark.django_db
-def test_customer_to_dict():
-    """
-    Test that the to_dict() method returns the correct dictionary.
-    """
-    user = User.objects.create_user(
-        username="janedoe",
-        email="janedoe@example.com",
-        password="testpass"
-    )
-    # If your CustomUser model includes a phone field, you can set it here:
-    # user.phone = "1234567890"
-    # user.save()
-
-    customer = Customer.objects.create(user=user)
-    customer_dict = customer.to_dict()
-
-    # Check the contents of the returned dictionary
-    assert customer_dict["id"] == customer.id
-    assert customer_dict["username"] == "janedoe"
-    assert customer_dict["email"] == "janedoe@example.com"
-    # assert customer_dict["phone"] == "1234567890"  # if phone field exists
+    customer_dict = customer_instance.to_dict()
+    assert customer_dict["id"] == customer_instance.id
+    assert customer_dict["username"] == user.username
+    assert customer_dict["email"] == user.email
+    assert customer_dict["phone"] == user.phone
     assert "created_at" in customer_dict
     assert "updated_at" in customer_dict

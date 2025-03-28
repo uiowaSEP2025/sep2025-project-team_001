@@ -1,6 +1,6 @@
 from django.db import models
 
-from .customer_models import Customer, Manager
+from .customer_models import Manager
 
 
 class Restaurant(models.Model):
