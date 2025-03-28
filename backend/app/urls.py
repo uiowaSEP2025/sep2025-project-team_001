@@ -1,11 +1,12 @@
+# urls.py
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from app.views.auth_views import login_user, register_user
-from app.views.menu_views import menu_items_api, manage_menu_item
-from app.views.orders_views import create_order
-from app.views.restaurant_views import get_menu_items, get_restaurants
 from .mobileViews.mobileViews import register_customer, login_customer
+from .views.auth_views import login_user, register_user
+from .views.menu_views import menu_items_api, manage_menu_item
+from .views.orders_views import create_order
+from .views.restaurant_views import get_menu_items, get_restaurants
 
 urlpatterns = [
     path('login/', login_user, name='login'),
@@ -17,7 +18,7 @@ urlpatterns = [
     path('mobile/login/', login_customer, name='customerLogin'),
     path('restaurants/list', get_restaurants, name='get_restaurants'),
     path('restaurants/<str:restaurant>/menu/', get_menu_items, name="get_menu_items"),
-    path('order/new', create_order, name='create_order'),
+    path('order/new/', create_order, name='create_order'),
 
     # api
     path('api/menu-items/', menu_items_api, name='menu_items_api'),
