@@ -8,6 +8,7 @@ omit =
 
     # Exclude tests
     */test_*.py
+    */tests/*
 
     # Django configuration files
     */settings.py
@@ -16,7 +17,7 @@ omit =
     **/manage.py
     **/admin.py
     **/apps.py
-    
+
 
     # Exclude coverage files
     .coveragerc
