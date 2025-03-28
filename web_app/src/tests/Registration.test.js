@@ -154,7 +154,7 @@ describe('Registration Component', () => {
   });
 
   test('shows error on registration failure', async () => {
-    axios.post.mockRejectedValue({ response: { data: 'Error from API' } });
+    axios.post.mockRejectedValue({ response: { data: { message: 'Error from API' } } });
 
     render(<Registration />, { wrapper: BrowserRouter });
     fillStep1();
