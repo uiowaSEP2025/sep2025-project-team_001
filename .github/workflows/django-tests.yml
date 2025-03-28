@@ -17,15 +17,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
+          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-django pytest-cov
 
       - name: Run tests with coverage
+        working-directory: backend
         env:
           DJANGO_SETTINGS_MODULE: django_backend.settings
         run: pytest --maxfail=1 --disable-warnings --cov=. --cov-report=xml --cov-report=html
@@ -35,5 +37,5 @@ jobs:
         with:
           name: coverage-report
           path: |
-            coverage.xml
-            htmlcov/
+            backend/coverage.xml
+            backend/htmlcov/
