@@ -28,7 +28,8 @@ class Item(models.Model):
     base64_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        image_preview = self.base64_image[:30] + "..." if self.base64_image else "No image"
+        return f"{self.name} (Image: {image_preview})"
     
 class OrderItems(models.Model):
     customer = models.ForeignKey(

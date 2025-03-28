@@ -21,7 +21,7 @@ const MenuPage = () => {
     }, []);
 
     const fetchItems = () => {
-        fetch('/api/menu-items/', {
+        fetch(`${process.env.REACT_APP_API_URL}/api/menu-items/`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }
@@ -75,7 +75,7 @@ const MenuPage = () => {
 
     const handleCreate = (e) => {
         e.preventDefault();
-        fetch('/api/manage-item/', {
+        fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -89,23 +89,31 @@ const MenuPage = () => {
                 image: imageBase64
             }),
         })
-            .then(() => {
-                setShowCreateModal(false);
-                fetchItems();
-            })
-            .catch(error => {
-                console.error('Error creating item:', error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            console.log("✅ Created item:", data.item_str); // ← log here
+            setShowCreateModal(false);
+            fetchItems();
+        })
+        .catch(error => {
+            console.error('Error creating item:', error);
+        });
     };
 
     const toggleAvailability = (item) => {
         const updatedItem = {
-            ...item,
+            item_id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            category: item.category,
+            stock: item.stock,
             available: !item.available,
+            image: item.base64_image,
             action: 'update',
         };
 
-        fetch('/api/manage-item', {
+        fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -128,7 +136,7 @@ const MenuPage = () => {
     };
 
     const handleDeleteConfirm = () => {
-        fetch('/api/manage-item', {
+        fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -137,7 +145,7 @@ const MenuPage = () => {
              },
             body: JSON.stringify({
                 action: 'delete',
-                id: deleteItemId
+                item_id: deleteItemId
             })
         })
             .then(() => {
