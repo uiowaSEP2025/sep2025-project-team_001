@@ -1,7 +1,8 @@
 from django.db import models
+
 from .customer_models import Customer
-from app.models.restaurant_models import Restaurant
-from app.models.restaurant_models import Item
+from .restaurant_models import Item, Restaurant
+
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="orders")
@@ -12,9 +13,10 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} by {self.customer.user.username} at {self.restaurant.name}"
-    
+
     def get_total(self):
         return sum(item.item.price * item.quantity for item in self.order_items.all())
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")

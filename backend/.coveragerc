@@ -1,0 +1,31 @@
+[run]
+omit =
+    # exclude init files
+    */__init__.py
+
+    # Exclude Django migrations
+    */migrations/*
+
+    # Exclude tests
+    */test_*.py
+    */tests/*
+
+    # Django configuration files
+    */settings.py
+    **/wsgi.py
+    **/asgi.py
+    **/manage.py
+    **/admin.py
+    **/apps.py
+
+
+    # Exclude coverage files
+    .coveragerc
+    .coverage
+    .coverage.*
+    coverage.xml
+    .hypothesis/
+    .pytest_cache/
+
+
+
