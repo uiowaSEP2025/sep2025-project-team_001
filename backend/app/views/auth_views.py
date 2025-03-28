@@ -63,7 +63,8 @@ def register_user(request):
         restaurant = Restaurant.objects.create(
             name=data["business_name"],
             address=data["business_address"],
-            phone=data["phone"]
+            phone=data["phone"],
+            restaurant_image=data.get("restaurantImage")
         )
         restaurant.managers.add(manager)  # Link manager to restaurant
 
@@ -75,6 +76,7 @@ def register_user(request):
             "tokens": tokens,
             "manager": manager.user.username,
             "restaurant": restaurant.name,
+            "restaurant_image": restaurant.restaurant_image[:30] + "..." if restaurant.restaurant_image else None,
             "restaurant_managers": [m.user.username for m in restaurant.managers.all()]
         }, status=201)
 
@@ -91,7 +93,19 @@ def login_user(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             tokens = get_tokens_for_user(user)  # Generate JWT tokens
-            return JsonResponse({"message": "Login successful", "tokens": tokens}, status=200)
+            # Get the bar/restaurant name associated with this manager
+            try:
+                manager = Manager.objects.get(user=user)
+                restaurant = Restaurant.objects.filter(managers=manager).first()
+                bar_name = restaurant.name if restaurant else None
+            except Manager.DoesNotExist:
+                bar_name = None
+
+            return JsonResponse({
+                "message": "Login successful",
+                "tokens": tokens,
+                "bar_name": bar_name
+            }, status=200)
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 

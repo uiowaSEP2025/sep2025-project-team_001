@@ -23,8 +23,14 @@ function Login() {
       });
 
       const { access, refresh } = response.data.tokens;
+      if (response.data.bar_name) {
+        localStorage.setItem("barName", response.data.bar_name);
+      } else {
+        localStorage.setItem("barName", "Error retrieving bar name");
+      }      
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
+
       navigate("/dashboard");
     } catch (error) {
       toast.error("Invalid username or password. Please try again.");

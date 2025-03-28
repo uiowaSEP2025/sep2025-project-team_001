@@ -15,6 +15,7 @@ const MenuPage = () => {
         stock: '',
         available: true
     });
+    const barName = localStorage.getItem("barName");
 
     useEffect(() => {
         fetchItems();
@@ -175,6 +176,7 @@ const MenuPage = () => {
         <div>
             <div className = "menu-page">
                 <div className="menu-page-container">
+                    {barName && <h2> Restaurant: {barName} </h2>}
                     <h2>Menu Manager</h2>
                     <button className="menu-create-button" onClick={openCreateModal}>
                         Create New Item

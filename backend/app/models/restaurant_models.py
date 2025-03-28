@@ -9,6 +9,7 @@ class Restaurant(models.Model):
     managers = models.ManyToManyField(Manager, related_name="restaurants")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    restaurant_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
