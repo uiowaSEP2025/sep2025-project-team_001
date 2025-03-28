@@ -6,7 +6,6 @@ from rest_framework import status
 from app.serializers.order_serializer import OrderSerializer
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def create_order(request):
     serializer = OrderSerializer(data=request.data)
     if serializer.is_valid():

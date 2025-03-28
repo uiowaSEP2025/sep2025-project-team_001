@@ -33,7 +33,8 @@ def register_customer(request):
             return JsonResponse(
                 {
                     "message": "User registered successfully",
-                    "tokens": tokens
+                    "tokens": tokens,
+                    "customer_id" : customer.id
                 },
                 status=201
             )
@@ -56,7 +57,7 @@ def login_customer(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             tokens = get_tokens_for_user(user) 
-            return JsonResponse({"message": "Login successful", "tokens": tokens}, status=200)
+            return JsonResponse({"message": "Login successful", "tokens": tokens, "customer_id": getattr(user.customer, 'id', None)}, status=200)
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 

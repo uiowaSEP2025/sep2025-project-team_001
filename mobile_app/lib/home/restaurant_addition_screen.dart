@@ -8,7 +8,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/search_box.dart';
 import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
-import 'package:mobile_app/classes/bar.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 class RestaurantAdditionScreen extends StatefulWidget {

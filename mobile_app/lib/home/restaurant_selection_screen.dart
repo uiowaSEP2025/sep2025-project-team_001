@@ -7,7 +7,7 @@ import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
-import 'package:mobile_app/classes/bar.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 class RestaurantSelectionScreen extends StatefulWidget {
@@ -58,7 +58,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
     //todo go to the menu page for that restaurant
     selectedRestaurantIndex = i;
     Navigator.pushNamed(context, '/home/restaurant_menu',
-        arguments: {'restaurant': restaurants[i].name});
+        arguments: {'restaurant': restaurants[i]});
   }
 
   @override

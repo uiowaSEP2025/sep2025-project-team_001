@@ -1,16 +1,13 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:mobile_app/classes/bar.dart';
+import 'package:mobile_app/home/restaurant/models/cart_item.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 Future<List<Restaurant>> fetchCustomerRestaurants() async {
-  return [
-    Restaurant(
-        name: "sep new",
-        address: "Scouts avenue",
-        phone: "1111111111"
-            "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FbrothersLogo.png?alt=media&token=d4b583ee-2fb5-499a-b3a2-04196ff68f98"),
-  ];
+
 
   return [];
 }
@@ -46,5 +43,60 @@ Future<List<Restaurant>> fetchCustomerRestaurants() async {
 
       print("Fetch restaurants error: ${e.response?.data}");
       throw Exception("Failed to fetch restaurants: ${e.response?.statusCode}");
+    }
+  }
+
+
+  Future<int> placeOrder({
+    required int customerId,
+    required int restaurantId,
+    required Map<String, CartItem> cart,
+  }) async {
+    final accessToken = await TokenManager.getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception('Access token not found');
+    }
+
+    const String endpoint = "${ApiConfig.baseUrl}/order/new";
+    final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+
+    final orderItems = cart.values.map((cartItem) {
+      return {
+        'item_id': cartItem.item.id,
+        'quantity': cartItem.quantity,
+      };
+    }).toList();
+
+    final body = {
+      'customer_id': customerId,
+      'restaurant_id': restaurantId,
+      'order_items': orderItems,
+    };
+
+    try {
+      final response = await dio.post(
+        endpoint,
+        data: jsonEncode(body),
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 201) {
+        print("Order placed! ID: ${response.data['order_id']}");
+        final orderId = response.data['order_id'];
+        return orderId;
+        
+      } else {
+        print("Failed to place order: ${response.data}");
+        throw Exception("Failed to place order");
+      }
+    } on DioException catch (e) {
+      print("Order error: ${e.response?.data}");
+      throw Exception("Error placing order: ${e.response?.statusCode}");
     }
   }
