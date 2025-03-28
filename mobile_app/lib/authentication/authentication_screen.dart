@@ -11,9 +11,12 @@ import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
+import 'package:mobile_app/utils/token_manager.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -28,9 +31,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   String email = "";
   String password = "";
   bool isLoading = false;
-
-  final Dio _dio = Dio();
-  final String apiUrl = "http://localhost:8000/auth/login/";
 
   @override
   void dispose() {
@@ -162,7 +162,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                 GestureDetector(
                                     onTap: () {
                                       Navigator.pushNamed(
-                                          context, "/recoverPassword");
+                                          context, "/recover_password");
                                     },
                                     child: Text(
                                       "Forgot Password?",
@@ -383,12 +383,10 @@ print(password);
     );
 
     final tokens = response.data['tokens'];
-    final access = tokens['access'];
-    final refresh = tokens['refresh'];
+    final accessToken = tokens['access'];
+    final refreshToken = tokens['refresh'];
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('access_token', access);
-    await prefs.setString('refresh_token', refresh);
+    await TokenManager.saveTokens(accessToken, refreshToken);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

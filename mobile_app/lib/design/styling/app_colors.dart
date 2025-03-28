@@ -7,4 +7,5 @@ class AppColors {
   static const Color paragraphText = Color(0xff5C5B5B);
   static const Color warning = Color(0xffDC5858);
   static const Color validGreen = Color(0xff85C441);
+  static const Color secondary = Color(0xffDEDBFF);
 }

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_app/home/bar_selection_screen.dart';
+import 'package:mobile_app/home/restaurant_selection_screen.dart';
 
 class TestHttpOverrides extends HttpOverrides {
   @override
@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets('Bars are selectable and toggle correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: BarSelectionScreen()));
+    await tester.pumpWidget(const MaterialApp(home: RestaurantSelectionScreen()));
 
     final bar1 = find.text('Scouts');
     final bar2 = find.text('Coa');
