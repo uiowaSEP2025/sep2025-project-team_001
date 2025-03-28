@@ -16,7 +16,7 @@ urlpatterns = [
     # mobile
     path('mobile/register/', register_customer, name='customerRegister'),
     path('mobile/login/', login_customer, name='customerLogin'),
-    path('restaurants/list', get_restaurants, name='get_restaurants'),
+    path('restaurants/list/', get_restaurants, name='get_restaurants'),
     path('restaurants/<str:restaurant>/menu/', get_menu_items, name="get_menu_items"),
     path('order/new/', create_order, name='create_order'),
 

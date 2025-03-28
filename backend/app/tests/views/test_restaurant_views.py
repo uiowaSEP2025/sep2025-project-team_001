@@ -63,7 +63,7 @@ def test_get_restaurants_authenticated(api_client, user, restaurant):
     When authenticated, get_restaurants should return a list containing the restaurant.
     """
     api_client.force_authenticate(user=user)
-    response = api_client.get("/restaurants/list")
+    response = api_client.get("/restaurants/list/")
     assert response.status_code == 200, response.content
     data = response.json()
     # Data should be a list and our restaurant should be included.
@@ -76,7 +76,7 @@ def test_get_restaurants_unauthenticated(api_client):
     """
     An unauthenticated request to get_restaurants should return a 401 error.
     """
-    response = api_client.get("/restaurants/list")
+    response = api_client.get("/restaurants/list/")
     assert response.status_code == 401
 
 

@@ -65,7 +65,7 @@ def test_create_order_success(api_client, user, customer, restaurant, item):
         ]
     }
 
-    response = api_client.post("/order/new", data=json.dumps(data), content_type="application/json")
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 201, response.content
     resp_data = response.json()
     assert resp_data.get("message") == "Order created successfully"
@@ -84,7 +84,7 @@ def test_create_order_invalid_data(api_client, user, customer, restaurant):
         "restaurant_id": restaurant.pk,
         # "order_items" is missing
     }
-    response = api_client.post("/order/new", data=json.dumps(data), content_type="application/json")
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400, response.content
 
 
@@ -99,5 +99,5 @@ def test_create_order_unauthenticated(api_client, customer, restaurant):
         "restaurant_id": restaurant.pk,
         "order_items": []
     }
-    response = api_client.post("/order/new", data=json.dumps(data), content_type="application/json")
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 401, response.content
