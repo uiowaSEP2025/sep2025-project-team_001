@@ -41,12 +41,11 @@ class MenuItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  
-                  child: Base64ImageWithFallback(base64ImageString: item.base64image)
-
-                      
-                ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Base64ImageWithFallback(
+                      width: screenWidth * 0.28,
+                          height: screenWidth * 0.32,
+                        base64ImageString: item.base64image)),
                 SizedBox(width: horizontalSpacing),
                 Expanded(
                   child: Column(

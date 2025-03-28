@@ -388,10 +388,6 @@ print(password);
 
     await TokenManager.saveTokens(accessToken, refreshToken);
 
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setString('access_token', access);
-    // await prefs.setString('refresh_token', refresh);
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Login successful!"),

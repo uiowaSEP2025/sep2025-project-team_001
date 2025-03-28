@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 
 class Base64ImageWithFallback extends StatelessWidget {
   final String? base64ImageString;
+  final double height; 
+  final double width;
 
-  const Base64ImageWithFallback({super.key, required this.base64ImageString});
+  const Base64ImageWithFallback({super.key, required this.base64ImageString, required this.height, required this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,8 @@ class Base64ImageWithFallback extends StatelessWidget {
       Uint8List imageBytes = base64Decode(base64String);
 
       return Image.memory(
+        height: height,
+        width: width,
         imageBytes,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
