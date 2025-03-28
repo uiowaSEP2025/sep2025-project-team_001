@@ -43,8 +43,8 @@ docker compose -f ./docker-compose-all-local.yml up --build
 
 2. Run PostgreSQL migrations:
 ```bash
-docker compose -f ./docker-compose-all-local.yml exec backend python django_backend/manage.py makemigrations
-docker compose -f ./docker-compose-all-local.yml exec backend python django_backend/manage.py migrate
+docker compose -f ./docker-compose-all-local.yml exec backend python manage.py makemigrations
+docker compose -f ./docker-compose-all-local.yml exec backend python manage.py migrate
 ```
 
 ---
