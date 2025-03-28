@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from app.models import Customer
+from app.models.customer_models import Customer
 
 # For convenience, retrieve the CustomUser model
 User = get_user_model()

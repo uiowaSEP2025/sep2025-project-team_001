@@ -1,6 +1,7 @@
 from django.db import models
-from .customer_models import Customer
-from app.models.customer_models import Manager
+
+from .customer_models import Customer, Manager
+
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
@@ -13,6 +14,7 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Item(models.Model):
     restaurant = models.ForeignKey(
@@ -31,7 +33,8 @@ class Item(models.Model):
     def __str__(self):
         image_preview = self.base64_image[:30] + "..." if self.base64_image else "No image"
         return f"{self.name} (Image: {image_preview})"
-    
+
+
 class OrderItems(models.Model):
     customer = models.ForeignKey(
         Customer,
@@ -54,14 +57,15 @@ class OrderItems(models.Model):
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
-
     def __str__(self):
         return f"{self.quantity} of {self.item.name} from {self.restaurant.name}"
-    
+
+
 class CurrentItem(models.Model):
     item_name = models.CharField(max_length=100)
     quantity = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=20, default="active")
     created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return f"{self.item_name} ({self.quantity})"

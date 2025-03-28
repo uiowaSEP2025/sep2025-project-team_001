@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from app.models import Manager
+from app.models.customer_models import Manager
 
 User = get_user_model()
 
