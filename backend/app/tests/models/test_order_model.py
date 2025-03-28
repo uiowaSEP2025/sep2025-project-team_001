@@ -51,7 +51,7 @@ def test_order_get_total(customer, restaurant):
         status="pending",
         total_price=Decimal("0.00")
     )
-    # Create two items for testing.
+    # Create two items for testing
     item1 = Item.objects.create(
         restaurant=restaurant,
         name="Burger",
@@ -72,7 +72,7 @@ def test_order_get_total(customer, restaurant):
         available=True,
         base64_image="dummy"
     )
-    # Create OrderItems.
+    # Create OrderItems
     OrderItem.objects.create(order=order, item=item1, quantity=2)
     OrderItem.objects.create(order=order, item=item2, quantity=3)
 

@@ -4,9 +4,8 @@ from decimal import Decimal
 import pytest
 from rest_framework.test import APIClient
 
-from app.models import CustomUser
+from app.models import CustomUser, Customer
 from app.models.restaurant_models import Restaurant, Item
-
 
 
 @pytest.fixture
@@ -21,7 +20,6 @@ def user():
 
 @pytest.fixture
 def customer(user):
-    from app.models.customer_models import Customer
     return Customer.objects.create(user=user)
 
 

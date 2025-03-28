@@ -2,10 +2,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.models import Restaurant
-from app.models.restaurant_models import Item
-from app.serializers.item_serializer import ItemSerializer
-from app.serializers.restaurant_serializers import RestaurantSerializer
+from ..models import Restaurant
+from ..models.restaurant_models import Item
+from ..serializers.item_serializer import ItemSerializer
+from ..serializers.restaurant_serializers import RestaurantSerializer
 
 
 @api_view(['GET'])

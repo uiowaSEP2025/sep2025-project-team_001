@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from app.models.customer_models import CustomUser, Manager
-from app.models.restaurant_models import Restaurant
+from ..models.customer_models import CustomUser, Manager
+from ..models.restaurant_models import Restaurant
 
 
 def get_tokens_for_user(user):
@@ -63,18 +63,17 @@ def register_user(request):
         # Create Manager profile
         manager = Manager.objects.create(user=user)
 
-        # Create Restaurant and add manager to the resturant
+        # Create Restaurant and add manager to the restaurant
         restaurant = Restaurant.objects.create(
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
             restaurant_image=data.get("restaurantImage")
         )
-        restaurant.managers.add(manager)  # Link manager to restaurant
+        restaurant.managers.add(manager)
 
         tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        # sanity check to see if all models were created correctly
         return JsonResponse({
             "message": "User registered successfully",
             "tokens": tokens,

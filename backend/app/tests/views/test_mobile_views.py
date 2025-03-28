@@ -3,7 +3,7 @@ import json
 import pytest
 from rest_framework.test import APIClient
 
-from app.models import CustomUser
+from app.models import CustomUser, Customer
 
 
 @pytest.fixture
@@ -32,7 +32,6 @@ def test_register_customer_success(api_client):
     user = CustomUser.objects.get(username="mobile@example.com")
     assert user.email == "mobile@example.com"
     # Verify that a corresponding Customer exists.
-    from app.models.customer_models import Customer
     customer = Customer.objects.get(user=user)
     assert customer is not None
 

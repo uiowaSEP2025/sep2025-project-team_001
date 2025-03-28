@@ -64,7 +64,6 @@ def test_order_item_multiple_entries(customer, restaurant):
     # Verify that both items are linked to the order.
     order_items = order.order_items.all()
     assert len(order_items) == 2
-    # Verify string representations are correct.
     expected_str1 = f"{order_item1.quantity}x {item_instance.name} (Order #{order.id})"
     expected_str2 = f"{order_item2.quantity}x {item_instance.name} (Order #{order.id})"
     assert str(order_item1) == expected_str1

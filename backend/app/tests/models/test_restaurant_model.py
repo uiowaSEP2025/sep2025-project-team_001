@@ -2,6 +2,9 @@ import time
 
 import pytest
 
+from app.models import CustomUser
+from app.models.customer_models import Manager
+
 
 @pytest.mark.django_db
 def test_restaurant_str(restaurant):
@@ -35,14 +38,9 @@ def test_restaurant_managers(restaurant, manager):
     """
     # The restaurant fixture should already have one manager added.
     assert restaurant.managers.count() == 1
-    # Optionally, add a new manager and verify it's linked.
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-    user = User.objects.create_user(
+    user = CustomUser.objects.create_user(
         username="manager2", email="manager2@example.com", password="pass"
     )
-    # Import Manager from the correct module.
-    from app.models.customer_models import Manager
     new_manager = Manager.objects.create(user=user)
     restaurant.managers.add(new_manager)
     assert new_manager in restaurant.managers.all()

@@ -23,6 +23,7 @@ def test_item_serializer_representation(restaurant):
     )
     serializer = ItemSerializer(item_instance)
     data = serializer.data
+
     assert data["id"] == item_instance.id
     assert data["name"] == "Test Burger"
     assert data["description"] == "Delicious test burger"
@@ -52,6 +53,7 @@ def test_item_serializer_deserialization_valid(restaurant):
     serializer = ItemSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
     item_instance = serializer.save()
+
     assert item_instance.name == "Test Sandwich"
     assert item_instance.description == "A tasty sandwich"
     assert item_instance.price == Decimal("5.99")

@@ -183,7 +183,7 @@ def test_manage_menu_item_update_success(client, restaurant):
     assert create_response.status_code == 201
     create_resp_data = json.loads(create_response.content)
     item_id = create_resp_data.get("item_id")
-    # Now, update the item.
+    # Update the item
     update_data = {
         "action": "update",
         "item_id": item_id,
@@ -199,7 +199,6 @@ def test_manage_menu_item_update_success(client, restaurant):
     update_resp_data = json.loads(update_response.content)
     assert update_resp_data.get("message") == "Item updated successfully"
     # Verify that the item was updated.
-    from app.models.restaurant_models import Item
     item = Item.objects.get(pk=item_id)
     assert item.name == "Updated Item"
     assert float(item.price) == 20.00

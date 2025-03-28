@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from app.models.restaurant_models import Restaurant, Item
+from ..models.restaurant_models import Restaurant, Item
 
 
 @csrf_exempt

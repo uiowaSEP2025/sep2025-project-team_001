@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from app.models.customer_models import Customer
-from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Restaurant, Item
+from ..models.customer_models import Customer
+from ..models.order_models import Order, OrderItem
+from ..models.restaurant_models import Restaurant, Item
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
