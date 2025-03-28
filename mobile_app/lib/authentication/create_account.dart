@@ -8,6 +8,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
+import 'package:mobile_app/utils/user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateAccount extends StatefulWidget {
@@ -388,6 +389,10 @@ class _CreateAccountState extends State<CreateAccount> {
     final tokens = response.data['tokens'];
     final accessToken = tokens['access'];
     final refreshToken = tokens['refresh'];
+
+    final userId = response.data['id'];
+
+    await UserManager.saveUser(userId);
 
     await TokenManager.saveTokens(accessToken, refreshToken);
 

@@ -5,9 +5,11 @@ class MenuItem {
   final String category;
   final bool available;
   final String? base64image;
+  final int id;
   
 
   MenuItem({
+    required this.id,
     required this.name,
     required this.description,
     required this.price,
@@ -18,6 +20,7 @@ class MenuItem {
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
+      id: json['id'],
       name: json['name'],
       description: json['description'] ?? '',
       price: double.parse(json['price']),

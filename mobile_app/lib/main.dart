@@ -6,6 +6,7 @@ import 'package:mobile_app/authentication/terms_conditions_screen.dart';
 import 'package:mobile_app/home/restaurant/restaurant_menu_screen.dart';
 import 'package:mobile_app/home/restaurant_addition_screen.dart';
 import 'package:mobile_app/home/restaurant_selection_screen.dart';
+import 'package:mobile_app/main_navigation/main_navigation_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +27,12 @@ class MyApp extends StatelessWidget {
           case '/':
             return MaterialPageRoute(
                 builder: (_) => const AuthenticationPage());
+          // case '/home':
+          //   return MaterialPageRoute(
+          //       builder: (_) => const RestaurantSelectionScreen());
           case '/home':
             return MaterialPageRoute(
-                builder: (_) => const RestaurantSelectionScreen());
+                builder: (_) => const MainNavigationScreen());
           case '/register':
             return MaterialPageRoute(builder: (_) => const CreateAccount());
           case '/terms':
@@ -44,7 +48,7 @@ class MyApp extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (_) => RestaurantMenuScreen(
-                restaurantName: args['restaurant'],
+                restaurant: args['restaurant'],
               ),
               settings: settings,
             );

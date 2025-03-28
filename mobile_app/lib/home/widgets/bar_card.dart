@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
-import 'package:mobile_app/classes/bar.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 
 class BarCard extends StatelessWidget {
   final Restaurant bar;
