@@ -30,6 +30,8 @@ class Item(models.Model):
     def __str__(self):
         image_preview = self.base64_image[:30] + "..." if self.base64_image else "No image"
         return f"{self.name} (Image: {image_preview})"
+
+
     
 class OrderItems(models.Model):
     customer = models.ForeignKey(

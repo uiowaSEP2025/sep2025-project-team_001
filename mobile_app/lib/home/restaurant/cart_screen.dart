@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/classes/menu_item.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 
 class CartScreen extends StatelessWidget {

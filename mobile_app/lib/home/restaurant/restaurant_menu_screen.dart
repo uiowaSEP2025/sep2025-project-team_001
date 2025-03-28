@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/classes/menu_item.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/cart_screen.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
+import 'package:mobile_app/home/restaurant/models/menu_item.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
 import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
 
@@ -116,7 +117,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               }).toList(),
             ),
           ),
-          Expanded(
+          Expanded( 
             child: ListView.builder(
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {

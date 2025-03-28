@@ -6,6 +6,7 @@ import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/search_box.dart';
+import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/classes/bar.dart';
 import 'package:mobile_app/utils/token_manager.dart';
@@ -55,38 +56,7 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
     }
   }
 
-  Future<List<Restaurant>> fetchRestaurants() async {
-    final accessToken = await TokenManager.getAccessToken();
 
-    if (accessToken == null) {
-      throw Exception('Access token not found');
-    }
-
-    final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
-    const String endpoint = "${ApiConfig.baseUrl}/restaurants/list";
-
-    try {
-      final response = await dio.get(
-        endpoint,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $accessToken",
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-
-      final data = response.data as List<dynamic>;
-      return data.map((json) => Restaurant.fromJson(json)).toList();
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception("Access token expired or unauthorized");
-      }
-
-      print("Fetch restaurants error: ${e.response?.data}");
-      throw Exception("Failed to fetch restaurants: ${e.response?.statusCode}");
-    }
-  }
 
   void selectRestaurant(int i) {
     setState(() {

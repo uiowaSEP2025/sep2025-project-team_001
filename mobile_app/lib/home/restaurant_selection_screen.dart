@@ -38,7 +38,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
     });
 
     try {
-      final fetchedRestaurants = await fetchCustomerRestaurants();
+      final fetchedRestaurants = await fetchRestaurants(); //todo change back to fetch only the customer restaurant the function is in the api_services.dart of this folder
       setState(() {
         restaurants = fetchedRestaurants;
       });

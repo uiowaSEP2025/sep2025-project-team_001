@@ -4,6 +4,8 @@ class MenuItem {
   final double price;
   final String category;
   final bool available;
+  final String? base64image;
+  
 
   MenuItem({
     required this.name,
@@ -11,6 +13,7 @@ class MenuItem {
     required this.price,
     required this.category,
     required this.available,
+     this.base64image,
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class MenuItem {
       price: double.parse(json['price']),
       category: json['category'] ?? 'Other',
       available: json['available'],
+      base64image: json['base64_image'],
     );
   }
 }

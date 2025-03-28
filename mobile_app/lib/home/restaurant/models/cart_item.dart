@@ -1,4 +1,4 @@
-import 'package:mobile_app/classes/menu_item.dart';
+import 'package:mobile_app/home/restaurant/models/menu_item.dart';
 
 class CartItem {
   final MenuItem item;
