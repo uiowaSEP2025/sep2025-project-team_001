@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - SCRUM-69-backend-testing
 
 jobs:
   test:
