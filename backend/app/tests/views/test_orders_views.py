@@ -2,12 +2,11 @@ import json
 from decimal import Decimal
 
 import pytest
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+from app.models import CustomUser
 from app.models.restaurant_models import Restaurant, Item
 
-User = get_user_model()
 
 
 @pytest.fixture
@@ -17,7 +16,7 @@ def api_client():
 
 @pytest.fixture
 def user():
-    return User.objects.create_user(username="orderuser", email="orderuser@example.com", password="pass")
+    return CustomUser.objects.create_user(username="orderuser", email="orderuser@example.com", password="pass")
 
 
 @pytest.fixture

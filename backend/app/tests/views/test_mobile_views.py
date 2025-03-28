@@ -1,10 +1,9 @@
 import json
 
 import pytest
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-User = get_user_model()
+from app.models import CustomUser
 
 
 @pytest.fixture
@@ -30,7 +29,7 @@ def test_register_customer_success(api_client):
     assert "tokens" in resp_data
 
     # Verify that the user was created.
-    user = User.objects.get(username="mobile@example.com")
+    user = CustomUser.objects.get(username="mobile@example.com")
     assert user.email == "mobile@example.com"
     # Verify that a corresponding Customer exists.
     from app.models.customer_models import Customer

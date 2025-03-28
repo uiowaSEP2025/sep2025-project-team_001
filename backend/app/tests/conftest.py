@@ -1,17 +1,14 @@
 from decimal import Decimal
 
 import pytest
-from django.contrib.auth import get_user_model
 
-from app.models.customer_models import Manager, Customer
+from app.models.customer_models import Manager, Customer, CustomUser
 from app.models.restaurant_models import Restaurant, Item
-
-User = get_user_model()
 
 
 @pytest.fixture
 def manager():
-    user = User.objects.create_user(
+    user = CustomUser.objects.create_user(
         username="manager1", email="manager1@example.com", password="pass"
     )
     return Manager.objects.create(user=user)
@@ -19,7 +16,7 @@ def manager():
 
 @pytest.fixture
 def customer():
-    user = User.objects.create_user(
+    user = CustomUser.objects.create_user(
         username="customer1", email="customer1@example.com", password="pass"
     )
     # Optionally set additional fields (e.g. phone) if needed.
