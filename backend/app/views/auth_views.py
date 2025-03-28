@@ -63,7 +63,8 @@ def register_user(request):
         restaurant = Restaurant.objects.create(
             name=data["business_name"],
             address=data["business_address"],
-            phone=data["phone"]
+            phone=data["phone"],
+            restaurant_image=data.get("restaurantImage")
         )
         restaurant.managers.add(manager)  # Link manager to restaurant
 
@@ -75,6 +76,7 @@ def register_user(request):
             "tokens": tokens,
             "manager": manager.user.username,
             "restaurant": restaurant.name,
+            "restaurant_image": restaurant.restaurant_image[:30] + "..." if restaurant.restaurant_image else None,
             "restaurant_managers": [m.user.username for m in restaurant.managers.all()]
         }, status=201)
 

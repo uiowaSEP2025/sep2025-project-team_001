@@ -21,6 +21,22 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Mock FileReader globally
+beforeEach(() => {
+  jest.spyOn(global, 'FileReader').mockImplementation(() => {
+    return {
+      readAsDataURL: jest.fn(function () {
+        this.result = 'data:image/png;base64,teststring';
+        this.onloadend();
+      }),
+      onloadend: null,
+      result: null,
+    };
+  });
+
+  jest.clearAllMocks();
+});
+
 const fillStep1 = () => {
   fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
     target: { value: 'Test User' },
@@ -49,13 +65,13 @@ const fillStep2 = () => {
   fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
     target: { value: '123 Test St' },
   });
+
+  fireEvent.change(document.getElementById('upload'), {
+    target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
+  });
 };
 
 describe('Registration Component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('renders Step 1 fields and Continue button', () => {
     render(<Registration />, { wrapper: BrowserRouter });
 
@@ -127,6 +143,9 @@ describe('Registration Component', () => {
     fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
       target: { value: '123 Street' },
     });
+    fireEvent.change(document.getElementById('upload'), {
+      target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /Register/i }));
     expect(toast.error).toHaveBeenCalledWith('Please enter a valid email address.');
@@ -166,5 +185,31 @@ describe('Registration Component', () => {
     });
 
     expect(toast.error).toHaveBeenCalledWith('Registration failed: Error from API');
+  });
+
+  test('uploads and stores image as base64 string', async () => {
+    render(<Registration />, { wrapper: BrowserRouter });
+    fillStep1();
+    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+
+    await act(async () => {
+      fireEvent.change(document.getElementById('upload'), {
+        target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
+      });
+    });
+
+    expect(await screen.findByText(/Image selected/i)).toBeInTheDocument();
+  });
+
+  test('does nothing when no image file is selected', async () => {
+    render(<Registration />, { wrapper: BrowserRouter });
+    fillStep1();
+    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+
+    await act(async () => {
+      fireEvent.change(document.getElementById('upload'), { target: { files: [] } });
+    });
+
+    expect(screen.queryByText(/Image selected/i)).not.toBeInTheDocument();
   });
 });

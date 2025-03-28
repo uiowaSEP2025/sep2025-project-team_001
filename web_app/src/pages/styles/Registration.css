@@ -122,3 +122,53 @@ html, body {
   justify-content: center !important;
 }
 
+.file-upload-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.file-upload-group label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* Hide the default file input */
+.upload-input {
+  display: none;
+}
+
+/* Styled custom file upload button */
+.custom-upload-button {
+  padding: 12px 24px;
+  background: linear-gradient(to right, #6DD5FA, #2980B9);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.custom-upload-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to right, #4facfe, #00f2fe);
+}
+
+.upload-file-name {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ccc;
+  text-align: center;
+}
+
+
