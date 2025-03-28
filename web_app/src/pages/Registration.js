@@ -32,19 +32,19 @@ function Registration() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
-  
+
     reader.onloadend = () => {
       setFormData((prev) => ({
         ...prev,
         restaurantImage: reader.result,
       }));
     };
-  
+
     if (file) {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleContinue = () => {
     const { name, username, password, confirmPassword } = formData;
     if (!name || !username || !password || !confirmPassword) {
@@ -66,7 +66,7 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address, restaurantImage} = formData;
+    const { email, phone, business_name, business_address, restaurantImage } = formData;
 
     if (!email || !phone || !business_name || !business_address || !restaurantImage) {
       toast.error("Please fill out all fields in Step 2.");
@@ -97,8 +97,10 @@ function Registration() {
 
       navigate("/dashboard");
     } catch (error) {
+
       toast.error("Registration failed: " + (error.response?.data?.message || error.message));
     }
+
   };
 
   return (

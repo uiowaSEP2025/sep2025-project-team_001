@@ -92,7 +92,7 @@ const MenuPage = () => {
         })
         .then(response => response.json())
         .then(data => {
-            console.log("✅ Created item:", data.item_str); // ← log here
+            console.log("✅ Created item:", data); // ← log here
             setShowCreateModal(false);
             fetchItems();
         })

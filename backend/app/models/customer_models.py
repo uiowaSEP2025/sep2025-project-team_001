@@ -16,7 +16,6 @@ class Manager(models.Model):
     def __str__(self):
         return f"{self.user.username} (Manager)"
 
-
 class Customer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="customer")
     created_at = models.DateTimeField(auto_now_add=True)
