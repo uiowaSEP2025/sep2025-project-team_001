@@ -78,7 +78,7 @@ function Registration() {
 
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Registration failed: " + (error.response?.data || error.message));
+      toast.error("Registration failed: " + (error.response?.data?.message || error.message));
     }
   };
 
