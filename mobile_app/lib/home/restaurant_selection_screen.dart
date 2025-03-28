@@ -140,9 +140,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                                         child: BarCard(
                                           bar: restaurants[i],
                                           screenHeight: screenHeight,
-                                          screenWidth: screenWidth,
-                                          isSelected:
-                                              selectedRestaurantIndex == i,
+                                          screenWidth: screenWidth
                                         ),
                                       ),
                                       if (i + 1 < restaurants.length) ...[
@@ -155,9 +153,6 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                                             bar: restaurants[i + 1],
                                             screenHeight: screenHeight,
                                             screenWidth: screenWidth,
-                                            isSelected:
-                                                selectedRestaurantIndex ==
-                                                    i + 1,
                                           ),
                                         ),
                                       ]

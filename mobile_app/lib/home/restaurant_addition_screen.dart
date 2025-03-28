@@ -182,7 +182,7 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                                       bar: restaurants[i],
                                       screenHeight: screenHeight,
                                       screenWidth: screenWidth,
-                                      isSelected: selectedRestaurantIndex == i,
+                                      
                                     ),
                                   ),
                                   if (i + 1 < restaurants.length) ...[
@@ -195,8 +195,7 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                                         bar: restaurants[i + 1],
                                         screenHeight: screenHeight,
                                         screenWidth: screenWidth,
-                                        isSelected:
-                                            selectedRestaurantIndex == i + 1,
+                                        
                                       ),
                                     ),
                                   ]

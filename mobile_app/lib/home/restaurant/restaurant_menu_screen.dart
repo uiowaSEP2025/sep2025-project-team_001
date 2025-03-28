@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/classes/menu_item.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/cart_screen.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
@@ -15,12 +17,12 @@ class RestaurantMenuScreen extends StatefulWidget {
 }
 
 class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
-bool isLoading = true;
+  bool isLoading = true;
   bool errorFetching = false;
   List<MenuItem> items = [];
   String selectedCategory = 'All';
   late String restaurantName;
-  Map<String , CartItem> cart = {};
+  Map<String, CartItem> cart = {};
 
   @override
   void didChangeDependencies() {
@@ -50,19 +52,18 @@ bool isLoading = true;
     }
   }
 
-  void  _addToCart(MenuItem item) {
-  setState(() {
-    if (cart.containsKey(item.name)) {
-      cart[item.name]!.quantity += 1;
-    } else {
-      cart[item.name] = CartItem(item: item);
-    }
-  });
-}
+  void _addToCart(MenuItem item) {
+    setState(() {
+      if (cart.containsKey(item.name)) {
+        cart[item.name]!.quantity += 1;
+      } else {
+        cart[item.name] = CartItem(item: item);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -83,7 +84,10 @@ bool isLoading = true;
       );
     }
 
-    final categories = ['All', ...{for (var item in items) item.category}];
+    final categories = [
+      'All',
+      ...{for (var item in items) item.category}
+    ];
     final filteredItems = (selectedCategory == 'All')
         ? items
         : items.where((item) => item.category == selectedCategory).toList();
@@ -97,7 +101,10 @@ bool isLoading = true;
             child: Row(
               children: categories.map((cat) {
                 return Padding(
-                  padding: EdgeInsets.only(left:horizontalSpacing/2,right: horizontalSpacing/2, top: verticalSpacing/2),
+                  padding: EdgeInsets.only(
+                      left: horizontalSpacing / 2,
+                      right: horizontalSpacing / 2,
+                      top: verticalSpacing / 2),
                   child: ChoiceChip(
                     label: Text(cat),
                     selected: selectedCategory == cat,
@@ -114,27 +121,48 @@ bool isLoading = true;
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
-                return MenuItemCard(item: item, screenHeight: screenHeight, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing, onAddToCart: _addToCart,);
+                return MenuItemCard(
+                  item: item,
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                  horizontalSpacing: horizontalSpacing,
+                  verticalSpacing: verticalSpacing,
+                  onAddToCart: _addToCart,
+                );
               },
             ),
           ),
+          SizedBox(height: verticalSpacing*2,)
         ],
       ),
       floatingActionButton: cart.isNotEmpty
-    ? FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CartScreen(cart: cart),
-            ),
-          );
-        },
-        label: Text('Cart (${cart.values.fold<int>(0, (sum, item) => sum + item.quantity)})'),
-        icon: Icon(Icons.shopping_cart),
-      )
-    : null,
-
+          ? Container(
+              height: screenWidth * 0.12,
+              width: screenWidth - horizontalSpacing * 2,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CartScreen(cart: cart),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                label: Text(
+                  "Cart (${cart.values.fold<int>(0, (sum, item) => sum + item.quantity)})",
+                  style: AppTextStyles.buttonText(
+                      screenHeight, AppColors.whiteText),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
