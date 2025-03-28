@@ -23,10 +23,13 @@ class Item(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=50, blank=True)  # e.g., drink or food'
+    stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
+    base64_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        image_preview = self.base64_image[:30] + "..." if self.base64_image else "No image"
+        return f"{self.name} (Image: {image_preview})"
     
 class OrderItems(models.Model):
     customer = models.ForeignKey(

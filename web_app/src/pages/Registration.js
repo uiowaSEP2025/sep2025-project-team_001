@@ -78,8 +78,21 @@ function Registration() {
 
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Registration failed: " + (error.response?.data || error.message));
+      console.error("Error during registration:", error);
+    
+      if (error.response?.data) {
+        const errors = error.response.data;
+    
+        // Try to find the first error message
+        const firstKey = Object.keys(errors)[0];
+        const firstError = Array.isArray(errors[firstKey]) ? errors[firstKey][0] : errors[firstKey];
+    
+        toast.error(`${firstKey}: ${firstError}`);
+      } else {
+        toast.error("Registration failed: " + error.message);
+      }
     }
+    
   };
 
   return (
