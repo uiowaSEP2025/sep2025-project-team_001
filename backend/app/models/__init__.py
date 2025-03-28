@@ -1,5 +1,6 @@
 from .customer_models import CustomUser, Customer
-from .restaurant_models import Restaurant, Item, OrderItems, CurrentItem
+from .restaurant_models import Restaurant, Item
+from .order_models import Order, OrderItem
 
 __all__ = [
     'CustomUser',
@@ -7,5 +8,5 @@ __all__ = [
     'Restaurant',
     'Item',
     'OrderItems',
-    'CurrentItem',
+    'Order',
 ]
