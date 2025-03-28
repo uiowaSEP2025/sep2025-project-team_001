@@ -22,12 +22,29 @@ function Registration() {
     phone: "",
     business_name: "",
     business_address: "",
+    restaurantImage: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+  
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        restaurantImage: reader.result,
+      }));
+    };
+  
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
+  
   const handleContinue = () => {
     const { name, username, password, confirmPassword } = formData;
     if (!name || !username || !password || !confirmPassword) {
@@ -49,9 +66,9 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address } = formData;
+    const { email, phone, business_name, business_address, restaurantImage} = formData;
 
-    if (!email || !phone || !business_name || !business_address) {
+    if (!email || !phone || !business_name || !business_address || !restaurantImage) {
       toast.error("Please fill out all fields in Step 2.");
       return;
     }
@@ -73,6 +90,7 @@ function Registration() {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, formData);
       const { access, refresh } = response.data.tokens;
 
+      console.log("Registrationa:", response.data);
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
 
@@ -196,6 +214,23 @@ function Registration() {
                 onChange={handleChange}
                 className="registration-form-control"
               />
+            </Form.Group>
+            <Form.Group controlId="restaurant_image" className="registration-form-group file-upload-group">
+              <input
+                type="file"
+                id="upload"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="upload-input"
+              />
+
+              <label htmlFor="upload" className="custom-upload-button">
+                Choose Image
+              </label>
+
+              {formData.restaurantImage && (
+                <div className="upload-file-name">Image selected</div>
+              )}
             </Form.Group>
           </Form>
         </Modal.Body>
