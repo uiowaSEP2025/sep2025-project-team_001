@@ -91,6 +91,7 @@ function Registration() {
       const { access, refresh } = response.data.tokens;
 
       console.log("Registrationa:", response.data);
+      localStorage.setItem("barName", business_name);
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
 
