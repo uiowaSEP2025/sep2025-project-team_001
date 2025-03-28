@@ -1,7 +1,18 @@
-from rest_framework import generics
-from app.models import CurrentItem
-from app.serializers.current_item_serializer import CurrentItemSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
-class CurrentItemsList(generics.ListAPIView):
-    queryset = CurrentItem.objects.filter(status="active")
-    serializer_class = CurrentItemSerializer
+from app.serializers.order_serializer import OrderSerializer
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+    serializer = OrderSerializer(data=request.data)
+    if serializer.is_valid():
+        order = serializer.save()
+        return Response({
+            "message": "Order created successfully",
+            "order_id": order.id
+        }, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
