@@ -23,6 +23,10 @@ function Login() {
       });
 
       const { access, refresh } = response.data.tokens;
+
+      //Log restaurant ID
+      console.log("Logged-in Restaurant ID:", response.data.restaurant_id);
+
       if (response.data.bar_name) {
         localStorage.setItem("barName", response.data.bar_name);
       } else {
