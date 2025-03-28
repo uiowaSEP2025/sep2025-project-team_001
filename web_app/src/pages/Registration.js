@@ -22,10 +22,27 @@ function Registration() {
     phone: "",
     business_name: "",
     business_address: "",
+    restaurantImage: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        restaurantImage: reader.result,
+      }));
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleContinue = () => {
@@ -49,9 +66,9 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address } = formData;
+    const { email, phone, business_name, business_address, restaurantImage } = formData;
 
-    if (!email || !phone || !business_name || !business_address) {
+    if (!email || !phone || !business_name || !business_address || !restaurantImage) {
       toast.error("Please fill out all fields in Step 2.");
       return;
     }
@@ -73,26 +90,16 @@ function Registration() {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, formData);
       const { access, refresh } = response.data.tokens;
 
+      console.log("Registrationa:", response.data);
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
 
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error during registration:", error);
-    
-      if (error.response?.data) {
-        const errors = error.response.data;
-    
-        // Try to find the first error message
-        const firstKey = Object.keys(errors)[0];
-        const firstError = Array.isArray(errors[firstKey]) ? errors[firstKey][0] : errors[firstKey];
-    
-        toast.error(`${firstKey}: ${firstError}`);
-      } else {
-        toast.error("Registration failed: " + error.message);
-      }
+
+      toast.error("Registration failed: " + (error.response?.data?.message || error.message));
     }
-    
+
   };
 
   return (
@@ -209,6 +216,23 @@ function Registration() {
                 onChange={handleChange}
                 className="registration-form-control"
               />
+            </Form.Group>
+            <Form.Group controlId="restaurant_image" className="registration-form-group file-upload-group">
+              <input
+                type="file"
+                id="upload"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="upload-input"
+              />
+
+              <label htmlFor="upload" className="custom-upload-button">
+                Choose Image
+              </label>
+
+              {formData.restaurantImage && (
+                <div className="upload-file-name">Image selected</div>
+              )}
             </Form.Group>
           </Form>
         </Modal.Body>
