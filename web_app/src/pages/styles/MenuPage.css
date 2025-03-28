@@ -1,20 +1,39 @@
-/* Container for the whole page */
+
+/* MenuPage.css */
+
+.menu-page {
+  background-color: #003a75;
+  min-height: 100vh;
+  padding-top: 40px;
+  box-sizing: border-box;
+  overflow-y: auto; /* This enables vertical scrolling when needed */
+}
+
+.menu-page h2{
+  color: white;
+}
+
+.menu-page p{
+  color: white;
+}
+
+
 .menu-page-container {
   width: 80%;
   margin: 0 auto;
-  padding-top: 20px;
+  padding-bottom: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Section headers */
 .menu-section-header {
   margin-top: 40px;
   font-size: 24px;
   border-bottom: 2px solid #ccc;
   padding-bottom: 8px;
   font-weight: bold;
-  color: #333;
+  color: white;
 }
+
 
 /* Sub-section headers */
 .menu-sub-section-header {
@@ -22,7 +41,7 @@
   font-size: 18px;
   font-weight: 600;
   text-decoration: underline;
-  color: #555;
+  color: white;
 }
 
 /* Button to create new item */
@@ -117,4 +136,23 @@
 
 .menu-modal-content button.cancel-button:hover {
   background-color: #bcbcbc;
+}
+
+.menu-image-preview-container {
+  text-align: center;
+}
+
+.menu-image-preview-container p {
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.menu-image-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  object-fit: cover;
 }

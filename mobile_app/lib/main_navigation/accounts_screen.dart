@@ -20,7 +20,7 @@ class AccountScreen extends StatelessWidget {
             const ListTile(
               leading: Icon(Icons.email),
               title: Text("Email"),
-              subtitle: Text("example@email.com"), // TODO: pull from user data
+              subtitle: Text("example@email.com"), 
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(

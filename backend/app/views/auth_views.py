@@ -1,11 +1,14 @@
 import json
+import re
+
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
-from app.models.customer_models import CustomUser, Manager
-from app.models.restaurant_models import Restaurant
-import re
+
+from ..models.customer_models import CustomUser, Manager
+from ..models.restaurant_models import Restaurant
+
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -13,6 +16,7 @@ def get_tokens_for_user(user):
         "refresh": str(refresh),
         "access": str(refresh.access_token),
     }
+
 
 @csrf_exempt
 def register_user(request):
@@ -28,14 +32,14 @@ def register_user(request):
             if not data.get(field):
                 return JsonResponse({"message": f"{field.replace('_', ' ').capitalize()} is required."}, status=400)
 
-        #Check if username is already taken
+        # Check if username is already taken
         if CustomUser.objects.filter(username=data["username"]).exists():
             return JsonResponse({"message": "Username already taken"}, status=400)
 
-        #Check if email is already registered
+        # Check if email is already registered
         if CustomUser.objects.filter(email=data["email"]).exists():
             return JsonResponse({"message": "Email already registered"}, status=400)
-        
+
         # Validate email format
         if not re.match(r"^[^@]+@[^@]+\.[^@]+$", data["email"]):
             return JsonResponse({"message": "Invalid email format."}, status=400)
@@ -59,18 +63,17 @@ def register_user(request):
         # Create Manager profile
         manager = Manager.objects.create(user=user)
 
-        # Create Restaurant and add manager to the resturant
+        # Create Restaurant and add manager to the restaurant
         restaurant = Restaurant.objects.create(
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
             restaurant_image=data.get("restaurantImage")
         )
-        restaurant.managers.add(manager)  # Link manager to restaurant
+        restaurant.managers.add(manager)
 
         tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        #sanity check to see if all models were created correctly
         return JsonResponse({
             "message": "User registered successfully",
             "tokens": tokens,
@@ -93,7 +96,21 @@ def login_user(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             tokens = get_tokens_for_user(user)  # Generate JWT tokens
-            return JsonResponse({"message": "Login successful", "tokens": tokens}, status=200)
+            try:
+                manager = Manager.objects.get(user=user)
+                restaurant = Restaurant.objects.filter(managers=manager).first()
+                bar_name = restaurant.name if restaurant else None
+                restaurant_id = restaurant.id if restaurant else None
+            except Manager.DoesNotExist:
+                bar_name = None
+                restaurant_id = None
+
+            return JsonResponse({
+                "message": "Login successful",
+                "tokens": tokens,
+                "bar_name": bar_name,
+                "restaurant_id": restaurant_id
+            }, status=200)
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 

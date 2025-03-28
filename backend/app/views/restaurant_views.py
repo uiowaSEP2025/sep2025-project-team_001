@@ -1,10 +1,12 @@
-from app.models.restaurant_models import Item
-from app.serializers.item_serializer import ItemSerializer
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from app.models import Restaurant
-from app.serializers.restaurant_serializers import RestaurantSerializer
+from rest_framework.response import Response
+
+from ..models import Restaurant
+from ..models.restaurant_models import Item
+from ..serializers.item_serializer import ItemSerializer
+from ..serializers.restaurant_serializers import RestaurantSerializer
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -13,10 +15,10 @@ def get_restaurants(request):
     serializer = RestaurantSerializer(restaurants, many=True)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_menu_items(request, restaurant):
     items = Item.objects.filter(restaurant__name=restaurant, available=True)
     serializer = ItemSerializer(items, many=True)
     return Response(serializer.data)
-

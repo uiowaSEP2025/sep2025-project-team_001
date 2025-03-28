@@ -1,6 +1,7 @@
 from django.db import models
-from .customer_models import Customer
-from app.models.customer_models import Manager
+
+from .customer_models import Manager
+
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
@@ -13,6 +14,7 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Item(models.Model):
     restaurant = models.ForeignKey(

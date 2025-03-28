@@ -1,8 +1,11 @@
 import json
-from django.views.decorators.csrf import csrf_exempt
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from app.models.restaurant_models import Restaurant, Item
+from django.views.decorators.csrf import csrf_exempt
+
+from ..models.restaurant_models import Restaurant, Item
+
 
 @csrf_exempt
 def menu_items_api(request):

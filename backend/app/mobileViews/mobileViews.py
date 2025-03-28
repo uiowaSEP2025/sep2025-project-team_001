@@ -1,9 +1,11 @@
 import json
+
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from app.views.auth_views import get_tokens_for_user
+
 from ..models import CustomUser, Customer
+from ..views.auth_views import get_tokens_for_user
 
 
 @csrf_exempt
@@ -47,6 +49,7 @@ def register_customer(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+
 @csrf_exempt
 def login_customer(request):
     if request.method == "POST":
@@ -58,6 +61,7 @@ def login_customer(request):
         if user is not None:
             tokens = get_tokens_for_user(user) 
             return JsonResponse({"message": "Login successful", "tokens": tokens, "customer_id": getattr(user.customer, 'id', None)}, status=200)
+
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 
