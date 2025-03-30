@@ -55,6 +55,7 @@ const OrdersPage = () => {
           <tr>
             <th>Customer</th>
             <th>Ordered Time</th>
+            <th>Total Price</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -67,6 +68,7 @@ const OrdersPage = () => {
             >
               <td>{order.customer_name}</td>
               <td>{new Date(order.start_time).toLocaleString()}</td>
+              <td>${Number(order.total_price).toFixed(2)}</td> 
               <td>{order.status}</td>
             </tr>
           ))}
