@@ -90,7 +90,7 @@ function Registration() {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, formData);
       const { access, refresh } = response.data.tokens;
 
-      console.log("Registrationa:", response.data);
+      console.log("Registration:", response.data);
       localStorage.setItem("barName", business_name);
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);

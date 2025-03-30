@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import '../pages/styles/MenuPage.css';
-import ItemCard from '../components/ItemCard.js'; 
+import ItemCard from '../components/ItemCard.js';
+
 const MenuPage = () => {
     const [items, setItems] = useState([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -92,7 +93,7 @@ const MenuPage = () => {
         })
         .then(response => response.json())
         .then(data => {
-            console.log("✅ Created item:", data); // ← log here
+            console.log("Created item:", data); // ← log here
             setShowCreateModal(false);
             fetchItems();
         })
