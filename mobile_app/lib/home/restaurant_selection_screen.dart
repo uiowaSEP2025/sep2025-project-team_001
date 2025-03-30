@@ -76,24 +76,15 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
           style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.person),
-            onSelected: (value) async {
-              if (value == 'logout') {
-                // Do logout logic here
-                await TokenManager.clearTokens();
-
-                print("Logging out...");
-                Navigator.pushReplacementNamed(context, "/");
-              }
+          GestureDetector(
+            onTap: (){
+              Navigator.pushNamed(context, "/add_restaurant");
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
-            ],
-          ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("ADD NEW +", style: AppTextStyles.buttonText(screenHeight, AppColors.primaryColor),),
+            ),
+          )
         ],
       ),
       body: GestureDetector(
@@ -202,26 +193,26 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
       //       )),
       // )
       // : null,
-      floatingActionButton: !isLoading && !errorFetching
-          ? Container(
-              height: screenWidth * 0.12,
-              width: screenWidth - horizontalSpacing * 2,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, "/add_restaurant");
-                },
-                icon: const Icon(Icons.add),
-                label: Text(
-                  "ADD NEW",
-                  style: AppTextStyles.buttonText(
-                      screenHeight, AppColors.whiteText),
-                ),
-              ),
-            )
-          : null,
+      // floatingActionButton: !isLoading && !errorFetching
+      //     ? Container(
+      //         height: screenWidth * 0.12,
+      //         width: screenWidth - horizontalSpacing * 2,
+      //         child: ElevatedButton.icon(
+      //           style: ElevatedButton.styleFrom(
+      //             backgroundColor: AppColors.primaryColor,
+      //           ),
+      //           onPressed: () {
+      //             Navigator.pushNamed(context, "/add_restaurant");
+      //           },
+      //           icon: const Icon(Icons.add),
+      //           label: Text(
+      //             "ADD NEW",
+      //             style: AppTextStyles.buttonText(
+      //                 screenHeight, AppColors.whiteText),
+      //           ),
+      //         ),
+      //       )
+      //     : null,
     );
   }
 }

@@ -58,7 +58,7 @@ Future<List<Restaurant>> fetchCustomerRestaurants() async {
       throw Exception('Access token not found');
     }
 
-    const String endpoint = "${ApiConfig.baseUrl}/order/new";
+    const String endpoint = "${ApiConfig.baseUrl}/order/new/";
     final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
     final orderItems = cart.values.map((cartItem) {
