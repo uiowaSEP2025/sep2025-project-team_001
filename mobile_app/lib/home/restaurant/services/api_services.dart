@@ -5,13 +5,14 @@ import 'package:mobile_app/utils/token_manager.dart';
 
 Future<List<MenuItem>> fetchMenuItems(String restaurantName) async {
   final accessToken = await TokenManager.getAccessToken();
-print(accessToken);
+  print(accessToken);
   if (accessToken == null) {
     throw Exception('Access token not found');
   }
 
   final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
-  final String endpoint = "${ApiConfig.baseUrl}/restaurants/$restaurantName/menu/";
+  final String endpoint =
+      "${ApiConfig.baseUrl}/restaurants/$restaurantName/menu/";
 
   try {
     final response = await dio.get(
@@ -25,6 +26,7 @@ print(accessToken);
     );
 
     final data = response.data as List<dynamic>;
+    print(data.map((json) => MenuItem.fromJson(json)));
     return data.map((json) => MenuItem.fromJson(json)).toList();
   } on DioException catch (e) {
     if (e.response?.statusCode == 401) {

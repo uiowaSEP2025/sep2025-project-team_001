@@ -1,11 +1,12 @@
 class MenuItem {
+  final int id;
   final String name;
   final String description;
   final double price;
   final String category;
   final bool available;
   final String? base64image;
-  final int id;
+  
   
 
   MenuItem({
@@ -23,7 +24,7 @@ class MenuItem {
       id: json['id'],
       name: json['name'],
       description: json['description'] ?? '',
-      price: double.parse(json['price']),
+      price: json['price'],
       category: json['category'] ?? 'Other',
       available: json['available'],
       base64image: json['base64_image'],

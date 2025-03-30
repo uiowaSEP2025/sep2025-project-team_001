@@ -48,6 +48,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       });
     } catch (e) {
       setState(() {
+        print(e);
         isLoading = false;
         errorFetching = true;
       });
