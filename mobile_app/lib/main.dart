@@ -31,8 +31,13 @@ class MyApp extends StatelessWidget {
           //   return MaterialPageRoute(
           //       builder: (_) => const RestaurantSelectionScreen());
           case '/home':
+            final args = settings.arguments as Map<String, dynamic>?;
+            final initialIndex = args?['initialIndex'] ?? 0;
+
             return MaterialPageRoute(
-                builder: (_) => const MainNavigationScreen());
+              builder: (_) => MainNavigationScreen(initialIndex: initialIndex),
+            );
+
           case '/register':
             return MaterialPageRoute(builder: (_) => const CreateAccount());
           case '/terms':

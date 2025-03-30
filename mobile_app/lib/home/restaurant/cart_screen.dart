@@ -52,6 +52,13 @@ class _CartScreenState extends State<CartScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("order placed with id $orderId")));
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
+          arguments: {'initialIndex': 1},
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error placing order, please try again")));

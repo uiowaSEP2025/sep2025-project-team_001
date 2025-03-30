@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
+import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
 class BarCard extends StatelessWidget {
   final Restaurant bar;
@@ -29,10 +30,10 @@ class BarCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Image.network(
-              "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FscoutsLogo.png?alt=media&token=512cb083-e65c-4435-ae27-018d7467473c",
-              height: screenWidth * 0.27,
-              fit: BoxFit.cover),
+              Base64ImageWithFallback(
+                      width: screenWidth * 0.28,
+                          height: screenWidth * 0.27,
+                        base64ImageString: bar.base64image),
           SizedBox(
             height: screenWidth * 0.02,
           ),
