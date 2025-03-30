@@ -41,6 +41,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'restaurant_name',
             'start_time',
             'status',
+            'total_price',
             'order_items'
         ]
 

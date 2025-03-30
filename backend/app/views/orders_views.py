@@ -12,6 +12,10 @@ def create_order(request):
     serializer = OrderSerializer(data=request.data)
     if serializer.is_valid():
         order = serializer.save()
+
+        order.total_price = order.get_total()
+        order.save()
+        
         return Response({
             "message": "Order created successfully",
             "order_id": order.id
