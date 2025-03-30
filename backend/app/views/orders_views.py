@@ -22,7 +22,13 @@ def create_order(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def retrieve_active_orders(request):
-    orders = Order.objects.prefetch_related(
+    try:
+        manager = request.user.manager  # Get the logged-in user's Manager profile
+        restaurant = manager.restaurants.first() 
+    except:
+        return Response({"error": "Manager or restaurant not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    orders = Order.objects.filter(restaurant=restaurant).prefetch_related(
         'order_items__item',
         'customer__user'
     ).order_by('-start_time')
