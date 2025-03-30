@@ -19,7 +19,7 @@ class Restaurant {
       name: json['name'],
       address: json['address'],
       phone: json['phone'],
-      base64image: json['base64_image'],
+      base64image: json['restaurant_image'],
     );
   }
 }

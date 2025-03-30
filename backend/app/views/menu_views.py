@@ -1,7 +1,4 @@
 import json
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -10,19 +7,16 @@ from django.views.decorators.csrf import csrf_exempt
 from ..models.restaurant_models import Restaurant, Item
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@csrf_exempt
 def menu_items_api(request):
     if request.method == 'GET':
-        try:
-            manager = request.user.manager  # Assumes OneToOne with user
-            restaurant = manager.restaurants.first()
-        except:
-            return Response({'error': 'Manager or restaurant not found'}, status=404)
+        restaurant = Restaurant.objects.first()
+        if not restaurant:
+            return JsonResponse({'error': 'Restaurant not found'}, status=404)
 
-        items = Item.objects.filter(restaurant=restaurant).values()
-        return Response({'items': list(items)}, status=200)
-    
+        items = list(restaurant.items.values())
+        return JsonResponse({'items': items}, status=200)
+
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
