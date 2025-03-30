@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
+import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
@@ -100,3 +101,23 @@ Future<List<Restaurant>> fetchCustomerRestaurants() async {
       throw Exception("Error placing order: ${e.response?.statusCode}");
     }
   }
+
+Future<List<Order>> fetchUserOrders(int customerId) async {
+  final accessToken = await TokenManager.getAccessToken();
+  final dio = Dio();
+
+  const String endpoint = "${ApiConfig.baseUrl}/order/customer/";
+
+  final response = await dio.get(
+    endpoint,
+    options: Options(
+      headers: {
+        "Authorization": "Bearer $accessToken",
+        "Content-Type": "application/json",
+      },
+    ),
+  );
+
+  final data = response.data as List;
+  return data.map((json) => Order.fromJson(json)).toList();
+}
