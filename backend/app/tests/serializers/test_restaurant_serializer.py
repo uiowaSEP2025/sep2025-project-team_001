@@ -1,7 +1,5 @@
 import pytest
-
 from app.serializers.restaurant_serializers import RestaurantSerializer
-
 
 @pytest.mark.django_db
 def test_restaurant_serializer_serialization(restaurant):
@@ -10,24 +8,23 @@ def test_restaurant_serializer_serialization(restaurant):
     """
     serializer = RestaurantSerializer(restaurant)
     data = serializer.data
-    # Check that the output contains expected fields.
     assert data["id"] == restaurant.id
     assert data["name"] == restaurant.name
     assert data["address"] == restaurant.address
     assert data["phone"] == restaurant.phone
-    # Ensure that fields not specified in the serializer are omitted.
-    assert "restaurant_image" not in data
-
+    assert "restaurant_image" in data
+    assert data["restaurant_image"] == restaurant.restaurant_image
 
 @pytest.mark.django_db
-def test_restaurant_serializer_deserialization_valid():
+def test_restaurant_serializer_deserialization_valid(manager):
     """
     Test that valid input data passes validation and creates a Restaurant instance.
     """
     data = {
         "name": "New Restaurant",
         "address": "456 New St",
-        "phone": "123-456-7890"
+        "phone": "123-456-7890",
+        "managers": [manager.pk]
     }
     serializer = RestaurantSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
@@ -35,17 +32,18 @@ def test_restaurant_serializer_deserialization_valid():
     assert restaurant.name == data["name"]
     assert restaurant.address == data["address"]
     assert restaurant.phone == data["phone"]
-
+    assert list(restaurant.managers.all()) == [manager]
 
 @pytest.mark.django_db
-def test_restaurant_serializer_deserialization_invalid():
+def test_restaurant_serializer_deserialization_invalid(manager):
     """
     Test that invalid input data fails validation.
     Here, 'name' is required, so omitting it should result in an error.
     """
     data = {
         "address": "456 New St",
-        "phone": "123-456-7890"
+        "phone": "123-456-7890",
+        "managers": [manager.pk]
     }
     serializer = RestaurantSerializer(data=data)
     assert not serializer.is_valid()

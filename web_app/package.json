@@ -49,7 +49,16 @@
   },
   "jest": {
     "coverageReporters": [
-      "text"
+      "json",
+      "lcov",
+      "text",
+      "clover"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/src/App.js",
+      "/src/index.js",
+      "/src/PrivateRoute.js"
     ]
   }
 }

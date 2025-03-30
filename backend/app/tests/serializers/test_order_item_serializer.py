@@ -37,9 +37,8 @@ def test_order_item_serializer_representation(customer, restaurant):
     )
     serializer = OrderItemSerializer(order_item)
     data = serializer.data
-    # Check that the read-only field 'item' shows the string representation.
-    assert "item" in data
-    # And that quantity is as expected.
+    assert "item_name" in data
+    assert data["item_name"] == "Burger"
     assert data["quantity"] == 2
 
 
