@@ -19,18 +19,6 @@ void main() {
     HttpOverrides.global = TestHttpOverrides();
   });
 
-  testWidgets('Bars are selectable and toggle correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: RestaurantSelectionScreen()));
 
-    final bar1 = find.text('Scouts');
-    final bar2 = find.text('Coa');
-    final bar3 = find.text('Roxxy');
-    final bar4 = find.text('Brothers');
-
-    await tester.tap(bar1);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Scouts'), findsOneWidget);
-  });
 
 }

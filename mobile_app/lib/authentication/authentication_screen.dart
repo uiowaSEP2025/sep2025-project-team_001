@@ -12,6 +12,7 @@ import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
+import 'package:mobile_app/utils/user_manager.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
@@ -385,6 +386,12 @@ print(password);
     final tokens = response.data['tokens'];
     final accessToken = tokens['access'];
     final refreshToken = tokens['refresh'];
+
+    final userId = response.data['customer_id'];
+
+    await UserManager.saveUser(userId);
+
+    print(userId);
 
     await TokenManager.saveTokens(accessToken, refreshToken);
 
