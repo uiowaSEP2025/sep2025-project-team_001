@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/cart_screen.dart';
@@ -10,8 +11,8 @@ import 'package:mobile_app/home/restaurant/services/api_services.dart';
 import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
-  final String restaurantName;
-  const RestaurantMenuScreen({super.key, required this.restaurantName});
+  final Restaurant restaurant;
+  const RestaurantMenuScreen({super.key, required this.restaurant});
 
   @override
   State<RestaurantMenuScreen> createState() => _RestaurantMenuScreenState();
@@ -29,7 +30,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)!.settings.arguments as Map;
-    restaurantName = args['restaurant'];
+    restaurantName = args['restaurant'].name;
     _fetchMenuItems();
   }
 
@@ -47,6 +48,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
       });
     } catch (e) {
       setState(() {
+        print(e);
         isLoading = false;
         errorFetching = true;
       });
@@ -117,7 +119,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               }).toList(),
             ),
           ),
-          Expanded( 
+          Expanded(
             child: ListView.builder(
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
@@ -133,7 +135,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               },
             ),
           ),
-          SizedBox(height: verticalSpacing*2,)
+          SizedBox(
+            height: verticalSpacing * 2,
+          )
         ],
       ),
       floatingActionButton: cart.isNotEmpty
@@ -147,11 +151,19 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CartScreen(cart: cart),
+                      builder: (_) => CartScreen(
+                        cart: cart,
+                        restaurant: widget.restaurant,
+                        onCartUpdated: (updatedCart) {
+                          setState(() {
+                            cart = updatedCart;
+                          });
+                        },
+                      ),
                     ),
                   );
                 },
