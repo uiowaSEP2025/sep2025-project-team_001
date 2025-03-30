@@ -80,22 +80,25 @@ describe('MenuPage Component', () => {
 
   test('handles error in creating menu item (line 101)', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    // Initial fetch from useEffect
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
-    render(<MenuPage />);
+    // Store the render result to access container.
+    const { container } = render(<MenuPage />);
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
-    // For the create request, simulate a failure.
+    // Simulate a failure for the create request.
     fetch.mockRejectOnce(new Error('Creation failed'));
 
-    // Fill out the form minimally.
-    const nameInput = screen.getByLabelText(/Item Name:/);
+    // Use container.querySelector since labels are not properly associated.
+    const nameInput = container.querySelector('input[name="name"]');
     fireEvent.change(nameInput, { target: { value: 'Error Item' } });
-    fireEvent.change(screen.getByLabelText(/Price:/), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText(/Category:/), { target: { value: 'food' } });
-    fireEvent.change(screen.getByLabelText(/Stock:/), { target: { value: '1' } });
-    const fileInput = screen.getByLabelText(/Upload Image:/);
+    const priceInput = container.querySelector('input[name="price"]');
+    fireEvent.change(priceInput, { target: { value: '10' } });
+    const categorySelect = container.querySelector('select[name="category"]');
+    fireEvent.change(categorySelect, { target: { value: 'food' } });
+    const stockInput = container.querySelector('input[name="stock"]');
+    fireEvent.change(stockInput, { target: { value: '1' } });
+    const fileInput = container.querySelector('input[type="file"]');
     const file = new File(['dummy'], 'error.png', { type: 'image/png' });
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -233,7 +236,8 @@ describe('MenuPage Component', () => {
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
-    // Since the checkbox doesn't have an associated accessible label, select it directly.
+    // Since the checkbox doesn't have an associated accessible label,
+    // use getByRole to fetch the checkbox.
     const availableCheckbox = screen.getByRole('checkbox');
     expect(availableCheckbox.checked).toBe(true);
 

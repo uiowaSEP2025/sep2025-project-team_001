@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, waitFor} from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import OrdersPage from '../pages/OrdersPage';
 import axios from 'axios';
 
@@ -22,52 +22,132 @@ describe('OrdersPage Component', () => {
     const orders = [
       {
         id: 1,
-        item_name: 'Burger',
-        quantity: 2,
-        status: 'Pending',
-        created_at: '2022-01-01T00:00:00Z'
+        customer_name: 'Burger Customer',
+        start_time: '2022-01-01T00:00:00Z',
+        status: 'Pending'
       },
       {
         id: 2,
-        item_name: 'Fries',
-        quantity: 1,
-        status: 'Served',
-        created_at: '2022-01-01T01:00:00Z'
+        customer_name: 'Fries Customer',
+        start_time: '2022-01-01T01:00:00Z',
+        status: 'Served'
       }
     ];
     axios.get.mockResolvedValue({ data: orders });
     render(<OrdersPage />);
 
-    // Wait for the header to appear (indicating that loading is done)
+    // Wait for the header to appear (loading done)
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
 
-    // Check that the orders are rendered in the table.
-    expect(screen.getByText('Burger')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
+    // Check that orders are rendered.
+    expect(screen.getByText('Burger Customer')).toBeInTheDocument();
     expect(screen.getByText('Pending')).toBeInTheDocument();
-    const createdAtFormatted = new Date('2022-01-01T00:00:00Z').toLocaleString();
-    expect(screen.getByText(createdAtFormatted)).toBeInTheDocument();
+    const startTimeFormatted = new Date('2022-01-01T00:00:00Z').toLocaleString();
+    expect(screen.getByText(startTimeFormatted)).toBeInTheDocument();
 
-    expect(screen.getByText('Fries')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('Fries Customer')).toBeInTheDocument();
     expect(screen.getByText('Served')).toBeInTheDocument();
-    const createdAtFormatted2 = new Date('2022-01-01T01:00:00Z').toLocaleString();
-    expect(screen.getByText(createdAtFormatted2)).toBeInTheDocument();
+    const startTimeFormatted2 = new Date('2022-01-01T01:00:00Z').toLocaleString();
+    expect(screen.getByText(startTimeFormatted2)).toBeInTheDocument();
   });
 
   it('renders table with no orders when axios fetch fails', async () => {
     axios.get.mockRejectedValue(new Error('Network Error'));
     render(<OrdersPage />);
 
-    // Wait for the component to finish loading
+    // Wait for loading to finish.
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
 
-    // Ensure that the loading spinner is gone.
+    // Loading spinner should be gone.
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
 
-    // The table should render the header but no order rows.
+    // Only header row should be rendered.
     const rows = screen.getAllByRole('row');
-    // The header row is present so we expect only one row.
     expect(rows.length).toBe(1);
+  });
+
+  // --- New tests for modal and complete order functionality ---
+
+  it('opens order details modal when clicking on an order row', async () => {
+    const order = {
+      id: 1,
+      customer_name: 'Test Customer',
+      start_time: '2022-01-01T00:00:00Z',
+      status: 'Pending',
+      order_items: [
+        { item_name: 'Test Item', quantity: 2 }
+      ]
+    };
+    axios.get.mockResolvedValue({ data: [order] });
+    render(<OrdersPage />);
+    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+
+    // Simulate clicking the order row by clicking on the customer's name.
+    fireEvent.click(screen.getByText('Test Customer'));
+    // Modal should now appear.
+    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+    // Verify that the order items are displayed.
+    expect(screen.getByText('Test Item')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  it('completes order successfully', async () => {
+    const order = {
+      id: 1,
+      customer_name: 'Test Customer',
+      start_time: '2022-01-01T00:00:00Z',
+      status: 'Pending',
+      order_items: [
+        { item_name: 'Test Item', quantity: 2 }
+      ]
+    };
+    axios.get.mockResolvedValue({ data: [order] });
+    axios.patch.mockResolvedValue({ data: { order_id: 1 } });
+    render(<OrdersPage />);
+    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+
+    // Open the order details modal.
+    fireEvent.click(screen.getByText('Test Customer'));
+    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+
+    // "Complete Order" button should be visible.
+    const completeButton = screen.getByText('Complete Order');
+    fireEvent.click(completeButton);
+
+    // After completion, the modal should update and hide the complete button.
+    await waitFor(() => {
+      expect(screen.queryByText('Complete Order')).not.toBeInTheDocument();
+    });
+  });
+
+  it('handles error in completing order', async () => {
+    const order = {
+      id: 1,
+      customer_name: 'Test Customer',
+      start_time: '2022-01-01T00:00:00Z',
+      status: 'Pending',
+      order_items: [
+        { item_name: 'Test Item', quantity: 2 }
+      ]
+    };
+    axios.get.mockResolvedValue({ data: [order] });
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    axios.patch.mockRejectedValue(new Error('Patch error'));
+    render(<OrdersPage />);
+    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Test Customer'));
+    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+
+    const completeButton = screen.getByText('Complete Order');
+    fireEvent.click(completeButton);
+
+    await waitFor(() =>
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error marking order as completed:',
+        expect.any(Error)
+      )
+    );
+    consoleErrorSpy.mockRestore();
   });
 });
