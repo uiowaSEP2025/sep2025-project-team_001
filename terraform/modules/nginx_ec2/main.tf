@@ -101,6 +101,7 @@ resource "aws_instance" "nginx" {
     server {
       listen 443 ssl;
       server_name ${var.domain_name};
+      client_max_body_size 50M;
 
       # SSL certificate from certbot
       ssl_certificate /etc/letsencrypt/live/${var.domain_name}/fullchain.pem;
