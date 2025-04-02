@@ -17,6 +17,14 @@ function Dashboard() {
     navigate("/menu");
   };
 
+  const handleLogOutClick = () => {
+    // Clear all relevant auth data from localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("barName");
+    navigate("/");
+  };
+
   return (
     <Container className="text-center mt-5">
       {barName && <h2 className="mb-4">Restaurant: {barName}</h2>}
@@ -25,6 +33,9 @@ function Dashboard() {
       </Button>
       <Button variant="primary" size="lg" onClick={handleMenuClick}>
         Menu
+      </Button>
+      <Button variant="danger" size="lg" onClick={handleLogOutClick}>
+        Log Out
       </Button>
     </Container>
   );
