@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Spinner, Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const navigate = useNavigate();
 
   const handleCompleteOrder = async (orderId) => {
     try {
@@ -49,6 +51,15 @@ const OrdersPage = () => {
 
   return (
     <Container className="mt-5">
+      <Button
+        variant="outline-primary"
+        className="mb-3"
+        onClick={() => navigate("/dashboard")}
+        style={{ position: "absolute", top: "20px", left: "20px", zIndex: 1051 }}
+      >
+        Dashboard
+      </Button>
+
       <h1>Active Orders</h1>
       <Table striped bordered hover responsive>
         <thead>

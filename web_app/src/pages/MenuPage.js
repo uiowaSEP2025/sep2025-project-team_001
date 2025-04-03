@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../pages/styles/MenuPage.css';
 import ItemCard from '../components/ItemCard.js';
+import { useNavigate } from 'react-router-dom';
 
 const MenuPage = () => {
     const [items, setItems] = useState([]);
@@ -17,6 +18,7 @@ const MenuPage = () => {
         available: true
     });
     const barName = sessionStorage.getItem("barName");
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchItems();
@@ -177,6 +179,13 @@ const MenuPage = () => {
         <div>
             <div className = "menu-page">
                 <div className="menu-page-container">
+                    <button
+                        className="menu-back-button"
+                        onClick={() => navigate("/dashboard")}
+                        >
+                        Dashboard
+                    </button>
+
                     {barName && <h2> Restaurant: {barName} </h2>}
                     <h2>Menu Manager</h2>
                     <button className="menu-create-button" onClick={openCreateModal}>
