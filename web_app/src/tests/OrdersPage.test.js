@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import OrdersPage from '../pages/OrdersPage';
 import axios from 'axios';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('axios');
 
@@ -14,7 +15,11 @@ describe('OrdersPage Component', () => {
     // Make axios.get return a promise that never resolves immediately.
     const promise = new Promise(() => {});
     axios.get.mockReturnValue(promise);
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -34,7 +39,11 @@ describe('OrdersPage Component', () => {
       }
     ];
     axios.get.mockResolvedValue({ data: orders });
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
 
     // Wait for the header to appear (loading done)
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
@@ -53,7 +62,11 @@ describe('OrdersPage Component', () => {
 
   it('renders table with no orders when axios fetch fails', async () => {
     axios.get.mockRejectedValue(new Error('Network Error'));
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
 
     // Wait for loading to finish.
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
@@ -79,7 +92,11 @@ describe('OrdersPage Component', () => {
       ]
     };
     axios.get.mockResolvedValue({ data: [order] });
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
 
     // Simulate clicking the order row by clicking on the customer's name.
@@ -103,7 +120,11 @@ describe('OrdersPage Component', () => {
     };
     axios.get.mockResolvedValue({ data: [order] });
     axios.patch.mockResolvedValue({ data: { order_id: 1 } });
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
 
     // Open the order details modal.
@@ -133,7 +154,11 @@ describe('OrdersPage Component', () => {
     axios.get.mockResolvedValue({ data: [order] });
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     axios.patch.mockRejectedValue(new Error('Patch error'));
-    render(<OrdersPage />);
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );    
     await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Test Customer'));
