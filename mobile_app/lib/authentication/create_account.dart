@@ -390,9 +390,12 @@ class _CreateAccountState extends State<CreateAccount> {
     final accessToken = tokens['access'];
     final refreshToken = tokens['refresh'];
 
-    final userId = response.data['id'];
+    final userId = response.data['customer_id'];
 
     await UserManager.saveUser(userId);
+
+    await UserManager.saveEmail(email);
+    await UserManager.saveName(name);
 
     await TokenManager.saveTokens(accessToken, refreshToken);
 

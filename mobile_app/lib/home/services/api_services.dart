@@ -22,7 +22,7 @@ Future<List<Restaurant>> fetchCustomerRestaurants() async {
     }
 
     final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
-    const String endpoint = "${ApiConfig.baseUrl}/restaurants/list";
+    const String endpoint = "${ApiConfig.baseUrl}/restaurants/list/";
 
     try {
       final response = await dio.get(

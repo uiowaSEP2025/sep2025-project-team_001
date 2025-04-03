@@ -17,7 +17,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   int _currentStep = 0;
   String email = "";
 
-  void _goToNextStep() {
+  void goToNextStep() {
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -30,7 +30,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     }
   }
 
-  void _goToPreviousStep() {
+  void goToPreviousStep() {
     if (_currentStep > 0) {
       setState(() {
         _currentStep--;
@@ -45,7 +45,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     }
   }
 
-    void _setEmail(String newEmail) {
+    void setEmail(String newEmail) {
     setState(() {
       email = newEmail;
     });
@@ -92,8 +92,8 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
             physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
-              EnterRecoveryEmail(onNext: _goToNextStep, enterEmail: _setEmail, enteredEmail: email),
-              EnterRecoveryCode(onNext: _goToNextStep, enteredEmail: email),
+              EnterRecoveryEmail(onNext: goToNextStep, enterEmail: setEmail, enteredEmail: email),
+              EnterRecoveryCode(onNext: goToNextStep, enteredEmail: email),
               EnterNewPassword(onNext: () => Navigator.pop(context), enteredEmail: email),
             ],
           ),
