@@ -1,28 +1,28 @@
 // src/pages/Dashboard.js
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const barName = sessionStorage.getItem("barName");
+  const barName = sessionStorage.getItem('barName');
 
   const handleOrderClick = () => {
-    navigate("/orders");
+    navigate('/orders');
   };
 
   const handleMenuClick = () => {
-    navigate("/menu");
+    navigate('/menu');
   };
 
   const handleLogOutClick = () => {
     // Clear all relevant auth data from sessionStorage
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("barName");
-    navigate("/");
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('barName');
+    navigate('/');
   };
 
   return (

@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Item
 
@@ -15,7 +14,7 @@ def test_order_item_str(customer, restaurant):
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     item_instance = Item.objects.create(
         restaurant=restaurant,
@@ -25,13 +24,9 @@ def test_order_item_str(customer, restaurant):
         category="Food",
         stock=10,
         available=True,
-        base64_image="dummy"
+        base64_image="dummy",
     )
-    order_item = OrderItem.objects.create(
-        order=order,
-        item=item_instance,
-        quantity=2
-    )
+    order_item = OrderItem.objects.create(order=order, item=item_instance, quantity=2)
     expected_str = f"2x {item_instance.name} (Order #{order.id})"
     assert str(order_item) == expected_str
 
@@ -45,7 +40,7 @@ def test_order_item_multiple_entries(customer, restaurant):
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     item_instance = Item.objects.create(
         restaurant=restaurant,
@@ -55,7 +50,7 @@ def test_order_item_multiple_entries(customer, restaurant):
         category="Food",
         stock=15,
         available=True,
-        base64_image="dummy"
+        base64_image="dummy",
     )
     # Create two order items for the same order.
     order_item1 = OrderItem.objects.create(order=order, item=item_instance, quantity=1)

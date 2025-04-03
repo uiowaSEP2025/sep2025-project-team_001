@@ -1,10 +1,9 @@
 from decimal import Decimal
 
 import pytest
-from django.utils import timezone
-
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Item
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -16,7 +15,7 @@ def test_order_str(customer, restaurant):
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     expected_str = f"Order #{order.id} by {customer.user.username} at {restaurant.name}"
     assert str(order) == expected_str
@@ -49,7 +48,7 @@ def test_order_get_total(customer, restaurant):
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     # Create two items for testing
     item1 = Item.objects.create(
@@ -60,7 +59,7 @@ def test_order_get_total(customer, restaurant):
         category="Food",
         stock=10,
         available=True,
-        base64_image="dummy"
+        base64_image="dummy",
     )
     item2 = Item.objects.create(
         restaurant=restaurant,
@@ -70,7 +69,7 @@ def test_order_get_total(customer, restaurant):
         category="Food",
         stock=20,
         available=True,
-        base64_image="dummy"
+        base64_image="dummy",
     )
     # Create OrderItems
     OrderItem.objects.create(order=order, item=item1, quantity=2)

@@ -10,13 +10,12 @@ class SearchBox extends StatelessWidget {
     required this.onChanged,
     this.hintText = "Search...",
     required this.screenHeight,
-
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: screenHeight*0.1,
+      height: screenHeight * 0.1,
       child: TextField(
         onChanged: onChanged,
         decoration: InputDecoration(
@@ -24,13 +23,14 @@ class SearchBox extends StatelessWidget {
           prefixIcon: const Icon(Icons.search),
           filled: true,
           fillColor: Colors.transparent,
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-      color: Colors.black,
-      width: 1.0,
-    ),
+            borderSide: const BorderSide(
+              color: Colors.black,
+              width: 1.0,
+            ),
           ),
         ),
       ),

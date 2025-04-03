@@ -17,39 +17,50 @@ function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login/`, {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/login/`,
+        {
+          username,
+          password,
+        },
+      );
 
       const { access, refresh } = response.data.tokens;
 
       //Log restaurant ID
-      console.log("Logged-in Restaurant ID:", response.data.restaurant_id);
+      console.log('Logged-in Restaurant ID:', response.data.restaurant_id);
 
       if (response.data.bar_name) {
-        sessionStorage.setItem("barName", response.data.bar_name);
+        sessionStorage.setItem('barName', response.data.bar_name);
       } else {
-        sessionStorage.setItem("barName", "Error retrieving bar name");
-      }      
-      sessionStorage.setItem("accessToken", access);
-      sessionStorage.setItem("refreshToken", refresh);
+        sessionStorage.setItem('barName', 'Error retrieving bar name');
+      }
+      sessionStorage.setItem('accessToken', access);
+      sessionStorage.setItem('refreshToken', refresh);
 
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-      toast.error("Invalid username or password. Please try again.");
+      toast.error('Invalid username or password. Please try again.');
     }
   };
 
   return (
     <div className="login-page-container">
-      <Modal show centered backdrop="static" keyboard={false} dialogClassName="login-modal-dialog">
-      <Modal.Header className="login-modal-header">
-        <button className="modal-back-button" onClick={() => navigate("/")}>
-          Back
-        </button>
-        <Modal.Title className="login-modal-title w-100 text-center">Login</Modal.Title>
-      </Modal.Header>
+      <Modal
+        show
+        centered
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="login-modal-dialog"
+      >
+        <Modal.Header className="login-modal-header">
+          <button className="modal-back-button" onClick={() => navigate('/')}>
+            Back
+          </button>
+          <Modal.Title className="login-modal-title w-100 text-center">
+            Login
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body className="login-modal-body">
           <Form onSubmit={handleLogin}>
             <Form.Group controlId="username" className="login-form-group">
@@ -75,7 +86,10 @@ function Login() {
             </Button>
             <div className="register-link-container">
               <span>Don't have an account? </span>
-              <span className="register-link" onClick={() => navigate("/register")}>
+              <span
+                className="register-link"
+                onClick={() => navigate('/register')}
+              >
                 Register
               </span>
             </div>
@@ -89,11 +103,11 @@ function Login() {
         hideProgressBar
         closeButton={false}
         toastStyle={{
-          textAlign: "center",
-          fontSize: "16px",
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
+          textAlign: 'center',
+          fontSize: '16px',
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
         }}
       />
     </div>

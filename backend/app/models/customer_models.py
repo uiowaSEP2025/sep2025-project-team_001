@@ -10,7 +10,9 @@ class CustomUser(AbstractUser):
 
 
 class Manager(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="manager")
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="manager"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -20,7 +22,9 @@ class Manager(models.Model):
 
 
 class Customer(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="customer")
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="customer"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

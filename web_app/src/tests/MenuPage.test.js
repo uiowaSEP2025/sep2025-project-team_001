@@ -35,8 +35,8 @@ describe('MenuPage Component', () => {
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     expect(await screen.findByText(/Menu Manager/)).toBeInTheDocument();
     expect(screen.getByText(/Available Items/)).toBeInTheDocument();
     expect(screen.getByText(/Unavailable Items/)).toBeInTheDocument();
@@ -51,13 +51,13 @@ describe('MenuPage Component', () => {
           { id: 3, name: 'Water', available: false, category: 'beverage' },
           { id: 4, name: 'Pizza', available: false, category: 'food' },
         ],
-      })
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     const cards = await screen.findAllByTestId('item-card');
     expect(cards.length).toBe(4);
   });
@@ -67,28 +67,32 @@ describe('MenuPage Component', () => {
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByText(/Cancel/));
     await waitFor(() => {
-      expect(screen.queryByText(/Create New Menu Item/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Create New Menu Item/),
+      ).not.toBeInTheDocument();
     });
   });
 
   test('toggles item availability', async () => {
     fetch.mockResponseOnce(
       JSON.stringify({
-        items: [{ id: 1, name: 'Water', available: false, category: 'beverage' }],
-      })
+        items: [
+          { id: 1, name: 'Water', available: false, category: 'beverage' },
+        ],
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     const toggleButton = await screen.findByText('Toggle');
     fireEvent.click(toggleButton);
     // Expect three fetch calls: 1 from mount, 1 for update POST, 1 for refetch.
@@ -96,14 +100,16 @@ describe('MenuPage Component', () => {
   });
 
   test('handles error in creating menu item (line 101)', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
     // Store the render result to access container.
     const { container } = render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
@@ -127,40 +133,46 @@ describe('MenuPage Component', () => {
 
     await waitFor(() => {
       expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain('Error creating item:');
+      expect(consoleErrorSpy.mock.calls[0][0]).toContain(
+        'Error creating item:',
+      );
     });
     consoleErrorSpy.mockRestore();
   });
 
   test('handles error in updating item availability (line 131)', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     fetch.mockResponseOnce(
       JSON.stringify({
-        items: [{
-          id: 1,
-          name: 'Test Item',
-          available: false,
-          category: 'beverage',
-          description: 'desc',
-          price: 10,
-          stock: 5,
-          base64_image: ''
-        }],
-      })
+        items: [
+          {
+            id: 1,
+            name: 'Test Item',
+            available: false,
+            category: 'beverage',
+            description: 'desc',
+            price: 10,
+            stock: 5,
+            base64_image: '',
+          },
+        ],
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     const toggleButton = await screen.findByText('Toggle');
     fetch.mockRejectOnce(new Error('Update failed'));
     fireEvent.click(toggleButton);
     await waitFor(() =>
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error updating item availability:',
-        expect.any(Error)
-      )
+        expect.any(Error),
+      ),
     );
     consoleErrorSpy.mockRestore();
   });
@@ -169,13 +181,13 @@ describe('MenuPage Component', () => {
     fetch.mockResponseOnce(
       JSON.stringify({
         items: [{ id: 1, name: 'DeleteMe', available: true, category: 'food' }],
-      })
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
 
@@ -188,13 +200,13 @@ describe('MenuPage Component', () => {
     fetch.mockResponseOnce(
       JSON.stringify({
         items: [{ id: 2, name: 'NoDelete', available: true, category: 'food' }],
-      })
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
 
@@ -205,17 +217,21 @@ describe('MenuPage Component', () => {
   });
 
   test('handles error in deleting item', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     fetch.mockResponseOnce(
       JSON.stringify({
-        items: [{ id: 1, name: 'DeleteError', available: true, category: 'food' }],
-      })
+        items: [
+          { id: 1, name: 'DeleteError', available: true, category: 'food' },
+        ],
+      }),
     );
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
     fetch.mockRejectOnce(new Error('Delete failed'));
@@ -223,8 +239,8 @@ describe('MenuPage Component', () => {
     await waitFor(() =>
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error deleting item:',
-        expect.any(Error)
-      )
+        expect.any(Error),
+      ),
     );
     consoleErrorSpy.mockRestore();
   });
@@ -232,25 +248,29 @@ describe('MenuPage Component', () => {
   test('creates a new menu item successfully', async () => {
     fetch.mockResponses(
       [JSON.stringify({ created: true, id: 10 }), { status: 200 }],
-      [JSON.stringify({ items: [] }), { status: 200 }]
+      [JSON.stringify({ items: [] }), { status: 200 }],
     );
     const { container } = render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
     const nameInput = container.querySelector('input[name="name"]');
-    const descriptionInput = container.querySelector('input[name="description"]');
+    const descriptionInput = container.querySelector(
+      'input[name="description"]',
+    );
     const priceInput = container.querySelector('input[name="price"]');
     const categorySelect = container.querySelector('select[name="category"]');
     const stockInput = container.querySelector('input[name="stock"]');
     const fileInput = container.querySelector('input[type="file"]');
 
     fireEvent.change(nameInput, { target: { value: 'Test Item' } });
-    fireEvent.change(descriptionInput, { target: { value: 'Test description' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Test description' },
+    });
     fireEvent.change(priceInput, { target: { value: '12.34' } });
     fireEvent.change(categorySelect, { target: { value: 'food' } });
     fireEvent.change(stockInput, { target: { value: '5' } });
@@ -265,7 +285,9 @@ describe('MenuPage Component', () => {
     fireEvent.click(screen.getByText(/^Create$/));
 
     await waitFor(() => {
-      expect(screen.queryByText(/Create New Menu Item/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Create New Menu Item/),
+      ).not.toBeInTheDocument();
     });
 
     expect(fetch).toHaveBeenCalledTimes(3);
@@ -276,8 +298,8 @@ describe('MenuPage Component', () => {
     render(
       <MemoryRouter>
         <MenuPage />
-      </MemoryRouter>
-    );    
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 

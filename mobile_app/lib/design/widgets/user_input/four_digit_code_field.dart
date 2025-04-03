@@ -8,8 +8,11 @@ class FourDigitCodeField extends StatefulWidget {
   final double screenWidth;
   final double screenHeight;
 
-  const FourDigitCodeField({Key? key, required this.onChanged, required this.screenHeight, required this.screenWidth})
-      : super(key: key);
+  const FourDigitCodeField(
+      {super.key,
+      required this.onChanged,
+      required this.screenHeight,
+      required this.screenWidth});
 
   @override
   State<FourDigitCodeField> createState() => _FourDigitCodeFieldState();
@@ -40,7 +43,6 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
     String enteredCode = _controllers.map((e) => e.text).join();
 
     widget.onChanged(enteredCode);
-
   }
 
   void _onBackspace(String value, int index) {
@@ -56,9 +58,9 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(4, (index) {
         return Container(
-          width: widget.screenWidth*0.12,
-          height: widget.screenWidth*0.12,
-          margin: EdgeInsets.symmetric(horizontal: widget.screenWidth*0.02),
+          width: widget.screenWidth * 0.12,
+          height: widget.screenWidth * 0.12,
+          margin: EdgeInsets.symmetric(horizontal: widget.screenWidth * 0.02),
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
@@ -68,7 +70,7 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
             style: AppTextStyles.appBarText(widget.screenHeight, Colors.black),
             cursorColor: AppColors.primaryColor,
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(0),
+              contentPadding: const EdgeInsets.all(0),
               counterText: "",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -76,7 +78,8 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.primaryColor, width: 2),
               ),
             ),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -108,7 +107,7 @@ class _EnterRecoveryEmailState extends State<EnterRecoveryEmail> {
                       screenHeight, AppColors.warning),
                 )
               : Container(),
-          Spacer(),
+          const Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : ElevatedButton(

@@ -39,14 +39,15 @@ class _PasswordTextBoxState extends State<PasswordTextBox> {
             ),
           ],
         ),
-        Container(
+        SizedBox(
             height: widget.screenWidth * 0.12,
             child: TextField(
               obscureText: passwordVisible,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: widget.screenWidth * 0.025),
+                contentPadding:
+                    EdgeInsets.only(left: widget.screenWidth * 0.025),
                 fillColor: AppColors.whiteText,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 hintText: "Password",
                 helperStyle: const TextStyle(color: AppColors.warning),
                 suffixIcon: IconButton(

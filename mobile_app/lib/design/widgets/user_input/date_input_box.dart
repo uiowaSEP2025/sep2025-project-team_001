@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 
-
 class DateInputBox extends StatefulWidget {
   final double screenWidth;
   final double screenHeight;
@@ -10,14 +9,13 @@ class DateInputBox extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
 
-  const DateInputBox({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-    required this.label,
-    required this.hintText,
-    required this.controller
-  });
+  const DateInputBox(
+      {super.key,
+      required this.screenWidth,
+      required this.screenHeight,
+      required this.label,
+      required this.hintText,
+      required this.controller});
 
   @override
   State<DateInputBox> createState() => _DateInputBoxState();
@@ -31,23 +29,24 @@ class _DateInputBoxState extends State<DateInputBox> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget? child) {
-      return Theme(
-        data: ThemeData(
-          colorScheme: ColorScheme.light(
-            primary: AppColors.primaryColor,
-            onPrimary: Colors.white,
-            onSurface: Colors.black,
+        return Theme(
+          data: ThemeData(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primaryColor,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
           ),
-          dialogBackgroundColor: Colors.white,
-        ),
-        child: child!,
-      );
-    },
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate != null) {
       setState(() {
-        widget.controller.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+        widget.controller.text =
+            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -80,17 +79,21 @@ class _DateInputBoxState extends State<DateInputBox> {
                   child: Padding(
                     padding: EdgeInsets.only(left: widget.screenWidth * 0.025),
                     child: Text(
-                      widget.controller.text.isEmpty
-                          ? widget.hintText
-                          : widget.controller.text,
-                      style: AppTextStyles.subtitleParagraph(widget.screenHeight, widget.controller.text.isEmpty
-                            ? Colors.grey
-                            : Colors.black,)
-                    ),
+                        widget.controller.text.isEmpty
+                            ? widget.hintText
+                            : widget.controller.text,
+                        style: AppTextStyles.subtitleParagraph(
+                          widget.screenHeight,
+                          widget.controller.text.isEmpty
+                              ? Colors.grey
+                              : Colors.black,
+                        )),
                   ),
                 ),
-                Icon(Icons.calendar_today, color: Colors.black),
-                SizedBox(width: widget.screenWidth * 0.025,)
+                const Icon(Icons.calendar_today, color: Colors.black),
+                SizedBox(
+                  width: widget.screenWidth * 0.025,
+                )
               ],
             ),
           ),

@@ -1,4 +1,3 @@
-
 /* MenuPage.css */
 
 .menu-page {
@@ -9,14 +8,13 @@
   overflow-y: auto; /* This enables vertical scrolling when needed */
 }
 
-.menu-page h2{
+.menu-page h2 {
   color: white;
 }
 
-.menu-page p{
+.menu-page p {
   color: white;
 }
-
 
 .menu-page-container {
   width: 80%;
@@ -33,7 +31,6 @@
   font-weight: bold;
   color: white;
 }
-
 
 /* Sub-section headers */
 .menu-sub-section-header {
@@ -99,8 +96,8 @@
   font-weight: 600;
 }
 
-.menu-modal-content input[type="text"],
-.menu-modal-content input[type="number"],
+.menu-modal-content input[type='text'],
+.menu-modal-content input[type='number'],
 .menu-modal-content select {
   padding: 9px;
   border: 1px solid #ccc;
@@ -108,11 +105,11 @@
   font-size: 14px;
 }
 
-.menu-modal-content input[type="file"] {
+.menu-modal-content input[type='file'] {
   padding: 6px 0;
 }
 
-.menu-modal-content input[type="checkbox"] {
+.menu-modal-content input[type='checkbox'] {
   margin-left: 8px;
 }
 
@@ -124,7 +121,7 @@
   cursor: pointer;
 }
 
-.menu-modal-content button[type="submit"] {
+.menu-modal-content button[type='submit'] {
   background-color: #28a745;
   color: white;
 }

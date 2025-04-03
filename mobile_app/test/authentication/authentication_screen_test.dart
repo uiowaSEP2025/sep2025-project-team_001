@@ -110,7 +110,7 @@ void main() {
     expect(find.text('Sign up Page'), findsOneWidget);
   });
 
-   testWidgets('Click Forgot password', (WidgetTester tester) async {
+  testWidgets('Click Forgot password', (WidgetTester tester) async {
     final mockDio = MockDio();
 
     await tester.pumpWidget(

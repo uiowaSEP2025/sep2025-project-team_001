@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-
 from app.models.restaurant_models import Item
 
 
@@ -19,7 +18,7 @@ def test_item_str_with_image(restaurant):
         category="Food",
         stock=5,
         available=True,
-        base64_image=image_str
+        base64_image=image_str,
     )
     expected_preview = image_str[:30] + "..."
     expected_str = f"Pizza (Image: {expected_preview})"
@@ -39,7 +38,7 @@ def test_item_str_without_image(restaurant):
         category="Food",
         stock=8,
         available=True,
-        base64_image=None
+        base64_image=None,
     )
     expected_str = "Salad (Image: No image)"
     assert str(item_instance) == expected_str
@@ -58,6 +57,6 @@ def test_item_relationship(restaurant):
         category="Food",
         stock=20,
         available=True,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
     assert item_instance.restaurant == restaurant

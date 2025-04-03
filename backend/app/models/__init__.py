@@ -1,12 +1,12 @@
-from .customer_models import CustomUser, Customer
+from .customer_models import Customer, CustomUser
 from .order_models import Order, OrderItem
-from .restaurant_models import Restaurant, Item
+from .restaurant_models import Item, Restaurant
 
 __all__ = [
-    'CustomUser',
-    'Customer',
-    'Restaurant',
-    'Item',
-    'OrderItem',
-    'Order',
+    "CustomUser",
+    "Customer",
+    "Restaurant",
+    "Item",
+    "OrderItem",
+    "Order",
 ]

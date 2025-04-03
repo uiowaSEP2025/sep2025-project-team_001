@@ -7,7 +7,6 @@ class AuthService {
   AuthService({Dio? dio}) : dio = dio ?? Dio();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-
     const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
 
     final response = await dio.post(

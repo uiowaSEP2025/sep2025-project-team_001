@@ -1,9 +1,8 @@
 from decimal import Decimal
 
 import pytest
-
-from app.models.customer_models import Manager, Customer, CustomUser
-from app.models.restaurant_models import Restaurant, Item
+from app.models.customer_models import Customer, CustomUser, Manager
+from app.models.restaurant_models import Item, Restaurant
 
 
 @pytest.fixture
@@ -31,7 +30,7 @@ def restaurant(manager):
         name="Testaurant",
         address="123 Main St",
         phone="555-555-5555",
-        restaurant_image="dummy_image_data"
+        restaurant_image="dummy_image_data",
     )
     restaurant.managers.add(manager)
     return restaurant
@@ -47,5 +46,5 @@ def item(restaurant):
         category="Food",
         stock=100,
         available=True,
-        base64_image="dummybase64string"
+        base64_image="dummybase64string",
     )

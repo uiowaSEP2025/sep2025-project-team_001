@@ -1,17 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/design/widgets/user_input/four_digit_code_field.dart';
-import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 
 class EnterRecoveryCode extends StatefulWidget {
   final VoidCallback onNext;
   final String enteredEmail;
 
-  EnterRecoveryCode(
+  const EnterRecoveryCode(
       {super.key, required this.onNext, required this.enteredEmail});
 
   @override
@@ -39,7 +37,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
     super.dispose();
   }
 
-  void sendCode() {} //todo call api to send code to the email 
+  void sendCode() {} //todo call api to send code to the email
 
   void validateCodeApiCall() {
     //todo call api to send code and validate it for now just to design front end invalid code is 0000
@@ -60,8 +58,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
 
     if (!invalidCode) {
       widget.onNext();
-    }
-    else{
+    } else {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -84,7 +81,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
 
     _timer?.cancel();
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_start == 0) {
         setState(() {
           canResend = true;
@@ -163,10 +160,12 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
                   ),
                 ),
               ),
-              SizedBox(width: horizontalSpacing*2,)
+              SizedBox(
+                width: horizontalSpacing * 2,
+              )
             ],
           ),
-          Spacer(),
+          const Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : ElevatedButton(

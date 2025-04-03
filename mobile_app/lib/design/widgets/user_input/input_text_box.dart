@@ -25,20 +25,21 @@ class InputTextBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        (label != "") ?
-        Row(
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.textFieldLabel(
-                  screenHeight, AppColors.paragraphText),
-            ),
-          ],
-        ) : Container(),
-        Container(
+        (label != "")
+            ? Row(
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.textFieldLabel(
+                        screenHeight, AppColors.paragraphText),
+                  ),
+                ],
+              )
+            : Container(),
+        SizedBox(
           height: screenWidth * 0.12,
           child: TextField(
-            onChanged:(value) {
+            onChanged: (value) {
               onChanged();
             },
             maxLines: 1,
@@ -51,7 +52,7 @@ class InputTextBox extends StatelessWidget {
                 contentPadding: EdgeInsets.only(left: screenWidth * 0.025),
                 filled: true,
                 fillColor: AppColors.whiteText,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 hintText: hintText),
           ),
         ),

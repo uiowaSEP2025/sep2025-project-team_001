@@ -1,0 +1,19 @@
+[flake8]
+ignore = E501, E722
+max-line-length = 89
+max-complexity = 18
+select = B,C,E,F,W,T4,B9
+exclude =
+    .git,
+    __pycache__,
+    .tox,
+    .venv,
+    .env,
+    .venv.bak,
+    .env.bak,
+    build,
+    dist,
+    docs,
+    tests,
+    test_*.py,
+    migrations,
