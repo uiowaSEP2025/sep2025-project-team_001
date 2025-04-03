@@ -36,7 +36,7 @@ class _DateInputBoxState extends State<DateInputBox> {
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
-            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
