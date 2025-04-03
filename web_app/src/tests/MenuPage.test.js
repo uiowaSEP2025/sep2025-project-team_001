@@ -3,10 +3,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import MenuPage from '../pages/MenuPage';
 import '@testing-library/jest-dom';
 import fetchMock from 'jest-fetch-mock';
+import { MemoryRouter } from 'react-router-dom';
 
 fetchMock.enableMocks();
 
-// Mock localStorage
+// Mock sessionStorage
 beforeAll(() => {
   Storage.prototype.getItem = jest.fn((key) => {
     if (key === 'accessToken') return 'test-token';
@@ -31,7 +32,11 @@ beforeEach(() => {
 describe('MenuPage Component', () => {
   test('renders MenuPage with section headers and fetches items', async () => {
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     expect(await screen.findByText(/Menu Manager/)).toBeInTheDocument();
     expect(screen.getByText(/Available Items/)).toBeInTheDocument();
     expect(screen.getByText(/Unavailable Items/)).toBeInTheDocument();
@@ -48,14 +53,22 @@ describe('MenuPage Component', () => {
         ],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     const cards = await screen.findAllByTestId('item-card');
     expect(cards.length).toBe(4);
   });
 
   test('opens and closes create modal', async () => {
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
@@ -75,7 +88,11 @@ describe('MenuPage Component', () => {
         ],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     const toggleButton = await screen.findByText('Toggle');
     fireEvent.click(toggleButton);
     // Expect three fetch calls: 1 from mount, 1 for update POST, 1 for refetch.
@@ -88,7 +105,11 @@ describe('MenuPage Component', () => {
       .mockImplementation(() => {});
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
     // Store the render result to access container.
-    const { container } = render(<MenuPage />);
+    const { container } = render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
@@ -139,7 +160,11 @@ describe('MenuPage Component', () => {
         ],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     const toggleButton = await screen.findByText('Toggle');
     fetch.mockRejectOnce(new Error('Update failed'));
     fireEvent.click(toggleButton);
@@ -158,7 +183,11 @@ describe('MenuPage Component', () => {
         items: [{ id: 1, name: 'DeleteMe', available: true, category: 'food' }],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
 
@@ -173,7 +202,11 @@ describe('MenuPage Component', () => {
         items: [{ id: 2, name: 'NoDelete', available: true, category: 'food' }],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
 
@@ -194,7 +227,11 @@ describe('MenuPage Component', () => {
         ],
       }),
     );
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(await screen.findByText('Delete'));
     expect(screen.getByText(/Confirm Delete/)).toBeInTheDocument();
     fetch.mockRejectOnce(new Error('Delete failed'));
@@ -213,7 +250,11 @@ describe('MenuPage Component', () => {
       [JSON.stringify({ created: true, id: 10 }), { status: 200 }],
       [JSON.stringify({ items: [] }), { status: 200 }],
     );
-    const { container } = render(<MenuPage />);
+    const { container } = render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 
@@ -254,7 +295,11 @@ describe('MenuPage Component', () => {
 
   test('updates available checkbox in create modal (line 278)', async () => {
     fetch.mockResponseOnce(JSON.stringify({ items: [] }));
-    render(<MenuPage />);
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByText(/Create New Item/));
     expect(screen.getByText(/Create New Menu Item/)).toBeInTheDocument();
 

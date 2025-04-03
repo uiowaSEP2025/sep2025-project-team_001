@@ -12,18 +12,18 @@ jest.mock('react-router-dom', () => ({
 
 describe('Dashboard Component', () => {
   beforeEach(() => {
-    // Clear localStorage and reset the navigate mock before each test.
-    localStorage.clear();
+    // Clear sessionStorage and reset the navigate mock before each test.
+    sessionStorage.clear();
     mockedUsedNavigate.mockReset();
   });
 
-  it('renders the restaurant name when barName is in localStorage', () => {
-    localStorage.setItem('barName', 'Test Restaurant');
+  it('renders the restaurant name when barName is in sessionStorage', () => {
+    sessionStorage.setItem('barName', 'Test Restaurant');
     render(<Dashboard />);
     expect(screen.getByText(/Restaurant: Test Restaurant/)).toBeInTheDocument();
   });
 
-  it('does not render the restaurant name when barName is not in localStorage', () => {
+  it('does not render the restaurant name when barName is not in sessionStorage', () => {
     render(<Dashboard />);
     expect(screen.queryByText(/Restaurant:/)).not.toBeInTheDocument();
   });

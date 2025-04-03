@@ -16,6 +16,7 @@ module.exports = [
         window: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
+        sessionStorage: 'readonly',
         console: 'readonly',
         process: 'readonly',
         module: 'writable',

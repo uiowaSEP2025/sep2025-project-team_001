@@ -73,7 +73,7 @@ describe('Login Component', () => {
       fireEvent.click(screen.getByRole('button', { name: /login/i }));
     });
 
-    expect(localStorage.getItem('barName')).toBe('Test Bar');
+    expect(sessionStorage.getItem('barName')).toBe('Test Bar');
   });
 
   test('successful login stores tokens and navigates', async () => {
@@ -99,8 +99,8 @@ describe('Login Component', () => {
       fireEvent.click(screen.getByRole('button', { name: /login/i }));
     });
 
-    expect(localStorage.getItem('accessToken')).toBe('access-token');
-    expect(localStorage.getItem('refreshToken')).toBe('refresh-token');
+    expect(sessionStorage.getItem('accessToken')).toBe('access-token');
+    expect(sessionStorage.getItem('refreshToken')).toBe('refresh-token');
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 

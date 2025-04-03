@@ -101,9 +101,9 @@ function Registration() {
       const { access, refresh } = response.data.tokens;
 
       console.log('Registration:', response.data);
-      localStorage.setItem('barName', business_name);
-      localStorage.setItem('accessToken', access);
-      localStorage.setItem('refreshToken', refresh);
+      sessionStorage.setItem('barName', business_name);
+      sessionStorage.setItem('accessToken', access);
+      sessionStorage.setItem('refreshToken', refresh);
 
       navigate('/dashboard');
     } catch (error) {
@@ -123,7 +123,13 @@ function Registration() {
         keyboard={false}
         dialogClassName="registration-modal-dialog"
       >
-        <Modal.Header>
+        <Modal.Header className="registration-modal-header">
+          <button
+            className="modal-back-button"
+            onClick={() => (step === 1 ? navigate('/') : setStep(1))}
+          >
+            Back
+          </button>
           <Modal.Title className="modal-title">
             Manager Registration
           </Modal.Title>
@@ -180,6 +186,12 @@ function Registration() {
               />
             </Form.Group>
           </Form>
+          <div className="login-link-container">
+            <span>Already have an account? </span>
+            <span className="login-link" onClick={() => navigate('/login')}>
+              Login
+            </span>
+          </div>
         </Modal.Body>
         <Modal.Footer className="registration-modal-footer">
           <Button
@@ -199,7 +211,13 @@ function Registration() {
         keyboard={false}
         dialogClassName="registration-modal-dialog"
       >
-        <Modal.Header>
+        <Modal.Header className="registration-modal-header">
+          <button
+            className="modal-back-button"
+            onClick={() => (step === 1 ? navigate('/') : setStep(1))}
+          >
+            Back
+          </button>
           <Modal.Title className="modal-title">
             Manager Registration
           </Modal.Title>

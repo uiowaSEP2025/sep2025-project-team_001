@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Function to refresh access token
 const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem('refreshToken');
+  const refreshToken = sessionStorage.getItem('refreshToken');
 
   if (!refreshToken) {
     console.log('No refresh token found. Logging out.');
@@ -18,12 +18,12 @@ const refreshAccessToken = async () => {
     );
 
     const { access } = response.data;
-    localStorage.setItem('accessToken', access);
+    sessionStorage.setItem('accessToken', access);
     return access;
   } catch (error) {
     console.error('Token refresh failed. Redirecting to login.');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refreshToken');
     window.location.href = '/login'; // Redirect to login
     return null;
   }
@@ -32,7 +32,7 @@ const refreshAccessToken = async () => {
 // Axios interceptor to automatically attach token to requests
 axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('accessToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
