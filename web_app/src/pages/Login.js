@@ -28,12 +28,12 @@ function Login() {
       console.log("Logged-in Restaurant ID:", response.data.restaurant_id);
 
       if (response.data.bar_name) {
-        localStorage.setItem("barName", response.data.bar_name);
+        sessionStorage.setItem("barName", response.data.bar_name);
       } else {
-        localStorage.setItem("barName", "Error retrieving bar name");
+        sessionStorage.setItem("barName", "Error retrieving bar name");
       }      
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
+      sessionStorage.setItem("accessToken", access);
+      sessionStorage.setItem("refreshToken", refresh);
 
       navigate("/dashboard");
     } catch (error) {

@@ -6,7 +6,7 @@ import fetchMock from 'jest-fetch-mock';
 
 fetchMock.enableMocks();
 
-// Mock localStorage
+// Mock sessionStorage
 beforeAll(() => {
   Storage.prototype.getItem = jest.fn((key) => {
     if (key === 'accessToken') return 'test-token';

@@ -229,8 +229,8 @@ describe('Registration Component', () => {
       fireEvent.click(screen.getByRole('button', {name: /Register/i}));
     });
 
-    expect(localStorage.getItem('accessToken')).toBe('access-token');
-    expect(localStorage.getItem('refreshToken')).toBe('refresh-token');
+    expect(sessionStorage.getItem('accessToken')).toBe('access-token');
+    expect(sessionStorage.getItem('refreshToken')).toBe('refresh-token');
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 

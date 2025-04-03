@@ -16,7 +16,7 @@ const MenuPage = () => {
         stock: '',
         available: true
     });
-    const barName = localStorage.getItem("barName");
+    const barName = sessionStorage.getItem("barName");
 
     useEffect(() => {
         fetchItems();
@@ -25,7 +25,7 @@ const MenuPage = () => {
     const fetchItems = () => {
         fetch(`${process.env.REACT_APP_API_URL}/api/menu-items/`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
             }
         })
             .then(response => response.json())
@@ -81,7 +81,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
             },
             body: JSON.stringify({
                 action: 'create',
@@ -119,7 +119,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
 
              },
             body: JSON.stringify(updatedItem)
@@ -142,7 +142,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
 
              },
             body: JSON.stringify({

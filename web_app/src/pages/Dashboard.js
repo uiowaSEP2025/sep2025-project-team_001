@@ -7,7 +7,7 @@ import Container from "react-bootstrap/Container";
 function Dashboard() {
   const navigate = useNavigate();
 
-  const barName = localStorage.getItem("barName");
+  const barName = sessionStorage.getItem("barName");
 
   const handleOrderClick = () => {
     navigate("/orders");
@@ -18,10 +18,10 @@ function Dashboard() {
   };
 
   const handleLogOutClick = () => {
-    // Clear all relevant auth data from localStorage
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("barName");
+    // Clear all relevant auth data from sessionStorage
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("barName");
     navigate("/");
   };
 
