@@ -1,7 +1,12 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenManager {
-  static const _storage = FlutterSecureStorage();
+  static FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  // Allows injection of a mock for testing
+  static void init({FlutterSecureStorage? storage}) {
+    _storage = storage ?? const FlutterSecureStorage();
+  }
 
   static Future<void> saveTokens(String access, String refresh) async {
     await _storage.write(key: 'access', value: access);

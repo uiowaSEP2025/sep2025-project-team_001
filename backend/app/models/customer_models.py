@@ -31,6 +31,7 @@ class Customer(models.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "name": self.user.first_name,
             "username": self.user.username,
             "email": self.user.email,
             "phone": self.user.phone,

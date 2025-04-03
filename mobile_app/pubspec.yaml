@@ -40,6 +40,7 @@ dependencies:
   mockito: ^5.4.4
   shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.2.4
+  build_runner: any
 
 dev_dependencies:
 

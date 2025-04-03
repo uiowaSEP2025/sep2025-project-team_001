@@ -15,7 +15,7 @@ class DateInputBox extends StatefulWidget {
     required this.screenHeight,
     required this.label,
     required this.hintText,
-    required this.controller,
+    required this.controller
   });
 
   @override

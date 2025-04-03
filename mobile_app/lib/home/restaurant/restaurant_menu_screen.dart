@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -73,15 +75,15 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Menu")),
-        body: const Center(child: CircularProgressIndicator()),
+        appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (errorFetching) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Menu")),
-        body: const Center(child: Text("Failed to load menu")),
+        appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
+        body: Center(child: Text("Failed to load menu")),
       );
     }
 
@@ -94,7 +96,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         : items.where((item) => item.category == selectedCategory).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Menu")),
+      appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
       body: Column(
         children: [
           SingleChildScrollView(
@@ -139,7 +141,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         ],
       ),
       floatingActionButton: cart.isNotEmpty
-          ? SizedBox(
+          ? Container(
               height: screenWidth * 0.12,
               width: screenWidth - horizontalSpacing * 2,
               child: ElevatedButton.icon(

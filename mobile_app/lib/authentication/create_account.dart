@@ -9,6 +9,7 @@ import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -70,8 +71,8 @@ class _CreateAccountState extends State<CreateAccount> {
     final RegExp emailRegex = RegExp(
       r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
     );
-    final isValid = emailRegex.hasMatch(email);
-    print("Validating email: $email -> $isValid");
+      final isValid = emailRegex.hasMatch(email);
+  print("Validating email: $email -> $isValid");
     return isValid;
   }
 
@@ -190,7 +191,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   style: AppTextStyles.smallFooters(
                                       screenHeight, AppColors.validGreen),
                                 )
-                              : SizedBox(
+                              : Container(
                                   width: screenWidth - horizontalSpacing * 2,
                                   child: Text(
                                     "At least 8 characters, including uppercase, lowercase, number, and special character",
@@ -320,9 +321,7 @@ class _CreateAccountState extends State<CreateAccount> {
                               _nameController.text.isEmpty ||
                               _passwordController.text.isEmpty ||
                               _birthdateController.text.isEmpty ||
-                              !termsAccepted ||
-                              !isPasswordMatch ||
-                              !isValidPassword)
+                              !termsAccepted || !isPasswordMatch || !isValidPassword)
                           ? null
                           : createAccount,
                       child: Center(
@@ -349,8 +348,8 @@ class _CreateAccountState extends State<CreateAccount> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
-    const String endpoint = "${ApiConfig.baseUrl}/mobile/register/";
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final String endpoint = "${ApiConfig.baseUrl}/mobile/register/";
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -387,19 +386,22 @@ class _CreateAccountState extends State<CreateAccount> {
         options: Options(headers: {"Content-Type": "application/json"}),
       );
 
-      final tokens = response.data['tokens'];
-      final accessToken = tokens['access'];
-      final refreshToken = tokens['refresh'];
+    final tokens = response.data['tokens'];
+    final accessToken = tokens['access'];
+    final refreshToken = tokens['refresh'];
 
-      final userId = response.data['id'];
+    final userId = response.data['customer_id'];
 
-      await UserManager.saveUser(userId);
+    await UserManager.saveUser(userId);
 
-      await TokenManager.saveTokens(accessToken, refreshToken);
+    await UserManager.saveEmail(email);
+    await UserManager.saveName(name);
 
-      // final prefs = await SharedPreferences.getInstance();
-      // await prefs.setString('access_token', access);
-      // await prefs.setString('refresh_token', refresh);
+    await TokenManager.saveTokens(accessToken, refreshToken);
+
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.setString('access_token', access);
+    // await prefs.setString('refresh_token', refresh);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

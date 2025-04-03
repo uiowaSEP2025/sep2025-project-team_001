@@ -1,9 +1,15 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/user_input/search_box.dart';
 import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
+import 'package:mobile_app/utils/token_manager.dart';
 
 class RestaurantSelectionScreen extends StatefulWidget {
   const RestaurantSelectionScreen({super.key});
@@ -18,6 +24,8 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
   int? selectedRestaurantIndex;
   bool isLoading = true;
   bool errorFetching = false;
+    String searchQuery = '';
+
 
   @override
   void initState() {
@@ -33,8 +41,7 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
     });
 
     try {
-      final fetchedRestaurants =
-          await fetchRestaurants(); //todo change back to fetch only the customer restaurant the function is in the api_services.dart of this folder
+      final fetchedRestaurants = await fetchRestaurants(); //todo change back to fetch only the customer restaurant the function is in the api_services.dart of this folder
       setState(() {
         restaurants = fetchedRestaurants;
       });
@@ -71,21 +78,17 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
           'Select a restaurant',
           style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, "/add_restaurant");
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "ADD NEW +",
-                style: AppTextStyles.buttonText(
-                    screenHeight, AppColors.primaryColor),
-              ),
-            ),
-          )
-        ],
+        // actions: [
+        //   GestureDetector(
+        //     onTap: (){
+        //       Navigator.pushNamed(context, "/add_restaurant");
+        //     },
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(8.0),
+        //       child: Text("ADD NEW +", style: AppTextStyles.buttonText(screenHeight, AppColors.primaryColor),),
+        //     ),
+        //   )
+        // ],
       ),
       body: GestureDetector(
         onTap: () {
@@ -118,6 +121,20 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                           ? Column(
                               children: [
                                 SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            SearchBox(
+                              screenHeight: screenHeight,
+                              hintText: "Search restaurants...",
+                              onChanged: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
+                                print("Searching for: $value");
+                              },
+                            ),
+                            
+                                SizedBox(
                                   height: horizontalSpacing,
                                 ),
                                 for (int i = 0;
@@ -129,9 +146,10 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                                       GestureDetector(
                                         onTap: () => selectRestaurant(i),
                                         child: BarCard(
-                                            bar: restaurants[i],
-                                            screenHeight: screenHeight,
-                                            screenWidth: screenWidth),
+                                          bar: restaurants[i],
+                                          screenHeight: screenHeight,
+                                          screenWidth: screenWidth
+                                        ),
                                       ),
                                       if (i + 1 < restaurants.length) ...[
                                         SizedBox(
@@ -216,25 +234,27 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
   }
 }
 
-// restaurants = [
-//   Restaurant(
-//       name: "Scouts",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FscoutsLogo.png?alt=media&token=512cb083-e65c-4435-ae27-018d7467473c"),
-//   Restaurant(
-//       name: "Coa",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FcoaLogo.png?alt=media&token=956d9fce-9522-4b27-bdf8-75ec5a80a78e"),
-//   Restaurant(
-//       name: "El Rays",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FelraysLogo.png?alt=media&token=623f67c2-3eda-4b80-884c-d175511511e9"),
-//   Restaurant(
-//       name: "Roxxy",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FroxxyLogo.png?alt=media&token=977221d7-3c5a-4937-a045-c43576c7a265"),
-//   Restaurant(
-//       name: "Brothers",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FbrothersLogo.png?alt=media&token=d4b583ee-2fb5-499a-b3a2-04196ff68f98"),
-// ];
+
+
+    // restaurants = [
+    //   Restaurant(
+    //       name: "Scouts",
+    //       imageUrl:
+    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FscoutsLogo.png?alt=media&token=512cb083-e65c-4435-ae27-018d7467473c"),
+    //   Restaurant(
+    //       name: "Coa",
+    //       imageUrl:
+    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FcoaLogo.png?alt=media&token=956d9fce-9522-4b27-bdf8-75ec5a80a78e"),
+    //   Restaurant(
+    //       name: "El Rays",
+    //       imageUrl:
+    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FelraysLogo.png?alt=media&token=623f67c2-3eda-4b80-884c-d175511511e9"),
+    //   Restaurant(
+    //       name: "Roxxy",
+    //       imageUrl:
+    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FroxxyLogo.png?alt=media&token=977221d7-3c5a-4937-a045-c43576c7a265"),
+    //   Restaurant(
+    //       name: "Brothers",
+    //       imageUrl:
+    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FbrothersLogo.png?alt=media&token=d4b583ee-2fb5-499a-b3a2-04196ff68f98"),
+    // ];

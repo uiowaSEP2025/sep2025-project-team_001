@@ -1,9 +1,13 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -11,10 +15,13 @@ import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthenticationPage extends StatefulWidget {
-  const AuthenticationPage({super.key});
+  final Dio? dio;
+  const AuthenticationPage({super.key, this.dio});
 
   @override
   State<AuthenticationPage> createState() => _AuthenticationPageState();
@@ -39,6 +46,99 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     super.initState();
+  }
+
+  void signInWithApple() async {
+    print("sign in with apple");
+  }
+
+  void signInWithGoogle() async {
+    print("sign in with google");
+  }
+
+  void authenticate() async {
+    final String email = _emailController.text.trim();
+    UserManager.saveEmail(email);
+    final String password = _passwordController.text.trim();
+    const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    print(email);
+    print(password);
+    print(endpoint);
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter email and password"),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final dio = widget.dio ?? Dio();
+
+      final response = await dio.post(
+        endpoint,
+        data: {
+          "username": email,
+          "password": password,
+        },
+        options: Options(headers: {"Content-Type": "application/json"}),
+      );
+
+      final tokens = response.data['tokens'];
+      final accessToken = tokens['access'];
+      final refreshToken = tokens['refresh'];
+
+      final userId = response.data['customer_id'];
+
+
+      print(response);
+      
+      final userName = response.data['name'];
+
+      await UserManager.saveUser(userId);
+
+      print(userId);
+      print(userName);
+
+      await TokenManager.saveTokens(accessToken, refreshToken);
+      await UserManager.saveName(userName);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Login successful!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      print("about to navigate to home");
+      Navigator.pushReplacementNamed(context, "/home");
+    } on DioException catch (e) {
+      String errorMessage = "Your password is incorrect";
+
+      print("Login error: ${e.response?.data}");
+      print("Status code: ${e.response?.statusCode}");
+
+      if (e.response?.data is Map && e.response?.data['error'] != null) {
+        errorMessage = e.response!.data['error'];
+      } else if (e.response?.data is Map) {
+        errorMessage = e.response!.data.toString();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -105,7 +205,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             SizedBox(
                               height: verticalSpacing / 2,
                             ),
-                            SizedBox(
+                            Container(
                               width: screenWidth * 0.75,
                               child: Text(
                                 "Sign in",
@@ -226,7 +326,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             SizedBox(
                               height: verticalSpacing,
                             ),
-                            Platform.isIOS
+                            // Platform.isIOS
+                            defaultTargetPlatform == TargetPlatform.iOS
                                 ? SizedBox(
                                     height: screenWidth * 0.12,
                                     width: screenWidth - horizontalSpacing * 2,
@@ -266,7 +367,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                               )),
                                   )
                                 : Container(),
-                            Platform.isIOS
+                            defaultTargetPlatform == TargetPlatform.iOS
                                 ? SizedBox(
                                     height: verticalSpacing,
                                   )
@@ -305,27 +406,27 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             SizedBox(
                               height: verticalSpacing * 2,
                             ),
-                            RichText(
-                              text: TextSpan(
-                                text: "Don't have an account? ",
-                                style: AppTextStyles.subtitleParagraph(
-                                    screenHeight, AppColors.paragraphText),
-                                children: [
-                                  TextSpan(
-                                    text: "Sign Up",
-                                    style: const TextStyle(
-                                      color: AppColors.primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        Navigator.pushNamed(
-                                            context, "/register");
-                                      },
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: AppTextStyles.subtitleParagraph(
+                                      screenHeight, AppColors.paragraphText),
+                                ),
+                                GestureDetector(
+                                  key: const Key('signUpButton'),
+                                  onTap: () {
+                                    Navigator.pushNamed(context, "/register");
+                                  },
+                                  child: Text(
+                                    "Sign Up",
+                                    style: AppTextStyles.buttonText(
+                                        screenHeight, AppColors.primaryColor),
                                   ),
-                                ],
-                              ),
-                            ),
+                                )
+                              ],
+                            )
                           ]),
                     ),
                   ],
@@ -336,89 +437,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         ),
       ),
     );
-  }
-
-  void signInWithApple() async {
-    print("sign in with apple");
-  }
-
-  void signInWithGoogle() async {
-    print("sign in with google");
-  }
-
-  void authenticate() async {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-    const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-    print(email);
-    print(password);
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter email and password"),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
-    }
-
-    setState(() => isLoading = true);
-
-    try {
-      final dio = Dio();
-      final response = await dio.post(
-        endpoint,
-        data: {
-          "username": email,
-          "password": password,
-        },
-        options: Options(headers: {"Content-Type": "application/json"}),
-      );
-
-      final tokens = response.data['tokens'];
-      final accessToken = tokens['access'];
-      final refreshToken = tokens['refresh'];
-
-      final userId = response.data['customer_id'];
-
-      await UserManager.saveUser(userId);
-
-      print(userId);
-
-      await TokenManager.saveTokens(accessToken, refreshToken);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Login successful!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      Navigator.pushReplacementNamed(context, "/home");
-    } on DioException catch (e) {
-      String errorMessage = "Your password is incorrect";
-
-      print("Login error: ${e.response?.data}");
-      print("Status code: ${e.response?.statusCode}");
-
-      if (e.response?.data is Map && e.response?.data['error'] != null) {
-        errorMessage = e.response!.data['error'];
-      } else if (e.response?.data is Map) {
-        errorMessage = e.response!.data.toString();
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-    } finally {
-      setState(() => isLoading = false);
-    }
   }
 }
 
