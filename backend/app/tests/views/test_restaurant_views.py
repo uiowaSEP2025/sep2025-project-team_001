@@ -1,10 +1,9 @@
 from decimal import Decimal
 
 import pytest
-from rest_framework.test import APIClient
-
 from app.models import CustomUser
-from app.models.restaurant_models import Restaurant, Item
+from app.models.restaurant_models import Item, Restaurant
+from rest_framework.test import APIClient
 
 
 @pytest.fixture
@@ -14,7 +13,9 @@ def api_client():
 
 @pytest.fixture
 def user():
-    return CustomUser.objects.create_user(username="testuser", email="test@example.com", password="pass")
+    return CustomUser.objects.create_user(
+        username="testuser", email="test@example.com", password="pass"
+    )
 
 
 @pytest.fixture
@@ -23,7 +24,7 @@ def restaurant():
         name="Testaurant",
         address="123 Main St",
         phone="555-555-5555",
-        restaurant_image="dummyimage"
+        restaurant_image="dummyimage",
     )
 
 
@@ -37,7 +38,7 @@ def available_item(restaurant):
         category="Food",
         stock=10,
         available=True,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
 
 
@@ -51,11 +52,12 @@ def unavailable_item(restaurant):
         category="Food",
         stock=10,
         available=False,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
 
 
 # --- get_restaurants tests ---
+
 
 @pytest.mark.django_db
 def test_get_restaurants_authenticated(api_client, user, restaurant):
@@ -82,8 +84,11 @@ def test_get_restaurants_unauthenticated(api_client):
 
 # --- get_menu_items tests ---
 
+
 @pytest.mark.django_db
-def test_get_menu_items_authenticated(api_client, user, restaurant, available_item, unavailable_item):
+def test_get_menu_items_authenticated(
+    api_client, user, restaurant, available_item, unavailable_item
+):
     """
     When authenticated, get_menu_items should return only available items for the given restaurant name.
     """

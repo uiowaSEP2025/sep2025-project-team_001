@@ -25,12 +25,20 @@ def register_user(request):
 
         # Check if all fields are present and non-empty
         required_fields = [
-            "name", "username", "password", "email",
-            "phone", "business_name", "business_address"
+            "name",
+            "username",
+            "password",
+            "email",
+            "phone",
+            "business_name",
+            "business_address",
         ]
         for field in required_fields:
             if not data.get(field):
-                return JsonResponse({"message": f"{field.replace('_', ' ').capitalize()} is required."}, status=400)
+                return JsonResponse(
+                    {"message": f"{field.replace('_', ' ').capitalize()} is required."},
+                    status=400,
+                )
 
         # Check if username is already taken
         if CustomUser.objects.filter(username=data["username"]).exists():
@@ -46,11 +54,15 @@ def register_user(request):
 
         # Validate phone number (must be 10 digits)
         if not re.match(r"^\d{10}$", data["phone"]):
-            return JsonResponse({"message": "Phone number must be exactly 10 digits."}, status=400)
+            return JsonResponse(
+                {"message": "Phone number must be exactly 10 digits."}, status=400
+            )
 
         # Validate password length
         if len(data["password"]) < 6:
-            return JsonResponse({"message": "Password must be at least 6 characters long."}, status=400)
+            return JsonResponse(
+                {"message": "Password must be at least 6 characters long."}, status=400
+            )
 
         # Create custom user for username, email, password, and name
         user = CustomUser.objects.create_user(
@@ -68,20 +80,29 @@ def register_user(request):
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
-            restaurant_image=data.get("restaurantImage")
+            restaurant_image=data.get("restaurantImage"),
         )
         restaurant.managers.add(manager)
 
         tokens = get_tokens_for_user(user)  # Generate JWT tokens
 
-        return JsonResponse({
-            "message": "User registered successfully",
-            "tokens": tokens,
-            "manager": manager.user.username,
-            "restaurant": restaurant.name,
-            "restaurant_image": restaurant.restaurant_image[:30] + "..." if restaurant.restaurant_image else None,
-            "restaurant_managers": [m.user.username for m in restaurant.managers.all()]
-        }, status=201)
+        return JsonResponse(
+            {
+                "message": "User registered successfully",
+                "tokens": tokens,
+                "manager": manager.user.username,
+                "restaurant": restaurant.name,
+                "restaurant_image": (
+                    restaurant.restaurant_image[:30] + "..."
+                    if restaurant.restaurant_image
+                    else None
+                ),
+                "restaurant_managers": [
+                    m.user.username for m in restaurant.managers.all()
+                ],
+            },
+            status=201,
+        )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
@@ -105,12 +126,15 @@ def login_user(request):
                 bar_name = None
                 restaurant_id = None
 
-            return JsonResponse({
-                "message": "Login successful",
-                "tokens": tokens,
-                "bar_name": bar_name,
-                "restaurant_id": restaurant_id
-            }, status=200)
+            return JsonResponse(
+                {
+                    "message": "Login successful",
+                    "tokens": tokens,
+                    "bar_name": bar_name,
+                    "restaurant_id": restaurant_id,
+                },
+                status=200,
+            )
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
 

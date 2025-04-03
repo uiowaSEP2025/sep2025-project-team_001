@@ -1,7 +1,6 @@
 import time
 
 import pytest
-
 from app.models.customer_models import Customer, CustomUser
 
 
@@ -11,9 +10,7 @@ def test_customer_str_and_to_dict():
     Ensure Customer.__str__ returns the expected string and to_dict returns a correct dictionary.
     """
     user = CustomUser.objects.create_user(
-        username="customeruser",
-        email="customer@example.com",
-        password="pass"
+        username="customeruser", email="customer@example.com", password="pass"
     )
     user.phone = "555-555-5555"
     user.save()
@@ -37,9 +34,7 @@ def test_customer_timestamps():
     Verify that created_at and updated_at are automatically set and that updated_at changes upon saving.
     """
     user = CustomUser.objects.create_user(
-        username="customer_timestamp",
-        email="timestamp@example.com",
-        password="pass"
+        username="customer_timestamp", email="timestamp@example.com", password="pass"
     )
     user.phone = "555-555-5555"
     user.save()

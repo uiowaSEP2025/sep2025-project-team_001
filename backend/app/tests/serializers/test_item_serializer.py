@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-
 from app.models.restaurant_models import Item
 from app.serializers.item_serializer import ItemSerializer
 
@@ -19,7 +18,7 @@ def test_item_serializer_representation(restaurant):
         category="Food",
         stock=100,
         available=True,
-        base64_image="dummybase64string"
+        base64_image="dummybase64string",
     )
     serializer = ItemSerializer(item_instance)
     data = serializer.data
@@ -48,7 +47,7 @@ def test_item_serializer_deserialization_valid(restaurant):
         "category": "Food",
         "stock": 50,
         "available": True,
-        "base64_image": "somedummystring"
+        "base64_image": "somedummystring",
     }
     serializer = ItemSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
@@ -76,7 +75,7 @@ def test_item_serializer_deserialization_invalid(restaurant):
         "category": "Food",
         "stock": 20,
         "available": True,
-        "base64_image": "dummy"
+        "base64_image": "dummy",
     }
     serializer = ItemSerializer(data=data)
     assert not serializer.is_valid()

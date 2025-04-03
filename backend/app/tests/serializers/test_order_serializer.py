@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-
 from app.models.restaurant_models import Item
 from app.serializers.order_serializer import OrderSerializer
 
@@ -20,15 +19,13 @@ def test_order_serializer_create(customer, restaurant):
         category="Food",
         stock=20,
         available=True,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
     # Prepare valid input data.
     data = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [
-            {"item_id": item_instance.pk, "quantity": 3}
-        ]
+        "order_items": [{"item_id": item_instance.pk, "quantity": 3}],
     }
     serializer = OrderSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
@@ -52,9 +49,7 @@ def test_order_serializer_deserialization_invalid(customer, restaurant):
     data = {
         # "customer_id" is missing
         "restaurant_id": restaurant.pk,
-        "order_items": [
-            {"item_id": 9999, "quantity": 2}
-        ]
+        "order_items": [{"item_id": 9999, "quantity": 2}],
     }
     serializer = OrderSerializer(data=data)
     assert not serializer.is_valid()

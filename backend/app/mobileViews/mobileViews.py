@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from ..models import CustomUser, Customer
+from ..models import Customer, CustomUser
 from ..views.auth_views import get_tokens_for_user
 
 
@@ -22,10 +22,7 @@ def register_customer(request):
                 return JsonResponse({"message": "Email already in use"}, status=400)
 
             user = CustomUser.objects.create_user(
-                username=email,
-                email=email,
-                password=password,
-                first_name=name
+                username=email, email=email, password=password, first_name=name
             )
 
             customer = Customer.objects.create(user=user)
@@ -36,15 +33,14 @@ def register_customer(request):
                 {
                     "message": "User registered successfully",
                     "tokens": tokens,
-                    "customer_id" : customer.id
+                    "customer_id": customer.id,
                 },
-                status=201
+                status=201,
             )
 
         except Exception as e:
             return JsonResponse(
-                {"message": "Registration failed", "error": str(e)},
-                status=500
+                {"message": "Registration failed", "error": str(e)}, status=500
             )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
@@ -59,8 +55,15 @@ def login_customer(request):
 
         user = authenticate(username=username, password=password)
         if user is not None:
-            tokens = get_tokens_for_user(user) 
-            return JsonResponse({"message": "Login successful", "tokens": tokens, "customer_id": getattr(user.customer, 'id', None)}, status=200)
+            tokens = get_tokens_for_user(user)
+            return JsonResponse(
+                {
+                    "message": "Login successful",
+                    "tokens": tokens,
+                    "customer_id": getattr(user.customer, "id", None),
+                },
+                status=200,
+            )
 
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)

@@ -2,9 +2,8 @@ import json
 from decimal import Decimal
 
 import pytest
+from app.models.restaurant_models import Item, Restaurant
 from rest_framework.test import APIClient
-
-from app.models.restaurant_models import Restaurant, Item
 
 
 @pytest.fixture
@@ -15,6 +14,7 @@ def api_client(manager):
 
 
 # --- Tests for menu_items_api ---
+
 
 @pytest.mark.django_db
 def test_menu_items_api_no_restaurant(api_client, manager):
@@ -59,7 +59,7 @@ def test_menu_items_api_with_items(api_client, restaurant):
         category="Food",
         stock=10,
         available=True,
-        base64_image="dummy1"
+        base64_image="dummy1",
     )
     item2 = Item.objects.create(
         restaurant=restaurant,
@@ -69,7 +69,7 @@ def test_menu_items_api_with_items(api_client, restaurant):
         category="Drink",
         stock=20,
         available=True,
-        base64_image="dummy2"
+        base64_image="dummy2",
     )
     response = api_client.get("/api/menu-items/")
     assert response.status_code == 200
@@ -85,7 +85,9 @@ def test_menu_items_api_invalid_method(api_client):
     """
     Non-GET methods on menu_items_api should return a 405 error.
     """
-    response = api_client.post("/api/menu-items/", data="{}", content_type="application/json")
+    response = api_client.post(
+        "/api/menu-items/", data="{}", content_type="application/json"
+    )
     assert response.status_code == 405
     data = response.json()
     # DRF returns a default "detail" message instead of an "error" key.
@@ -93,6 +95,7 @@ def test_menu_items_api_invalid_method(api_client):
 
 
 # --- Tests for manage_menu_item ---
+
 
 @pytest.mark.django_db
 def test_manage_menu_item_no_restaurant(api_client, manager):
@@ -106,12 +109,17 @@ def test_manage_menu_item_no_restaurant(api_client, manager):
         "price": "10.00",
         "category": "Food",
         "stock": "5",
-        "image": "dummyimage"
+        "image": "dummyimage",
     }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 404
     resp_data = response.json()
-    assert resp_data.get("error") in ["Manager or restaurant not found", "Restaurant not found"]
+    assert resp_data.get("error") in [
+        "Manager or restaurant not found",
+        "Restaurant not found",
+    ]
 
 
 @pytest.mark.django_db
@@ -125,9 +133,11 @@ def test_manage_menu_item_create_missing_fields(api_client, restaurant):
         "price": "10.00",
         "category": "Food",
         "stock": "5",
-        "image": "dummyimage"
+        "image": "dummyimage",
     }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400
     resp_data = response.json()
     error_msg = resp_data.get("error") or resp_data.get("message", "")
@@ -145,9 +155,11 @@ def test_manage_menu_item_create_success(api_client, restaurant):
         "price": "10.00",
         "category": "Food",
         "stock": "5",
-        "image": "dummyimage"
+        "image": "dummyimage",
     }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 201
     resp_data = response.json()
     assert resp_data.get("message") == "Item created successfully"
@@ -167,9 +179,11 @@ def test_manage_menu_item_update_missing_item_id(api_client, restaurant):
         "price": "12.00",
         "category": "Food",
         "stock": "10",
-        "image": "updatedimage"
+        "image": "updatedimage",
     }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400
     resp_data = response.json()
     assert "invalid action or missing item_id" in resp_data.get("error", "").lower()
@@ -187,10 +201,13 @@ def test_manage_menu_item_update_success(api_client, restaurant):
         "price": "15.00",
         "category": "Food",
         "stock": "8",
-        "image": "origimage"
+        "image": "origimage",
     }
-    create_response = api_client.post("/api/manage-item/", data=json.dumps(create_data),
-                                      content_type="application/json")
+    create_response = api_client.post(
+        "/api/manage-item/",
+        data=json.dumps(create_data),
+        content_type="application/json",
+    )
     assert create_response.status_code == 201
     create_resp_data = create_response.json()
     item_id = create_resp_data.get("item_id")
@@ -203,10 +220,13 @@ def test_manage_menu_item_update_success(api_client, restaurant):
         "category": "Food",
         "stock": "10",
         "image": "newimage",
-        "description": "Updated description"
+        "description": "Updated description",
     }
-    update_response = api_client.post("/api/manage-item/", data=json.dumps(update_data),
-                                      content_type="application/json")
+    update_response = api_client.post(
+        "/api/manage-item/",
+        data=json.dumps(update_data),
+        content_type="application/json",
+    )
     assert update_response.status_code == 200
     update_resp_data = update_response.json()
     assert update_resp_data.get("message") == "Item updated successfully"
@@ -219,6 +239,7 @@ def test_manage_menu_item_update_success(api_client, restaurant):
 
 
 # --- New Tests for manage_menu_item delete and invalid action ---
+
 
 @pytest.mark.django_db
 def test_manage_menu_item_delete_success(api_client, restaurant):
@@ -234,13 +255,12 @@ def test_manage_menu_item_delete_success(api_client, restaurant):
         category="Food",
         stock=5,
         available=True,
-        base64_image="deleteme"
+        base64_image="deleteme",
     )
-    data = {
-        "action": "delete",
-        "item_id": item.id
-    }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    data = {"action": "delete", "item_id": item.id}
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 200
     resp_data = response.json()
     assert resp_data.get("message") == "Item deleted successfully"
@@ -258,7 +278,9 @@ def test_manage_menu_item_invalid_action(api_client, restaurant):
         "action": "unknown"
         # No item_id provided.
     }
-    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400
     resp_data = response.json()
     assert "invalid action or missing item_id" in resp_data.get("error", "").lower()

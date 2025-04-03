@@ -18,9 +18,7 @@ class Restaurant(models.Model):
 
 class Item(models.Model):
     restaurant = models.ForeignKey(
-        Restaurant,
-        on_delete=models.CASCADE,
-        related_name="items"
+        Restaurant, on_delete=models.CASCADE, related_name="items"
     )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -31,5 +29,7 @@ class Item(models.Model):
     base64_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        image_preview = self.base64_image[:30] + "..." if self.base64_image else "No image"
+        image_preview = (
+            self.base64_image[:30] + "..." if self.base64_image else "No image"
+        )
         return f"{self.name} (Image: {image_preview})"

@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Item
 from app.serializers.order_serializer import OrderItemSerializer
@@ -17,7 +16,7 @@ def test_order_item_serializer_representation(customer, restaurant):
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     item_instance = Item.objects.create(
         restaurant=restaurant,
@@ -27,14 +26,10 @@ def test_order_item_serializer_representation(customer, restaurant):
         category="Food",
         stock=50,
         available=True,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
     # Create an OrderItem.
-    order_item = OrderItem.objects.create(
-        order=order,
-        item=item_instance,
-        quantity=2
-    )
+    order_item = OrderItem.objects.create(order=order, item=item_instance, quantity=2)
     serializer = OrderItemSerializer(order_item)
     data = serializer.data
     assert "item_name" in data
@@ -48,11 +43,11 @@ def test_order_item_serializer_deserialization(customer, restaurant):
     Test direct validation of OrderItemSerializer input data.
     """
     # Create an Order and an Item.
-    order = Order.objects.create(
+    Order.objects.create(
         customer=customer,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     item_instance = Item.objects.create(
         restaurant=restaurant,
@@ -62,13 +57,10 @@ def test_order_item_serializer_deserialization(customer, restaurant):
         category="Food",
         stock=50,
         available=True,
-        base64_image="dummyimage"
+        base64_image="dummyimage",
     )
     # Prepare input data for OrderItemSerializer.
-    data = {
-        "item_id": item_instance.pk,
-        "quantity": 4
-    }
+    data = {"item_id": item_instance.pk, "quantity": 4}
     serializer = OrderItemSerializer(data=data)
     # Validate that the serializer accepts the input.
     assert serializer.is_valid(), serializer.errors

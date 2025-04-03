@@ -5,8 +5,12 @@ from .restaurant_models import Item, Restaurant
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="orders")
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="orders")
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="orders"
+    )
+    restaurant = models.ForeignKey(
+        Restaurant, on_delete=models.CASCADE, related_name="orders"
+    )
     start_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, default="pending")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -19,7 +23,9 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="order_items"
+    )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 

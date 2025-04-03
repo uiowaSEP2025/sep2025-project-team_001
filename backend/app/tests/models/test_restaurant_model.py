@@ -1,7 +1,6 @@
 import time
 
 import pytest
-
 from app.models import CustomUser
 from app.models.customer_models import Manager
 

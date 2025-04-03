@@ -1,2 +1,12 @@
+[tool.black]
+force-exclude = [
+    "*/migrations/*",
+    "*/__init__.py",
+]
+
 [tool.isort]
 profile = "black"
+skip_glob = [
+    "*/migrations/*",
+    "*/__init__.py",
+]

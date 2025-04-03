@@ -1,13 +1,14 @@
 import json
 from decimal import Decimal
-import pytest
-from rest_framework.test import APIClient
-from app.models import CustomUser, Customer
-from app.models.restaurant_models import Restaurant, Item
-from app.models.order_models import Order, OrderItem
 
+import pytest
+from app.models import Customer, CustomUser
+from app.models.order_models import Order, OrderItem
+from app.models.restaurant_models import Item, Restaurant
+from rest_framework.test import APIClient
 
 # --- Fixtures ---
+
 
 @pytest.fixture
 def api_client():
@@ -17,16 +18,22 @@ def api_client():
 # Use the existing conftest manager fixture (if not available, this creates one)
 @pytest.fixture
 def manager_user():
-    user = CustomUser.objects.create_user(username="manager_for_order", email="manager_for_order@example.com",
-                                          password="pass")
-    from app.models.customer_models import Manager  # Import here to avoid circular import issues
+    user = CustomUser.objects.create_user(
+        username="manager_for_order",
+        email="manager_for_order@example.com",
+        password="pass",
+    )
+    from app.models.customer_models import (  # Import here to avoid circular import issues
+        Manager,
+    )
+
     manager = Manager.objects.create(user=user)
     # Create a restaurant and assign to manager.
     restaurant = Restaurant.objects.create(
         name="Manager's Restaurant",
         address="456 Manager St",
         phone="111-222-3333",
-        restaurant_image="manager_dummy"
+        restaurant_image="manager_dummy",
     )
     restaurant.managers.add(manager)
     return user
@@ -40,8 +47,9 @@ def manager_client(api_client, manager_user):
 
 @pytest.fixture
 def customer_user():
-    user = CustomUser.objects.create_user(username="order_customer", email="order_customer@example.com",
-                                          password="pass")
+    user = CustomUser.objects.create_user(
+        username="order_customer", email="order_customer@example.com", password="pass"
+    )
     return user
 
 
@@ -58,11 +66,12 @@ def customer_restaurant():
         name="Customer Restaurant",
         address="789 Customer Ave",
         phone="444-555-6666",
-        restaurant_image="customer_dummy"
+        restaurant_image="customer_dummy",
     )
 
 
 # --- Tests for create_order ---
+
 
 @pytest.mark.django_db
 def test_create_order_success(api_client, customer, customer_restaurant, item):
@@ -74,11 +83,11 @@ def test_create_order_success(api_client, customer, customer_restaurant, item):
     data = {
         "customer_id": customer.pk,
         "restaurant_id": customer_restaurant.pk,
-        "order_items": [
-            {"item_id": item.pk, "quantity": 2}
-        ]
+        "order_items": [{"item_id": item.pk, "quantity": 2}],
     }
-    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/order/new/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 201, response.content
     resp_data = response.json()
     assert resp_data.get("message") == "Order created successfully"
@@ -96,7 +105,9 @@ def test_create_order_invalid_data(api_client, customer, customer_restaurant):
         "restaurant_id": customer_restaurant.pk,
         # Missing "order_items"
     }
-    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/order/new/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
 
 
@@ -108,13 +119,16 @@ def test_create_order_unauthenticated(api_client, customer, customer_restaurant)
     data = {
         "customer_id": customer.pk,
         "restaurant_id": customer_restaurant.pk,
-        "order_items": []
+        "order_items": [],
     }
-    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    response = api_client.post(
+        "/order/new/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 401, response.content
 
 
 # --- Tests for retrieve_active_orders ---
+
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_success(manager_client, manager_user):
@@ -122,17 +136,18 @@ def test_retrieve_active_orders_success(manager_client, manager_user):
     Test that an authenticated manager can retrieve active orders for their restaurant.
     """
     # Get manager's restaurant.
-    from app.models.customer_models import Manager
     manager = manager_user.manager
     restaurant = manager.restaurants.first()
     # Create a customer and an order for this restaurant.
-    cust_user = CustomUser.objects.create_user(username="cust1", email="cust1@example.com", password="pass")
+    cust_user = CustomUser.objects.create_user(
+        username="cust1", email="cust1@example.com", password="pass"
+    )
     cust = Customer.objects.create(user=cust_user)
     order = Order.objects.create(
         customer=cust,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     # Create an OrderItem for the order.
     item = Item.objects.create(
@@ -143,7 +158,7 @@ def test_retrieve_active_orders_success(manager_client, manager_user):
         category="Food",
         stock=5,
         available=True,
-        base64_image="active_dummy"
+        base64_image="active_dummy",
     )
     OrderItem.objects.create(order=order, item=item, quantity=3)
 
@@ -162,7 +177,9 @@ def test_retrieve_active_orders_no_manager(api_client):
     Test that a user who is not a manager gets a 404 when trying to retrieve active orders.
     """
     # Create a non-manager user.
-    user = CustomUser.objects.create_user(username="nonmanager", email="nonmanager@example.com", password="pass")
+    user = CustomUser.objects.create_user(
+        username="nonmanager", email="nonmanager@example.com", password="pass"
+    )
     client = APIClient()
     client.force_authenticate(user=user)
     response = client.get("/retrieve/orders/")
@@ -173,6 +190,7 @@ def test_retrieve_active_orders_no_manager(api_client):
 
 # --- Tests for mark_order_completed ---
 
+
 @pytest.mark.django_db
 def test_mark_order_completed_success(manager_client, manager_user):
     """
@@ -181,13 +199,15 @@ def test_mark_order_completed_success(manager_client, manager_user):
     manager = manager_user.manager
     restaurant = manager.restaurants.first()
     # Create a customer and an order.
-    cust_user = CustomUser.objects.create_user(username="cust_mark", email="cust_mark@example.com", password="pass")
+    cust_user = CustomUser.objects.create_user(
+        username="cust_mark", email="cust_mark@example.com", password="pass"
+    )
     cust = Customer.objects.create(user=cust_user)
     order = Order.objects.create(
         customer=cust,
         restaurant=restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     order_id = order.id
     url = f"/orders/{order_id}/complete/"
@@ -212,6 +232,7 @@ def test_mark_order_completed_not_found(manager_client):
 
 # --- Tests for get_customer_orders ---
 
+
 @pytest.mark.django_db
 def test_get_customer_orders_success(api_client, customer, customer_restaurant):
     """
@@ -224,7 +245,7 @@ def test_get_customer_orders_success(api_client, customer, customer_restaurant):
         customer=customer,
         restaurant=customer_restaurant,
         status="pending",
-        total_price=Decimal("0.00")
+        total_price=Decimal("0.00"),
     )
     item = Item.objects.create(
         restaurant=customer_restaurant,
@@ -234,7 +255,7 @@ def test_get_customer_orders_success(api_client, customer, customer_restaurant):
         category="Food",
         stock=10,
         available=True,
-        base64_image="cust_dummy"
+        base64_image="cust_dummy",
     )
     OrderItem.objects.create(order=order, item=item, quantity=1)
 

@@ -17,12 +17,10 @@ def test_register_success(client):
         "phone": "1234567890",
         "business_name": "John's Diner",
         "business_address": "123 Main St",
-        "restaurantImage": "imagedata_that_is_longer_than_30_characters_for_truncation_test"
+        "restaurantImage": "imagedata_that_is_longer_than_30_characters_for_truncation_test",
     }
     response = client.post(
-        "/register/",
-        data=json.dumps(data),
-        content_type="application/json"
+        "/register/", data=json.dumps(data), content_type="application/json"
     )
     assert response.status_code == 201, response.content
     resp_data = response.json()
@@ -50,12 +48,10 @@ def test_register_missing_field(client):
         "email": "janedoe@example.com",
         "phone": "1234567890",
         "business_name": "Jane's Cafe",
-        "business_address": "456 Main St"
+        "business_address": "456 Main St",
     }
     response = client.post(
-        "/register/",
-        data=json.dumps(data),
-        content_type="application/json"
+        "/register/", data=json.dumps(data), content_type="application/json"
     )
     assert response.status_code == 400, response.content
     resp_data = response.json()
@@ -74,7 +70,7 @@ def test_register_username_taken(client):
         "email": "john1@example.com",
         "phone": "1234567890",
         "business_name": "John's Diner",
-        "business_address": "123 Main St"
+        "business_address": "123 Main St",
     }
     # First registration succeeds.
     client.post("/register/", data=json.dumps(data), content_type="application/json")
@@ -86,9 +82,11 @@ def test_register_username_taken(client):
         "email": "jane@example.com",
         "phone": "0987654321",
         "business_name": "Jane's Cafe",
-        "business_address": "456 Main St"
+        "business_address": "456 Main St",
     }
-    response = client.post("/register/", data=json.dumps(data2), content_type="application/json")
+    response = client.post(
+        "/register/", data=json.dumps(data2), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
     resp_data = response.json()
     assert "Username already taken" in resp_data.get("message", "")
@@ -118,7 +116,9 @@ def test_register_email_registered(client):
         "business_name": "Jane's Cafe",
         "business_address": "456 Main St",
     }
-    response = client.post("/register/", data=json.dumps(data2), content_type="application/json")
+    response = client.post(
+        "/register/", data=json.dumps(data2), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
     resp_data = response.json()
     assert "Email already registered" in resp_data.get("message", "")
@@ -138,7 +138,9 @@ def test_register_invalid_email(client):
         "business_name": "John's Diner",
         "business_address": "123 Main St",
     }
-    response = client.post("/register/", data=json.dumps(data), content_type="application/json")
+    response = client.post(
+        "/register/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
     resp_data = response.json()
     assert "Invalid email format" in resp_data.get("message", "")
@@ -158,7 +160,9 @@ def test_register_invalid_phone(client):
         "business_name": "John's Diner",
         "business_address": "123 Main St",
     }
-    response = client.post("/register/", data=json.dumps(data), content_type="application/json")
+    response = client.post(
+        "/register/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
     resp_data = response.json()
     assert "Phone number must be exactly 10 digits" in resp_data.get("message", "")
@@ -178,13 +182,16 @@ def test_register_short_password(client):
         "business_name": "John's Diner",
         "business_address": "123 Main St",
     }
-    response = client.post("/register/", data=json.dumps(data), content_type="application/json")
+    response = client.post(
+        "/register/", data=json.dumps(data), content_type="application/json"
+    )
     assert response.status_code == 400, response.content
     resp_data = response.json()
     assert "Password must be at least 6 characters long" in resp_data.get("message", "")
 
 
 # --- LOGIN TESTS ---
+
 
 @pytest.mark.django_db
 def test_login_success(client):
@@ -202,14 +209,15 @@ def test_login_success(client):
         "business_name": "Alice's Restaurant",
         "business_address": "789 Main St",
     }
-    client.post("/register/", data=json.dumps(register_data), content_type="application/json")
+    client.post(
+        "/register/", data=json.dumps(register_data), content_type="application/json"
+    )
 
     # Now, attempt to login.
-    login_data = {
-        "username": "alice",
-        "password": "strongpassword"
-    }
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    login_data = {"username": "alice", "password": "strongpassword"}
+    response = client.post(
+        "/login/", data=json.dumps(login_data), content_type="application/json"
+    )
     assert response.status_code == 200, response.content
     resp_data = response.json()
     assert "tokens" in resp_data
@@ -232,14 +240,15 @@ def test_login_invalid_credentials(client):
         "business_name": "Bob's Burgers",
         "business_address": "101 Main St",
     }
-    client.post("/register/", data=json.dumps(register_data), content_type="application/json")
+    client.post(
+        "/register/", data=json.dumps(register_data), content_type="application/json"
+    )
 
     # Attempt to login with an incorrect password.
-    login_data = {
-        "username": "bob",
-        "password": "wrongpassword"
-    }
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    login_data = {"username": "bob", "password": "wrongpassword"}
+    response = client.post(
+        "/login/", data=json.dumps(login_data), content_type="application/json"
+    )
     assert response.status_code == 401, response.content
     resp_data = response.json()
     assert "Invalid credentials" in resp_data.get("error", "")
