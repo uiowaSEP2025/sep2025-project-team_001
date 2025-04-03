@@ -37,7 +37,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   void _startPolling() {
-    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _loadOrders();
     });
   }
@@ -103,58 +103,57 @@ class _OrdersScreenState extends State<OrdersScreen> {
   //   );
   // }
 
-Widget _buildOrderTile(Order order) {
-  return ExpansionTile(
-    title: Text("Order #${order.id}"),
-    subtitle: Text("Placed on ${order.startTime}"),
-trailing: Text("${_getTotalItems(order.items)} items"),
-    children: order.items.map((item) {
-  return ListTile(
-    title: Text(item['item_name'] ?? 'Unnamed item'),
-    subtitle: Text("Quantity: ${item['quantity']}"),
-    visualDensity: VisualDensity.compact,
-  );
-}).toList(),
-
-  );
-}
-
-int _getTotalItems(List<dynamic> items) {
-  int total = 0;
-  for (var item in items) {
-    final quantity = item['quantity'];
-    if (quantity is int && quantity > 0) {
-      total += quantity;
-    } else {
-      total += 1; // fallback if quantity is null or invalid
-    }
+  Widget _buildOrderTile(Order order) {
+    return ExpansionTile(
+      title: Text("Order #${order.id}"),
+      subtitle: Text("Placed on ${order.startTime}"),
+      trailing: Text("${_getTotalItems(order.items)} items"),
+      children: order.items.map((item) {
+        return ListTile(
+          title: Text(item['item_name'] ?? 'Unnamed item'),
+          subtitle: Text("Quantity: ${item['quantity']}"),
+          visualDensity: VisualDensity.compact,
+        );
+      }).toList(),
+    );
   }
-  return total;
-}
 
-
+  int _getTotalItems(List<dynamic> items) {
+    int total = 0;
+    for (var item in items) {
+      final quantity = item['quantity'];
+      if (quantity is int && quantity > 0) {
+        total += quantity;
+      } else {
+        total += 1; // fallback if quantity is null or invalid
+      }
+    }
+    return total;
+  }
 
   @override
   Widget build(BuildContext context) {
-            double screenWidth = MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     double horizontalSpacing = screenWidth * 0.05;
     double verticalSpacing = screenHeight * 0.025;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Your Orders',style: AppTextStyles.appBarText(screenHeight, Colors.black))),
+      appBar: AppBar(
+          title: Text('Your Orders',
+              style: AppTextStyles.appBarText(screenHeight, Colors.black))),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorFetching
-              ? Center(child: Text('Failed to load orders. Try again.'))
+              ? const Center(child: Text('Failed to load orders. Try again.'))
               : (pendingOrders.isEmpty && completedOrders.isEmpty)
                   ? const Center(
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
                       children: [
                         if (pendingOrders.isNotEmpty) ...[
-                           Padding(
+                          const Padding(
                             padding: EdgeInsets.all(8),
                             child: Text("Pending Orders",
                                 style: TextStyle(

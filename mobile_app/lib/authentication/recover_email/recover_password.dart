@@ -24,7 +24,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       });
       _pageController.animateToPage(
         _currentStep,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -37,7 +37,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       });
       _pageController.animateToPage(
         _currentStep,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
@@ -45,7 +45,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     }
   }
 
-    void setEmail(String newEmail) {
+  void setEmail(String newEmail) {
     setState(() {
       email = newEmail;
     });
@@ -74,7 +74,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
               });
               _pageController.animateToPage(
                 _currentStep,
-                duration: Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
               );
             } else {
@@ -89,12 +89,16 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                 style: AppTextStyles.appBarText(screenHeight, Colors.black)),
           ),
           body: PageView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
-              EnterRecoveryEmail(onNext: goToNextStep, enterEmail: setEmail, enteredEmail: email),
+              EnterRecoveryEmail(
+                  onNext: goToNextStep,
+                  enterEmail: setEmail,
+                  enteredEmail: email),
               EnterRecoveryCode(onNext: goToNextStep, enteredEmail: email),
-              EnterNewPassword(onNext: () => Navigator.pop(context), enteredEmail: email),
+              EnterNewPassword(
+                  onNext: () => Navigator.pop(context), enteredEmail: email),
             ],
           ),
         ),

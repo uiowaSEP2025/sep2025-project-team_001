@@ -53,19 +53,22 @@ class _AccountScreenState extends State<AccountScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.person),
-              title: Text("Name"),
+              title: const Text("Name"),
               subtitle: name != null ? Text(name) : null,
             ),
-             SizedBox(height: verticalSpacing/2),
+            SizedBox(height: verticalSpacing / 2),
             ListTile(
               leading: const Icon(Icons.email),
               title: const Text("Email"),
               subtitle: email != null ? Text(email) : null,
             ),
-            SizedBox(height: verticalSpacing/2),
+            SizedBox(height: verticalSpacing / 2),
             ElevatedButton.icon(
               onPressed: () => _logout(context),
-              icon: const Icon(Icons.logout, color: Colors.white,),
+              icon: const Icon(
+                Icons.logout,
+                color: Colors.white,
+              ),
               label: Text(
                 "Logout",
                 style:

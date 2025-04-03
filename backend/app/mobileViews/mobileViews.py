@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from ..models import CustomUser, Customer
+from ..models import Customer, CustomUser
 from ..views.auth_views import get_tokens_for_user
 
 
@@ -36,8 +36,8 @@ def register_customer(request):
                 {
                     "message": "User registered successfully",
                     "tokens": tokens,
-                    "customer_id" : customer.id,
-                    "name" : customer.user.first_name
+                    "customer_id": customer.id,
+                    "name": customer.user.first_name
                 },
                 status=201
             )
@@ -60,7 +60,7 @@ def login_customer(request):
 
         user = authenticate(username=username, password=password)
         if user is not None:
-            tokens = get_tokens_for_user(user) 
+            tokens = get_tokens_for_user(user)
             return JsonResponse({"message": "Login successful", "tokens": tokens, "customer_id": getattr(user.customer, 'id', None), "name": getattr(user.customer.user, 'first_name', None)}, status=200)
 
         else:

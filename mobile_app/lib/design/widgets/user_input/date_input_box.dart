@@ -9,14 +9,13 @@ class DateInputBox extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
 
-  const DateInputBox({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-    required this.label,
-    required this.hintText,
-    required this.controller
-  });
+  const DateInputBox(
+      {super.key,
+      required this.screenWidth,
+      required this.screenHeight,
+      required this.label,
+      required this.hintText,
+      required this.controller});
 
   @override
   State<DateInputBox> createState() => _DateInputBoxState();

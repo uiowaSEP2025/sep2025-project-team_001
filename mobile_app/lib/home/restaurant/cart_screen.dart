@@ -61,8 +61,8 @@ class _CartScreenState extends State<CartScreen> {
           arguments: {'initialIndex': 1},
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error placing order, please try again")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Error placing order, please try again")));
       }
     }
 
@@ -77,7 +77,9 @@ class _CartScreenState extends State<CartScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Your Cart',style: AppTextStyles.appBarText(screenHeight, Colors.black))),
+        appBar: AppBar(
+            title: Text('Your Cart',
+                style: AppTextStyles.appBarText(screenHeight, Colors.black))),
         body: ListView(
           children: _cart.entries.map((entry) {
             final key = entry.key;
@@ -88,7 +90,7 @@ class _CartScreenState extends State<CartScreen> {
               subtitle: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.remove),
+                    icon: const Icon(Icons.remove),
                     onPressed: () {
                       if (cartItem.quantity > 1) {
                         setState(() {
@@ -102,7 +104,7 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   Text('${cartItem.quantity}'),
                   IconButton(
-                    icon: Icon(Icons.add),
+                    icon: const Icon(Icons.add),
                     onPressed: () {
                       setState(() {
                         _cart[key] = CartItem(
@@ -121,7 +123,7 @@ class _CartScreenState extends State<CartScreen> {
                     '\$${(cartItem.item.price * cartItem.quantity).toStringAsFixed(2)}',
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
                       setState(() {
                         _cart.remove(key);
@@ -142,7 +144,8 @@ class _CartScreenState extends State<CartScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Total: \$${total.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -152,7 +155,7 @@ class _CartScreenState extends State<CartScreen> {
                         widget.onCartUpdated.call(_cart);
                         Navigator.pop(context);
                       },
-                      child: Text('Back to Menu'),
+                      child: const Text('Back to Menu'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -162,7 +165,7 @@ class _CartScreenState extends State<CartScreen> {
                         print(widget.restaurant.id);
                         submitOrder();
                       },
-                      child: Text('Checkout'),
+                      child: const Text('Checkout'),
                     ),
                   ),
                 ],
