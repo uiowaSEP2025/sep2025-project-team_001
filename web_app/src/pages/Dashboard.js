@@ -1,20 +1,20 @@
 // src/pages/Dashboard.js
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/Container";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const barName = localStorage.getItem("barName");
+  const barName = localStorage.getItem('barName');
 
   const handleOrderClick = () => {
-    navigate("/orders");
+    navigate('/orders');
   };
 
   const handleMenuClick = () => {
-    navigate("/menu");
+    navigate('/menu');
   };
 
   return (

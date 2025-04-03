@@ -48,7 +48,7 @@ class _EnterNewPasswordState extends State<EnterNewPassword> {
       isLoading = true;
     });
 
-    //todo pop if password was successfully set 
+    //todo pop if password was successfully set
     Navigator.pop(context);
   }
 

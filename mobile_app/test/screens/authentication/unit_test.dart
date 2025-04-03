@@ -5,7 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 @GenerateMocks([Dio])
-import 'unit_tests.mocks.dart';  // Auto-generated file
+import 'unit_tests.mocks.dart'; // Auto-generated file
 
 void main() {
   group('AuthenticationPage Unit Tests', () {

@@ -44,7 +44,8 @@ class _PasswordTextBoxState extends State<PasswordTextBox> {
             child: TextField(
               obscureText: passwordVisible,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: widget.screenWidth * 0.025),
+                contentPadding:
+                    EdgeInsets.only(left: widget.screenWidth * 0.025),
                 fillColor: AppColors.whiteText,
                 border: OutlineInputBorder(),
                 hintText: "Password",

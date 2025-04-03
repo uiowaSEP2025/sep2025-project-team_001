@@ -39,7 +39,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
     super.dispose();
   }
 
-  void sendCode() {} //todo call api to send code to the email 
+  void sendCode() {} //todo call api to send code to the email
 
   void validateCodeApiCall() {
     //todo call api to send code and validate it for now just to design front end invalid code is 0000
@@ -60,8 +60,7 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
 
     if (!invalidCode) {
       widget.onNext();
-    }
-    else{
+    } else {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -163,7 +162,9 @@ class _EnterRecoveryCodeState extends State<EnterRecoveryCode> {
                   ),
                 ),
               ),
-              SizedBox(width: horizontalSpacing*2,)
+              SizedBox(
+                width: horizontalSpacing * 2,
+              )
             ],
           ),
           Spacer(),

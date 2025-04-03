@@ -6,8 +6,6 @@ class MenuItem {
   final String category;
   final bool available;
   final String? base64image;
-  
-  
 
   MenuItem({
     required this.id,
@@ -16,7 +14,7 @@ class MenuItem {
     required this.price,
     required this.category,
     required this.available,
-     this.base64image,
+    this.base64image,
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {

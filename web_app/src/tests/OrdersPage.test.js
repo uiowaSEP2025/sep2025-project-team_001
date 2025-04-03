@@ -24,30 +24,36 @@ describe('OrdersPage Component', () => {
         id: 1,
         customer_name: 'Burger Customer',
         start_time: '2022-01-01T00:00:00Z',
-        status: 'Pending'
+        status: 'Pending',
       },
       {
         id: 2,
         customer_name: 'Fries Customer',
         start_time: '2022-01-01T01:00:00Z',
-        status: 'Served'
-      }
+        status: 'Served',
+      },
     ];
     axios.get.mockResolvedValue({ data: orders });
     render(<OrdersPage />);
 
     // Wait for the header to appear (loading done)
-    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+    );
 
     // Check that orders are rendered.
     expect(screen.getByText('Burger Customer')).toBeInTheDocument();
     expect(screen.getByText('Pending')).toBeInTheDocument();
-    const startTimeFormatted = new Date('2022-01-01T00:00:00Z').toLocaleString();
+    const startTimeFormatted = new Date(
+      '2022-01-01T00:00:00Z',
+    ).toLocaleString();
     expect(screen.getByText(startTimeFormatted)).toBeInTheDocument();
 
     expect(screen.getByText('Fries Customer')).toBeInTheDocument();
     expect(screen.getByText('Served')).toBeInTheDocument();
-    const startTimeFormatted2 = new Date('2022-01-01T01:00:00Z').toLocaleString();
+    const startTimeFormatted2 = new Date(
+      '2022-01-01T01:00:00Z',
+    ).toLocaleString();
     expect(screen.getByText(startTimeFormatted2)).toBeInTheDocument();
   });
 
@@ -56,7 +62,9 @@ describe('OrdersPage Component', () => {
     render(<OrdersPage />);
 
     // Wait for loading to finish.
-    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+    );
 
     // Loading spinner should be gone.
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -74,18 +82,20 @@ describe('OrdersPage Component', () => {
       customer_name: 'Test Customer',
       start_time: '2022-01-01T00:00:00Z',
       status: 'Pending',
-      order_items: [
-        { item_name: 'Test Item', quantity: 2 }
-      ]
+      order_items: [{ item_name: 'Test Item', quantity: 2 }],
     };
     axios.get.mockResolvedValue({ data: [order] });
     render(<OrdersPage />);
-    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+    );
 
     // Simulate clicking the order row by clicking on the customer's name.
     fireEvent.click(screen.getByText('Test Customer'));
     // Modal should now appear.
-    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Order Details')).toBeInTheDocument(),
+    );
     // Verify that the order items are displayed.
     expect(screen.getByText('Test Item')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
@@ -97,18 +107,20 @@ describe('OrdersPage Component', () => {
       customer_name: 'Test Customer',
       start_time: '2022-01-01T00:00:00Z',
       status: 'Pending',
-      order_items: [
-        { item_name: 'Test Item', quantity: 2 }
-      ]
+      order_items: [{ item_name: 'Test Item', quantity: 2 }],
     };
     axios.get.mockResolvedValue({ data: [order] });
     axios.patch.mockResolvedValue({ data: { order_id: 1 } });
     render(<OrdersPage />);
-    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+    );
 
     // Open the order details modal.
     fireEvent.click(screen.getByText('Test Customer'));
-    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Order Details')).toBeInTheDocument(),
+    );
 
     // "Complete Order" button should be visible.
     const completeButton = screen.getByText('Complete Order');
@@ -126,18 +138,22 @@ describe('OrdersPage Component', () => {
       customer_name: 'Test Customer',
       start_time: '2022-01-01T00:00:00Z',
       status: 'Pending',
-      order_items: [
-        { item_name: 'Test Item', quantity: 2 }
-      ]
+      order_items: [{ item_name: 'Test Item', quantity: 2 }],
     };
     axios.get.mockResolvedValue({ data: [order] });
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     axios.patch.mockRejectedValue(new Error('Patch error'));
     render(<OrdersPage />);
-    await waitFor(() => expect(screen.getByText('Active Orders')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+    );
 
     fireEvent.click(screen.getByText('Test Customer'));
-    await waitFor(() => expect(screen.getByText('Order Details')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Order Details')).toBeInTheDocument(),
+    );
 
     const completeButton = screen.getByText('Complete Order');
     fireEvent.click(completeButton);
@@ -145,8 +161,8 @@ describe('OrdersPage Component', () => {
     await waitFor(() =>
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error marking order as completed:',
-        expect.any(Error)
-      )
+        expect.any(Error),
+      ),
     );
     consoleErrorSpy.mockRestore();
   });

@@ -28,7 +28,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
     });
 
     try {
-      final userId = await UserManager.getUser(); // Assuming this returns customer ID
+      final userId =
+          await UserManager.getUser(); // Assuming this returns customer ID
       if (userId == null) throw Exception("Customer ID not found");
 
       final fetchedOrders = await fetchUserOrders(userId);
@@ -52,7 +53,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
           : errorFetching
               ? Center(child: Text('Failed to load orders. Try again.'))
               : orders.isEmpty
-                  ? const Center(child: Text("You haven't placed any orders yet."))
+                  ? const Center(
+                      child: Text("You haven't placed any orders yet."))
                   : ListView.builder(
                       itemCount: orders.length,
                       itemBuilder: (context, index) {

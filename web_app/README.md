@@ -70,13 +70,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 ### Testing
-Unit Tests: 
-    Run Tests in a Test Directory: npm test -- src/tests
+
+Unit Tests:
+Run Tests in a Test Directory: npm test -- src/tests
 
 Acceptance Tests with Cypress:
-    Install cypress - npm install cypress --save-dev
-    Open Cypress UI - npx cypress open
-    Run Cypress Tests w/o UI - npx cypress run
-
-
-
+Install cypress - npm install cypress --save-dev
+Open Cypress UI - npx cypress open
+Run Cypress Tests w/o UI - npx cypress run

@@ -8,7 +8,11 @@ class FourDigitCodeField extends StatefulWidget {
   final double screenWidth;
   final double screenHeight;
 
-  const FourDigitCodeField({Key? key, required this.onChanged, required this.screenHeight, required this.screenWidth})
+  const FourDigitCodeField(
+      {Key? key,
+      required this.onChanged,
+      required this.screenHeight,
+      required this.screenWidth})
       : super(key: key);
 
   @override
@@ -40,7 +44,6 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
     String enteredCode = _controllers.map((e) => e.text).join();
 
     widget.onChanged(enteredCode);
-
   }
 
   void _onBackspace(String value, int index) {
@@ -56,9 +59,9 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(4, (index) {
         return Container(
-          width: widget.screenWidth*0.12,
-          height: widget.screenWidth*0.12,
-          margin: EdgeInsets.symmetric(horizontal: widget.screenWidth*0.02),
+          width: widget.screenWidth * 0.12,
+          height: widget.screenWidth * 0.12,
+          margin: EdgeInsets.symmetric(horizontal: widget.screenWidth * 0.02),
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],

@@ -17,33 +17,42 @@ function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login/`, {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/login/`,
+        {
+          username,
+          password,
+        },
+      );
 
       const { access, refresh } = response.data.tokens;
 
       //Log restaurant ID
-      console.log("Logged-in Restaurant ID:", response.data.restaurant_id);
+      console.log('Logged-in Restaurant ID:', response.data.restaurant_id);
 
       if (response.data.bar_name) {
-        localStorage.setItem("barName", response.data.bar_name);
+        localStorage.setItem('barName', response.data.bar_name);
       } else {
-        localStorage.setItem("barName", "Error retrieving bar name");
-      }      
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
+        localStorage.setItem('barName', 'Error retrieving bar name');
+      }
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
 
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-      toast.error("Invalid username or password. Please try again.");
+      toast.error('Invalid username or password. Please try again.');
     }
   };
 
   return (
     <div className="login-page-container">
-      <Modal show centered backdrop="static" keyboard={false} dialogClassName="login-modal-dialog">
+      <Modal
+        show
+        centered
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="login-modal-dialog"
+      >
         <Modal.Header className="justify-content-center">
           <Modal.Title className="login-modal-title">Login</Modal.Title>
         </Modal.Header>
@@ -80,11 +89,11 @@ function Login() {
         hideProgressBar
         closeButton={false}
         toastStyle={{
-          textAlign: "center",
-          fontSize: "16px",
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
+          textAlign: 'center',
+          fontSize: '16px',
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
         }}
       />
     </div>

@@ -6,11 +6,11 @@
 
 ## 1. Install Docker (and Docker Compose)
 
-1. **Windows / Mac**:  
-   - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).  
+1. **Windows / Mac**:
+   - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
    - Docker Desktop **includes** Docker Compose, so you’re all set.
-2. **Linux**:  
-   - Install [Docker Engine](https://docs.docker.com/engine/install/) for your distribution (Ubuntu, Debian, etc.).  
+2. **Linux**:
+   - Install [Docker Engine](https://docs.docker.com/engine/install/) for your distribution (Ubuntu, Debian, etc.).
    - Install [Docker Compose](https://docs.docker.com/compose/install/) if it’s not included in your package manager.
 
 **Verify** your installation:
@@ -36,7 +36,7 @@ REACT_APP_API_URL=http://localhost:8000/auth/
 
 ## 3. Build and Run the Project
 
-1. Build the project:  
+1. Build the project:
 ```bash
 docker compose -f ./docker-compose-all-local.yml up --build
 ```
@@ -61,15 +61,14 @@ docker compose -f ./docker-compose-all-local.yml exec backend python manage.py m
 
 ## 5. Stop the Project
 
-1. Stop the project (Keep local DB volumes):  
+1. Stop the project (Keep local DB volumes):
 ```bash
 docker compose down
 ```
 
 **OR**
 
-2. Remove all volumes as well:  
+2. Remove all volumes as well:
 ```bash
 docker compose down --volumes
 ```
-

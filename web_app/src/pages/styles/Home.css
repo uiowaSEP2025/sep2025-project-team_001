@@ -1,5 +1,3 @@
-
-
 /* Fullscreen background with solid color */
 .home-container {
   display: flex;
@@ -88,20 +86,20 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .home-logo {
-      max-width: 250px;
+    max-width: 250px;
   }
 
   .home-button-group {
-      flex-direction: column;
-      gap: 15px;
+    flex-direction: column;
+    gap: 15px;
   }
 
   .home-btn {
-      width: 100%;
-      padding: 14px 0;
+    width: 100%;
+    padding: 14px 0;
   }
 
   .home-footer {
-      font-size: 0.8rem;
+    font-size: 0.8rem;
   }
 }

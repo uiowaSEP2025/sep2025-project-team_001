@@ -9,32 +9,37 @@ const OrdersPage = () => {
 
   const handleCompleteOrder = async (orderId) => {
     try {
-      const response = await axios.patch(`${process.env.REACT_APP_API_URL}/orders/${orderId}/complete/`);
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/orders/${orderId}/complete/`,
+      );
       console.log(`Order ${response.data.order_id} marked as completed.`);
-      
+
       // Update local state
-      const updatedOrders = orders.map(order =>
-        order.id === orderId ? { ...order, status: 'completed' } : order
+      const updatedOrders = orders.map((order) =>
+        order.id === orderId ? { ...order, status: 'completed' } : order,
       );
       setOrders(updatedOrders);
-  
+
       // Update selected order in modal too
-      setSelectedOrder(prev => prev ? { ...prev, status: 'completed' } : null);
+      setSelectedOrder((prev) =>
+        prev ? { ...prev, status: 'completed' } : null,
+      );
     } catch (error) {
       console.error('Error marking order as completed:', error);
     }
-  };  
+  };
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/retrieve/orders/`)
-    .then(response => {
-      setOrders(response.data);
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Error fetching orders:', error);
-      setLoading(false);
-    });
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/retrieve/orders/`)
+      .then((response) => {
+        setOrders(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching orders:', error);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -60,7 +65,7 @@ const OrdersPage = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map(order => (
+          {orders.map((order) => (
             <tr
               key={order.id}
               onClick={() => setSelectedOrder(order)}
@@ -68,7 +73,7 @@ const OrdersPage = () => {
             >
               <td>{order.customer_name}</td>
               <td>{new Date(order.start_time).toLocaleString()}</td>
-              <td>${Number(order.total_price).toFixed(2)}</td> 
+              <td>${Number(order.total_price).toFixed(2)}</td>
               <td>{order.status}</td>
             </tr>
           ))}
@@ -76,7 +81,11 @@ const OrdersPage = () => {
       </Table>
 
       {/* Modal for Order Details */}
-      <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered>
+      <Modal
+        show={!!selectedOrder}
+        onHide={() => setSelectedOrder(null)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Order Details</Modal.Title>
         </Modal.Header>
@@ -115,7 +124,6 @@ const OrdersPage = () => {
             Close
           </Button>
         </Modal.Footer>
-
       </Modal>
     </Container>
   );

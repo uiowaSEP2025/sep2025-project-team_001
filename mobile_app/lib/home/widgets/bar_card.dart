@@ -12,8 +12,7 @@ class BarCard extends StatelessWidget {
       {super.key,
       required this.bar,
       required this.screenHeight,
-      required this.screenWidth
-      });
+      required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +29,10 @@ class BarCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-              Base64ImageWithFallback(
-                      width: screenWidth * 0.28,
-                          height: screenWidth * 0.27,
-                        base64ImageString: bar.base64image),
+          Base64ImageWithFallback(
+              width: screenWidth * 0.28,
+              height: screenWidth * 0.27,
+              base64ImageString: bar.base64image),
           SizedBox(
             height: screenWidth * 0.02,
           ),

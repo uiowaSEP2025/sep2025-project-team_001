@@ -56,8 +56,6 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
     }
   }
 
-
-
   void selectRestaurant(int i) {
     setState(() {
       if (selectedRestaurantIndex == i) {
@@ -78,8 +76,8 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
 
     return GestureDetector(
       onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -152,7 +150,6 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                                       bar: restaurants[i],
                                       screenHeight: screenHeight,
                                       screenWidth: screenWidth,
-                                      
                                     ),
                                   ),
                                   if (i + 1 < restaurants.length) ...[
@@ -165,7 +162,6 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                                         bar: restaurants[i + 1],
                                         screenHeight: screenHeight,
                                         screenWidth: screenWidth,
-                                        
                                       ),
                                     ),
                                   ]
@@ -173,8 +169,9 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
                               ),
                               SizedBox(height: horizontalSpacing),
                             ],
-                            SizedBox(height: screenHeight*0.1*restaurants.length,)
-                            
+                            SizedBox(
+                              height: screenHeight * 0.1 * restaurants.length,
+                            )
                           ],
                         ),
                       ),
@@ -185,27 +182,25 @@ class _RestaurantAdditionScreenState extends State<RestaurantAdditionScreen> {
   }
 }
 
-
-
-    // restaurants = [
-    //   Restaurant(
-    //       name: "Scouts",
-    //       imageUrl:
-    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FscoutsLogo.png?alt=media&token=512cb083-e65c-4435-ae27-018d7467473c"),
-    //   Restaurant(
-    //       name: "Coa",
-    //       imageUrl:
-    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FcoaLogo.png?alt=media&token=956d9fce-9522-4b27-bdf8-75ec5a80a78e"),
-    //   Restaurant(
-    //       name: "El Rays",
-    //       imageUrl:
-    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FelraysLogo.png?alt=media&token=623f67c2-3eda-4b80-884c-d175511511e9"),
-    //   Restaurant(
-    //       name: "Roxxy",
-    //       imageUrl:
-    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FroxxyLogo.png?alt=media&token=977221d7-3c5a-4937-a045-c43576c7a265"),
-    //   Restaurant(
-    //       name: "Brothers",
-    //       imageUrl:
-    //           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FbrothersLogo.png?alt=media&token=d4b583ee-2fb5-499a-b3a2-04196ff68f98"),
-    // ];
+// restaurants = [
+//   Restaurant(
+//       name: "Scouts",
+//       imageUrl:
+//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FscoutsLogo.png?alt=media&token=512cb083-e65c-4435-ae27-018d7467473c"),
+//   Restaurant(
+//       name: "Coa",
+//       imageUrl:
+//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FcoaLogo.png?alt=media&token=956d9fce-9522-4b27-bdf8-75ec5a80a78e"),
+//   Restaurant(
+//       name: "El Rays",
+//       imageUrl:
+//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FelraysLogo.png?alt=media&token=623f67c2-3eda-4b80-884c-d175511511e9"),
+//   Restaurant(
+//       name: "Roxxy",
+//       imageUrl:
+//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FroxxyLogo.png?alt=media&token=977221d7-3c5a-4937-a045-c43576c7a265"),
+//   Restaurant(
+//       name: "Brothers",
+//       imageUrl:
+//           "https://firebasestorage.googleapis.com/v0/b/mi-cielo-app.appspot.com/o/tests%2FbrothersLogo.png?alt=media&token=d4b583ee-2fb5-499a-b3a2-04196ff68f98"),
+// ];

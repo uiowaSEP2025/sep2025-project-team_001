@@ -1,28 +1,28 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import Form from "react-bootstrap/Form";
-import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
-import "./styles/Registration.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+import './styles/Registration.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Registration() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
-    name: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    email: "",
-    phone: "",
-    business_name: "",
-    business_address: "",
-    restaurantImage: "",
+    name: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    email: '',
+    phone: '',
+    business_name: '',
+    business_address: '',
+    restaurantImage: '',
   });
 
   const handleChange = (e) => {
@@ -48,15 +48,15 @@ function Registration() {
   const handleContinue = () => {
     const { name, username, password, confirmPassword } = formData;
     if (!name || !username || !password || !confirmPassword) {
-      toast.error("Please fill out all fields.");
+      toast.error('Please fill out all fields.');
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
+      toast.error('Passwords do not match!');
       return;
     }
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
+      toast.error('Password must be at least 6 characters long.');
       return;
     }
     setStep(2);
@@ -66,10 +66,17 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address, restaurantImage } = formData;
+    const { email, phone, business_name, business_address, restaurantImage } =
+      formData;
 
-    if (!email || !phone || !business_name || !business_address || !restaurantImage) {
-      toast.error("Please fill out all fields in Step 2.");
+    if (
+      !email ||
+      !phone ||
+      !business_name ||
+      !business_address ||
+      !restaurantImage
+    ) {
+      toast.error('Please fill out all fields in Step 2.');
       return;
     }
 
@@ -77,30 +84,34 @@ function Registration() {
     const phoneRegex = /^\d{10}$/;
 
     if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
+      toast.error('Please enter a valid email address.');
       return;
     }
 
     if (!phoneRegex.test(phone)) {
-      toast.error("Phone number must be exactly 10 digits.");
+      toast.error('Phone number must be exactly 10 digits.');
       return;
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register/`, formData);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/register/`,
+        formData,
+      );
       const { access, refresh } = response.data.tokens;
 
-      console.log("Registration:", response.data);
-      localStorage.setItem("barName", business_name);
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
+      console.log('Registration:', response.data);
+      localStorage.setItem('barName', business_name);
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
 
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-
-      toast.error("Registration failed: " + (error.response?.data?.message || error.message));
+      toast.error(
+        'Registration failed: ' +
+          (error.response?.data?.message || error.message),
+      );
     }
-
   };
 
   return (
@@ -113,7 +124,9 @@ function Registration() {
         dialogClassName="registration-modal-dialog"
       >
         <Modal.Header>
-          <Modal.Title className="modal-title">Manager Registration</Modal.Title>
+          <Modal.Title className="modal-title">
+            Manager Registration
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body className="registration-modal-body">
           <Form>
@@ -127,7 +140,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="username" className="registration-form-group">
+            <Form.Group
+              controlId="username"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="text"
                 placeholder="Desired Username"
@@ -137,7 +153,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="password" className="registration-form-group">
+            <Form.Group
+              controlId="password"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="password"
                 placeholder="Desired Password"
@@ -147,7 +166,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="confirmPassword" className="registration-form-group">
+            <Form.Group
+              controlId="confirmPassword"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="password"
                 placeholder="Confirm Password"
@@ -160,7 +182,11 @@ function Registration() {
           </Form>
         </Modal.Body>
         <Modal.Footer className="registration-modal-footer">
-          <Button className="registration-button" variant="primary" onClick={handleContinue}>
+          <Button
+            className="registration-button"
+            variant="primary"
+            onClick={handleContinue}
+          >
             Continue
           </Button>
         </Modal.Footer>
@@ -174,7 +200,9 @@ function Registration() {
         dialogClassName="registration-modal-dialog"
       >
         <Modal.Header>
-          <Modal.Title className="modal-title">Manager Registration</Modal.Title>
+          <Modal.Title className="modal-title">
+            Manager Registration
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body className="registration-modal-body">
           <Form onSubmit={handleRegister}>
@@ -198,7 +226,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="business_name" className="registration-form-group">
+            <Form.Group
+              controlId="business_name"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="text"
                 placeholder="Business Name"
@@ -208,7 +239,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="business_address" className="registration-form-group">
+            <Form.Group
+              controlId="business_address"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="text"
                 placeholder="Business Address"
@@ -218,7 +252,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="restaurant_image" className="registration-form-group file-upload-group">
+            <Form.Group
+              controlId="restaurant_image"
+              className="registration-form-group file-upload-group"
+            >
               <input
                 type="file"
                 id="upload"
@@ -238,10 +275,19 @@ function Registration() {
           </Form>
         </Modal.Body>
         <Modal.Footer className="registration-modal-footer">
-          <Button className="registration-button" variant="secondary" onClick={handleBack}>
+          <Button
+            className="registration-button"
+            variant="secondary"
+            onClick={handleBack}
+          >
             Back
           </Button>
-          <Button className="registration-button" variant="success" type="submit" onClick={handleRegister}>
+          <Button
+            className="registration-button"
+            variant="success"
+            type="submit"
+            onClick={handleRegister}
+          >
             Register
           </Button>
         </Modal.Footer>
@@ -253,11 +299,11 @@ function Registration() {
         hideProgressBar
         closeButton={false}
         toastStyle={{
-          textAlign: "center",
-          fontSize: "16px",
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
+          textAlign: 'center',
+          fontSize: '16px',
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
         }}
       />
     </div>
