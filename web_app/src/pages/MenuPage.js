@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../pages/styles/MenuPage.css';
 import ItemCard from '../components/ItemCard.js';
+import { useNavigate } from 'react-router-dom';
 
 const MenuPage = () => {
     const [items, setItems] = useState([]);
@@ -16,7 +17,8 @@ const MenuPage = () => {
         stock: '',
         available: true
     });
-    const barName = localStorage.getItem("barName");
+    const barName = sessionStorage.getItem("barName");
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchItems();
@@ -25,7 +27,7 @@ const MenuPage = () => {
     const fetchItems = () => {
         fetch(`${process.env.REACT_APP_API_URL}/api/menu-items/`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
             }
         })
             .then(response => response.json())
@@ -81,7 +83,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
             },
             body: JSON.stringify({
                 action: 'create',
@@ -119,7 +121,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
 
              },
             body: JSON.stringify(updatedItem)
@@ -142,7 +144,7 @@ const MenuPage = () => {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization' : `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization' : `Bearer ${sessionStorage.getItem('accessToken')}`
 
              },
             body: JSON.stringify({
@@ -177,6 +179,13 @@ const MenuPage = () => {
         <div>
             <div className = "menu-page">
                 <div className="menu-page-container">
+                    <button
+                        className="menu-back-button"
+                        onClick={() => navigate("/dashboard")}
+                        >
+                        Dashboard
+                    </button>
+
                     {barName && <h2> Restaurant: {barName} </h2>}
                     <h2>Menu Manager</h2>
                     <button className="menu-create-button" onClick={openCreateModal}>

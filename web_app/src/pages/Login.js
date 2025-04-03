@@ -28,12 +28,12 @@ function Login() {
       console.log("Logged-in Restaurant ID:", response.data.restaurant_id);
 
       if (response.data.bar_name) {
-        localStorage.setItem("barName", response.data.bar_name);
+        sessionStorage.setItem("barName", response.data.bar_name);
       } else {
-        localStorage.setItem("barName", "Error retrieving bar name");
+        sessionStorage.setItem("barName", "Error retrieving bar name");
       }      
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
+      sessionStorage.setItem("accessToken", access);
+      sessionStorage.setItem("refreshToken", refresh);
 
       navigate("/dashboard");
     } catch (error) {
@@ -44,9 +44,12 @@ function Login() {
   return (
     <div className="login-page-container">
       <Modal show centered backdrop="static" keyboard={false} dialogClassName="login-modal-dialog">
-        <Modal.Header className="justify-content-center">
-          <Modal.Title className="login-modal-title">Login</Modal.Title>
-        </Modal.Header>
+      <Modal.Header className="login-modal-header">
+        <button className="modal-back-button" onClick={() => navigate("/")}>
+          Back
+        </button>
+        <Modal.Title className="login-modal-title w-100 text-center">Login</Modal.Title>
+      </Modal.Header>
         <Modal.Body className="login-modal-body">
           <Form onSubmit={handleLogin}>
             <Form.Group controlId="username" className="login-form-group">
@@ -70,6 +73,12 @@ function Login() {
             <Button variant="primary" type="submit" className="login-button">
               Login
             </Button>
+            <div className="register-link-container">
+              <span>Don't have an account? </span>
+              <span className="register-link" onClick={() => navigate("/register")}>
+                Register
+              </span>
+            </div>
           </Form>
         </Modal.Body>
       </Modal>

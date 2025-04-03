@@ -102,4 +102,78 @@
       max-width: 90%;
     }
   }
+
+  .register-link-container {
+    margin-top: 15px;
+    text-align: center;
+    color: #ccc;
+    font-size: 15px;
+  }
+  
+  .register-link {
+    color: #6DD5FA;
+    margin-left: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .register-link:hover {
+    color: #00f2fe;
+    text-decoration: underline;
+  }
+  .back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  color: #6DD5FA;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 1051; /* Make sure it appears above the modal backdrop */
+  transition: color 0.2s ease-in-out;
+}
+
+.back-button:hover {
+  color: #00f2fe;
+  text-decoration: underline;
+}
+
+.login-modal-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: none;
+}
+
+.modal-back-button {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(to right, #6DD5FA, #2980B9);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-back-button:hover {
+  transform: translateY(-50%) scale(1.05);
+  background: linear-gradient(to right, #4facfe, #00f2fe);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+  
+  
   
