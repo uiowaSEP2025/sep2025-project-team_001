@@ -9,11 +9,10 @@ class FourDigitCodeField extends StatefulWidget {
   final double screenHeight;
 
   const FourDigitCodeField(
-      {Key? key,
+      {super.key,
       required this.onChanged,
       required this.screenHeight,
-      required this.screenWidth})
-      : super(key: key);
+      required this.screenWidth});
 
   @override
   State<FourDigitCodeField> createState() => _FourDigitCodeFieldState();
@@ -71,7 +70,7 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
             style: AppTextStyles.appBarText(widget.screenHeight, Colors.black),
             cursorColor: AppColors.primaryColor,
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(0),
+              contentPadding: const EdgeInsets.all(0),
               counterText: "",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -79,7 +78,8 @@ class _FourDigitCodeFieldState extends State<FourDigitCodeField> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.primaryColor, width: 2),
               ),
             ),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],

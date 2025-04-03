@@ -36,7 +36,7 @@ class InputTextBox extends StatelessWidget {
                 ],
               )
             : Container(),
-        Container(
+        SizedBox(
           height: screenWidth * 0.12,
           child: TextField(
             onChanged: (value) {
@@ -52,7 +52,7 @@ class InputTextBox extends StatelessWidget {
                 contentPadding: EdgeInsets.only(left: screenWidth * 0.025),
                 filled: true,
                 fillColor: AppColors.whiteText,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 hintText: hintText),
           ),
         ),

@@ -1,8 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
@@ -35,7 +31,7 @@ class MenuItemCard extends StatelessWidget {
         elevation: 3,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Container(
+          child: SizedBox(
             height: screenWidth * 0.32,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,17 +58,17 @@ class MenuItemCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text('\$${item.price.toStringAsFixed(2)}',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                           item.available
                               ? ElevatedButton(
                                   onPressed: () => onAddToCart(item),
-                                  child: Text("Add to Cart"),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primaryColor,
                                     foregroundColor: Colors.white,
@@ -85,8 +81,9 @@ class MenuItemCard extends StatelessWidget {
                                         screenHeight * 0.8,
                                         AppColors.whiteText),
                                   ),
+                                  child: const Text("Add to Cart"),
                                 )
-                              : Text("Unavailable",
+                              : const Text("Unavailable",
                                   style: TextStyle(color: Colors.red)),
                         ],
                       ),

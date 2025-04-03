@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -120,7 +119,7 @@ class _EnterNewPasswordState extends State<EnterNewPassword> {
                       style: AppTextStyles.smallFooters(
                           screenHeight, AppColors.validGreen),
                     )
-                  : Container(
+                  : SizedBox(
                       width: screenWidth - horizontalSpacing * 2,
                       child: Text(
                         "At least 8 characters, including uppercase, lowercase, number, and special character",
@@ -169,7 +168,7 @@ class _EnterNewPasswordState extends State<EnterNewPassword> {
                   ],
                 )
               : Container(),
-          Spacer(),
+          const Spacer(),
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : ElevatedButton(

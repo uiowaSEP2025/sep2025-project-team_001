@@ -27,7 +27,7 @@ class SearchBox extends StatelessWidget {
               const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: Colors.black,
               width: 1.0,
             ),

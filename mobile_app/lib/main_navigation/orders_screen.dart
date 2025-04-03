@@ -51,7 +51,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorFetching
-              ? Center(child: Text('Failed to load orders. Try again.'))
+              ? const Center(child: Text('Failed to load orders. Try again.'))
               : orders.isEmpty
                   ? const Center(
                       child: Text("You haven't placed any orders yet."))

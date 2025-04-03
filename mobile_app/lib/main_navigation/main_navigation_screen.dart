@@ -16,9 +16,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _selectedIndex;
 
   final List<Widget> _screens = [
-    RestaurantSelectionScreen(),
-    OrdersScreen(),
-    AccountScreen(),
+    const RestaurantSelectionScreen(),
+    const OrdersScreen(),
+    const AccountScreen(),
   ];
 
   @override

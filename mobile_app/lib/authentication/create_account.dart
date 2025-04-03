@@ -9,7 +9,6 @@ import 'package:mobile_app/design/widgets/user_input/date_input_box.dart';
 import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -191,7 +190,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   style: AppTextStyles.smallFooters(
                                       screenHeight, AppColors.validGreen),
                                 )
-                              : Container(
+                              : SizedBox(
                                   width: screenWidth - horizontalSpacing * 2,
                                   child: Text(
                                     "At least 8 characters, including uppercase, lowercase, number, and special character",
@@ -350,7 +349,7 @@ class _CreateAccountState extends State<CreateAccount> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
-    final String endpoint = "${ApiConfig.baseUrl}/mobile/register/";
+    const String endpoint = "${ApiConfig.baseUrl}/mobile/register/";
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     if (password != confirmPassword) {

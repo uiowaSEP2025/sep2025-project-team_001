@@ -41,7 +41,7 @@ void main() {
         any,
         data: anyNamed('data'),
         options: anyNamed('options'),
-      )).thenThrow(DioError(
+      )).thenThrow(DioException(
         requestOptions: RequestOptions(path: ''),
         response: Response(
             data: {'error': 'Invalid credentials'},
@@ -54,7 +54,7 @@ void main() {
             data: {"username": "wrong@gmail.com", "password": "wrongpassword"},
             options: Options(headers: {"Content-Type": "application/json"}));
       } catch (error) {
-        expect(error, isInstanceOf<DioError>());
+        expect(error, isInstanceOf<DioException>());
       }
     });
   });

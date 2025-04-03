@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
@@ -38,7 +37,7 @@ class BarCard extends StatelessWidget {
           ),
           Text(bar.name,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black)),

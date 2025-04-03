@@ -32,12 +32,12 @@ class _DateInputBoxState extends State<DateInputBox> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: AppColors.primaryColor,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
-            dialogBackgroundColor: Colors.white,
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );
@@ -91,7 +91,7 @@ class _DateInputBoxState extends State<DateInputBox> {
                         )),
                   ),
                 ),
-                Icon(Icons.calendar_today, color: Colors.black),
+                const Icon(Icons.calendar_today, color: Colors.black),
                 SizedBox(
                   width: widget.screenWidth * 0.025,
                 )

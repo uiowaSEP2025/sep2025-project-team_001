@@ -1,12 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -14,9 +11,7 @@ import 'package:mobile_app/design/widgets/user_input/input_text_box.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 import 'dart:ui';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_app/design/widgets/user_input/password_text_box.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -110,7 +105,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             SizedBox(
                               height: verticalSpacing / 2,
                             ),
-                            Container(
+                            SizedBox(
                               width: screenWidth * 0.75,
                               child: Text(
                                 "Sign in",

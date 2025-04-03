@@ -15,7 +15,7 @@ class Base64ImageWithFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (this.base64ImageString == null) {
+    if (base64ImageString == null) {
       return const Icon(Icons.broken_image, size: 40, color: Colors.grey);
     } else {
       try {

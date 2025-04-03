@@ -34,8 +34,6 @@ module.exports = [
       semi: ['error', 'always'],
       'no-unused-vars': 'off',
       'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/display-name': 'off',
     },
     settings: {
       react: {
