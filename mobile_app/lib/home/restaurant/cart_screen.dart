@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/services/api_services.dart';
@@ -76,7 +77,7 @@ class _CartScreenState extends State<CartScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Your Cart')),
+        appBar: AppBar(title: Text('Your Cart',style: AppTextStyles.appBarText(screenHeight, Colors.black))),
         body: ListView(
           children: _cart.entries.map((entry) {
             final key = entry.key;

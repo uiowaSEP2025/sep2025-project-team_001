@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
+import 'package:mobile_app/design/widgets/user_input/search_box.dart';
 import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/home/widgets/bar_card.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
@@ -23,6 +24,8 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
   int? selectedRestaurantIndex;
   bool isLoading = true;
   bool errorFetching = false;
+    String searchQuery = '';
+
 
   @override
   void initState() {
@@ -75,17 +78,17 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
           'Select a restaurant',
           style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
-        actions: [
-          GestureDetector(
-            onTap: (){
-              Navigator.pushNamed(context, "/add_restaurant");
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("ADD NEW +", style: AppTextStyles.buttonText(screenHeight, AppColors.primaryColor),),
-            ),
-          )
-        ],
+        // actions: [
+        //   GestureDetector(
+        //     onTap: (){
+        //       Navigator.pushNamed(context, "/add_restaurant");
+        //     },
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(8.0),
+        //       child: Text("ADD NEW +", style: AppTextStyles.buttonText(screenHeight, AppColors.primaryColor),),
+        //     ),
+        //   )
+        // ],
       ),
       body: GestureDetector(
         onTap: () {
@@ -117,6 +120,20 @@ class _RestaurantSelectionScreenState extends State<RestaurantSelectionScreen> {
                       child: restaurants.isNotEmpty
                           ? Column(
                               children: [
+                                SizedBox(
+                              height: verticalSpacing,
+                            ),
+                            SearchBox(
+                              screenHeight: screenHeight,
+                              hintText: "Search restaurants...",
+                              onChanged: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
+                                print("Searching for: $value");
+                              },
+                            ),
+                            
                                 SizedBox(
                                   height: horizontalSpacing,
                                 ),

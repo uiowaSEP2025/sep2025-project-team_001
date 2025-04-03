@@ -75,14 +75,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
 
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text("Menu")),
+        appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (errorFetching) {
       return Scaffold(
-        appBar: AppBar(title: Text("Menu")),
+        appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
         body: Center(child: Text("Failed to load menu")),
       );
     }
@@ -96,7 +96,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         : items.where((item) => item.category == selectedCategory).toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text("Menu")),
+      appBar: AppBar(title: Text("Menu",style: AppTextStyles.appBarText(screenHeight, Colors.black))),
       body: Column(
         children: [
           SingleChildScrollView(
