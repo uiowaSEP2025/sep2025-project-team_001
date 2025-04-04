@@ -103,11 +103,35 @@ class _OrdersScreenState extends State<OrdersScreen> {
   //   );
   // }
 
+  // Widget _buildOrderTile(Order order) {
+  //   return ExpansionTile(
+  //     title: Text("Order #${order.id}"),
+  //     subtitle: Text("Placed on ${order.startTime}"),
+  //     trailing: Text("${_getTotalItems(order.items)} items"),
+  //     children: order.items.map((item) {
+  //       return ListTile(
+  //         title: Text(item['item_name'] ?? 'Unnamed item'),
+  //         subtitle: Text("Quantity: ${item['quantity']}"),
+  //         visualDensity: VisualDensity.compact,
+  //       );
+  //     }).toList(),
+  //   );
+  // }
   Widget _buildOrderTile(Order order) {
     return ExpansionTile(
       title: Text("Order #${order.id}"),
       subtitle: Text("Placed on ${order.startTime}"),
-      trailing: Text("${_getTotalItems(order.items)} items"),
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text("${_getTotalItems(order.items)} items"),
+          const SizedBox(height: 4),
+          Text(
+            "\$${order.totalPrice.toStringAsFixed(2)}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
       children: order.items.map((item) {
         return ListTile(
           title: Text(item['item_name'] ?? 'Unnamed item'),
@@ -125,7 +149,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       if (quantity is int && quantity > 0) {
         total += quantity;
       } else {
-        total += 1; // fallback if quantity is null or invalid
+        total += 1;
       }
     }
     return total;

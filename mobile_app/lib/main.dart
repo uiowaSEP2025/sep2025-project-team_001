@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:mobile_app/authentication/authentication_screen.dart';
 import 'package:mobile_app/authentication/create_account.dart';
 import 'package:mobile_app/authentication/recover_email/recover_password.dart';
@@ -9,6 +10,7 @@ import 'package:mobile_app/main_navigation/main_navigation_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = 'pk_test_51RAFr02cTgsJM4b11a6uRlyWLHp0qyDzpf7FnNvBdWC15nc7r0UGfmgDTUBgaK3thLKa6OXRGtufqo69pXRz6ikT00EWGzhEwv';
   runApp(const MyApp());
 }
 
