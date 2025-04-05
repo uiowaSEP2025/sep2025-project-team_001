@@ -18,7 +18,8 @@ def get_restaurants(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_menu_items(request, restaurant):
-    items = Item.objects.filter(restaurant__name=restaurant, available=True)
+def get_menu_items(request, restaurant_id):
+    items = Item.objects.filter(restaurant__id=restaurant_id, available=True)
     serializer = ItemSerializer(items, many=True)
     return Response(serializer.data)
+

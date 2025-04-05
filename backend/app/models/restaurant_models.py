@@ -1,16 +1,17 @@
 from django.db import models
-
-from .customer_models import Manager
+from .customer_models import CustomUser
 
 
 class Restaurant(models.Model):
-    name = models.CharField(max_length=255)
-    address = models.CharField(max_length=255, blank=True)
-    phone = models.CharField(max_length=50, blank=True)
-    managers = models.ManyToManyField(Manager, related_name="restaurants")
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="restaurant",
+    )
+    name = models.CharField(max_length=255)  # Business name
+    address = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50)
+    restaurant_image = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    restaurant_image = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
