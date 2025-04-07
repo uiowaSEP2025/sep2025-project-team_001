@@ -82,7 +82,7 @@ class _CartScreenState extends State<CartScreen> {
       0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
 
   try {
-    final clientSecret = await createPaymentIntent(total);
+    final clientSecret = await createPaymentIntent(total); //todo now setup payment intent to save payment methods
 
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
@@ -100,6 +100,7 @@ class _CartScreenState extends State<CartScreen> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
+      
       SnackBar(content: Text("Order placed with ID $orderId")),
     );
 

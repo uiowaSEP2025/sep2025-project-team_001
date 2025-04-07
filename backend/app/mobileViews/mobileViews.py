@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from app.mobileViews.stripeViews import create_stripe_customer
+
 from ..models import Customer, CustomUser
 from ..views.auth_views import get_tokens_for_user
 
@@ -28,7 +30,12 @@ def register_customer(request):
                 first_name=name
             )
 
-            customer = Customer.objects.create(user=user)
+            stripe_customer_id = create_stripe_customer(email)
+
+            customer = Customer.objects.create(
+                user=user,
+                stripe_customer_id=stripe_customer_id
+            )
 
             tokens = get_tokens_for_user(user)
 
@@ -37,6 +44,7 @@ def register_customer(request):
                     "message": "User registered successfully",
                     "tokens": tokens,
                     "customer_id": customer.id,
+                    "stripe_customer_id": stripe_customer_id,
                     "name": customer.user.first_name
                 },
                 status=201

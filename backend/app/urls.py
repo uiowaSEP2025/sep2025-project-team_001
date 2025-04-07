@@ -2,7 +2,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .mobileViews.stripeViews import create_payment_intent
+from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
 from .mobileViews.mobileViews import login_customer, register_customer
 from .views.auth_views import login_user, register_user
 from .views.menu_views import manage_menu_item, menu_items_api
@@ -34,5 +34,5 @@ urlpatterns = [
         "orders/<int:order_id>/complete/",
         mark_order_completed,
         name="mark_order_completed",
-    ),  # <int:... passed to view as the order_id
+    ),
 ]
