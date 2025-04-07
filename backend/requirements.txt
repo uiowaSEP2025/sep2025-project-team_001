@@ -8,3 +8,4 @@ djangorestframework
 setuptools
 django-cors-headers
 djangorestframework-simplejwt
+stripe

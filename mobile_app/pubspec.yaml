@@ -41,6 +41,7 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.2.4
   build_runner: any
+  flutter_stripe: ^11.4.0
 
 dev_dependencies:
 

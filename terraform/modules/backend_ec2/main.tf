@@ -104,6 +104,7 @@ resource "aws_instance" "backend_ec2" {
     echo "DB_USER=${var.db_user}" >> .env
     echo "DB_PASS=${var.db_pass}" >> .env
     echo "DJANGO_SECRET_KEY=${var.dj_secret_key}" >> .env
+    echo "STRIPE_SECRET_KEY=${var.stripe_secret_key}" >> .env
 
     # Build Docker image from Dockerfile in your backend folder
     docker build -t backend-image .
