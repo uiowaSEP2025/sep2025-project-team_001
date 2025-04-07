@@ -7,13 +7,14 @@
 ## 1. Install Docker (and Docker Compose)
 
 1. **Windows / Mac**:
-   - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-   - Docker Desktop **includes** Docker Compose, so you’re all set.
+    - Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+    - Docker Desktop **includes** Docker Compose, so you’re all set.
 2. **Linux**:
-   - Install [Docker Engine](https://docs.docker.com/engine/install/) for your distribution (Ubuntu, Debian, etc.).
-   - Install [Docker Compose](https://docs.docker.com/compose/install/) if it’s not included in your package manager.
+    - Install [Docker Engine](https://docs.docker.com/engine/install/) for your distribution (Ubuntu, Debian, etc.).
+    - Install [Docker Compose](https://docs.docker.com/compose/install/) if it’s not included in your package manager.
 
 **Verify** your installation:
+
 ```bash
 docker --version
 docker compose version
@@ -24,6 +25,7 @@ docker compose version
 ## 2. Create `.env` file
 
 Create a `.env` file in the root of the project directory with the following content:
+
 ```
 DB_NAME=TestDatabase
 DB_USER=TestUser
@@ -37,11 +39,13 @@ REACT_APP_API_URL=http://localhost:8000/auth/
 ## 3. Build and Run the Project
 
 1. Build the project:
+
 ```bash
 docker compose -f ./docker-compose-all-local.yml up --build
 ```
 
 2. Run PostgreSQL migrations:
+
 ```bash
 docker compose -f ./docker-compose-all-local.yml exec backend python manage.py makemigrations
 docker compose -f ./docker-compose-all-local.yml exec backend python manage.py migrate
@@ -62,6 +66,7 @@ docker compose -f ./docker-compose-all-local.yml exec backend python manage.py m
 ## 5. Stop the Project
 
 1. Stop the project (Keep local DB volumes):
+
 ```bash
 docker compose -f ./docker-compose-all-local.yml down 
 ```
@@ -69,6 +74,28 @@ docker compose -f ./docker-compose-all-local.yml down
 **OR**
 
 2. Remove all volumes as well:
+
 ```bash
 docker compose -f ./docker-compose-all-local.yml down --volumes
+```
+
+## Setup Pre-commit
+
+First time setup:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Run pre-commit manually:
+
+```bash
+pre-commit run --all-files
+```
+
+Commit without running pre-commit:
+
+```bash
+git commit -m "your commit message" --no-verify
 ```

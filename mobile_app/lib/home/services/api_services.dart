@@ -115,5 +115,41 @@ Future<List<Order>> fetchUserOrders(int customerId) async {
   );
 
   final data = response.data as List;
+  print(data);
   return data.map((json) => Order.fromJson(json)).toList();
 }
+
+Future<String> createPaymentIntent(double amountInDollars) async {
+  final accessToken = await TokenManager.getAccessToken();
+
+  if (accessToken == null) {
+    throw Exception('Access token not found');
+  }
+
+  const String endpoint = "${ApiConfig.baseUrl}/order/payment/";
+  final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+
+  try {
+    final response = await dio.post(
+      endpoint,
+      data: jsonEncode({'amount': (amountInDollars * 100).toInt()}), //cents for stripe
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final clientSecret = response.data['clientSecret'];
+      return clientSecret;
+    } else {
+      throw Exception("Failed to create PaymentIntent");
+    }
+  } on DioException catch (e) {
+    print("PaymentIntent error: ${e.response?.data}");
+    throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
+  }
+}
+

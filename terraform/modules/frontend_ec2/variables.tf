@@ -1,7 +1,7 @@
 variable "name_prefix" {
   type        = string
   description = "Prefix for naming frontend resources"
-  default     = "my-frontend"
+  default     = "frontend"
 }
 
 variable "vpc_id" {

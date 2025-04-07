@@ -17,6 +17,7 @@ services:
       - DB_PASS=${DB_PASS}
       - DB_HOST=db
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
     depends_on:
       - db
     ports:

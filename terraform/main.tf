@@ -181,6 +181,7 @@ module "backend_ec2" {
   db_user       = "TestUser"
   db_pass       = var.db_password
   dj_secret_key = "mysecretkey123"
+  stripe_secret_key = "sk_test_51RAFr02cTgsJM4b1zq9w4tYcXuLKqwlvMGwEvW354FGgtknjwwV5OQgT5oLm1hfbGyZzecZn0r0kdfzr9ArKtwBW00uvzbCTbA"
 
   repo_url            = var.repo_url
   repo_branch         = var.repo_branch

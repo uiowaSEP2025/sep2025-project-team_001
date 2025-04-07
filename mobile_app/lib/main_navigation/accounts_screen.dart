@@ -3,6 +3,7 @@ import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -14,6 +15,7 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   late String email = " ";
   late String name = " ";
+  bool notifications_enabled = true;
 
   void _logout(BuildContext context) async {
     await TokenManager.clearTokens();
@@ -32,6 +34,14 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       email = retrievedEmail ?? '';
       name = retrievedName ?? '';
+    });
+  }
+
+    void loadNotificationPreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool enabled = prefs.getBool('notifications_enabled') ?? true;
+    setState(() {
+      notifications_enabled = enabled;
     });
   }
 

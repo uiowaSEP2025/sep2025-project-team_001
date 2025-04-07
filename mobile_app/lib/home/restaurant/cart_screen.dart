@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
@@ -37,34 +38,88 @@ class _CartScreenState extends State<CartScreen> {
     double horizontalSpacing = screenWidth * 0.05;
     double verticalSpacing = screenHeight * 0.025;
 
+    // void submitOrder() async {
+    //   final customerId = await UserManager.getUser();
+    //   final restaurantId = widget.restaurant.id;
+
+    //   if (customerId == null) {
+    //     throw Exception('customer id not found');
+    //   }
+
+    //   try {
+    //     final orderId = await placeOrder(
+    //         customerId: customerId,
+    //         restaurantId: restaurantId,
+    //         cart: widget.cart);
+
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(content: Text("order placed with id $orderId")));
+
+    //     Navigator.pushNamedAndRemoveUntil(
+    //       context,
+    //       '/home',
+    //       (route) => false,
+    //       arguments: {'initialIndex': 1},
+    //     );
+    //   } catch (e) {
+    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    //         content: Text("Error placing order, please try again")));
+    //   }
+    // }
+
     void submitOrder() async {
-      final customerId = await UserManager.getUser();
-      final restaurantId = widget.restaurant.id;
+  final customerId = await UserManager.getUser();
+  final restaurantId = widget.restaurant.id;
 
-      if (customerId == null) {
-        throw Exception('customer id not found');
-      }
+  if (customerId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Customer ID not found")),
+    );
+    return;
+  }
 
-      try {
-        final orderId = await placeOrder(
-            customerId: customerId,
-            restaurantId: restaurantId,
-            cart: widget.cart);
+  double total = _cart.values.fold<double>(
+      0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("order placed with id $orderId")));
+  try {
+    final clientSecret = await createPaymentIntent(total); //todo now setup payment intent to save payment methods
 
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-          arguments: {'initialIndex': 1},
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Error placing order, please try again")));
-      }
-    }
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: 'Streamline',
+      ),
+    );
+
+    await Stripe.instance.presentPaymentSheet();
+
+    final orderId = await placeOrder(
+      customerId: customerId,
+      restaurantId: restaurantId,
+      cart: _cart,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      
+      SnackBar(content: Text("Order placed with ID $orderId")),
+    );
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
+      arguments: {'initialIndex': 1},
+    );
+  } catch (e) {
+    print("Payment/order error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Payment failed or cancelled")),
+    );
+  }
+}
+
+
+    
 
     double total = _cart.values.fold<double>(
         0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
