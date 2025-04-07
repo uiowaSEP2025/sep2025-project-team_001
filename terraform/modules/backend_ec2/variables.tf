@@ -72,6 +72,12 @@ variable "dj_secret_key" {
   default   = "mysecretkey"
 }
 
+variable "stripe_secret_key" {
+  type      = string
+  sensitive = true
+  default   = "sk_test_51RAFr02cTgsJM4b1zq9w4tYcXuLKqwlvMGwEvW354FGgtknjwwV5OQgT5oLm1hfbGyZzecZn0r0kdfzr9ArKtwBW00uvzbCTbA"
+}
+
 variable "frontend_sg_id" {
   type        = string
   description = "Security Group ID of the frontend EC2 instance"
