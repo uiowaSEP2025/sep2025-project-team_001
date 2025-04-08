@@ -23,6 +23,7 @@ function Registration() {
     business_name: '',
     business_address: '',
     restaurantImage: '',
+    pin: '',
   });
 
   const handleChange = (e) => {
@@ -46,8 +47,9 @@ function Registration() {
   };
 
   const handleContinue = () => {
-    const { name, username, password, confirmPassword } = formData;
-    if (!name || !username || !password || !confirmPassword) {
+    const { name, username, password, confirmPassword, pin } = formData;
+  
+    if (!name || !username || !password || !confirmPassword || !pin) {
       toast.error('Please fill out all fields.');
       return;
     }
@@ -59,8 +61,12 @@ function Registration() {
       toast.error('Password must be at least 6 characters long.');
       return;
     }
+    if (!/^\d{4}$/.test(pin)) {
+      toast.error('PIN must be exactly 4 digits.');
+      return;
+    }
     setStep(2);
-  };
+  };  
 
   const handleBack = () => setStep(1);
 
@@ -136,6 +142,36 @@ function Registration() {
         </Modal.Header>
         <Modal.Body className="registration-modal-body">
           <Form>
+            <Form.Group controlId="username" className="registration-form-group">
+              <Form.Control
+                type="text"
+                placeholder="Desired Username"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                className="registration-form-control"
+              />
+            </Form.Group>
+            <Form.Group controlId="password" className="registration-form-group">
+              <Form.Control
+                type="password"
+                placeholder="Desired Password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="registration-form-control"
+              />
+            </Form.Group>
+            <Form.Group controlId="confirmPassword" className="registration-form-group">
+              <Form.Control
+                type="password"
+                placeholder="Confirm Password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="registration-form-control"
+              />
+            </Form.Group>
             <Form.Group controlId="name" className="registration-form-group">
               <Form.Control
                 type="text"
@@ -146,41 +182,12 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group
-              controlId="username"
-              className="registration-form-group"
-            >
+            <Form.Group controlId="pin" className="registration-form-group">
               <Form.Control
                 type="text"
-                placeholder="Desired Username"
+                placeholder="4-digit PIN"
                 required
-                value={formData.username}
-                onChange={handleChange}
-                className="registration-form-control"
-              />
-            </Form.Group>
-            <Form.Group
-              controlId="password"
-              className="registration-form-group"
-            >
-              <Form.Control
-                type="password"
-                placeholder="Desired Password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="registration-form-control"
-              />
-            </Form.Group>
-            <Form.Group
-              controlId="confirmPassword"
-              className="registration-form-group"
-            >
-              <Form.Control
-                type="password"
-                placeholder="Confirm Password"
-                required
-                value={formData.confirmPassword}
+                value={formData.pin}
                 onChange={handleChange}
                 className="registration-form-control"
               />

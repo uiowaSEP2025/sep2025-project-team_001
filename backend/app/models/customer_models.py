@@ -9,18 +9,6 @@ class CustomUser(AbstractUser):
     pass
 
 
-class Manager(models.Model):
-    user = models.OneToOneField(
-        CustomUser, on_delete=models.CASCADE, related_name="manager"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # create string rep of this object
-    def __str__(self):
-        return f"{self.user.username} (Manager)"
-
-
 class Customer(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="customer"

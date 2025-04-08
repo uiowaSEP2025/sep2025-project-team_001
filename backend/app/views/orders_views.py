@@ -12,7 +12,6 @@ def create_order(request):
     serializer = OrderSerializer(data=request.data)
     if serializer.is_valid():
         order = serializer.save()
-
         order.total_price = order.get_total()
         order.save()
 
@@ -26,15 +25,13 @@ def create_order(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def retrieve_active_orders(request):
-    try:
-        manager = request.user.manager  # Get the logged-in user's Manager profile
-        restaurant = manager.restaurants.first()
-    except:
+    if not hasattr(request.user, "restaurant"):
         return Response(
-            {"error": "Manager or restaurant not found"},
-            status=status.HTTP_404_NOT_FOUND,
+            {"error": "Only restaurant accounts can view active orders."},
+            status=status.HTTP_403_FORBIDDEN,
         )
 
+    restaurant = request.user.restaurant
     orders = (
         Order.objects.filter(restaurant=restaurant)
         .prefetch_related("order_items__item", "customer__user")
@@ -48,8 +45,14 @@ def retrieve_active_orders(request):
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def mark_order_completed(request, order_id):
+    if not hasattr(request.user, "restaurant"):
+        return Response(
+            {"error": "Only restaurant accounts can update orders."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     try:
-        order = Order.objects.get(pk=order_id)
+        order = Order.objects.get(pk=order_id, restaurant=request.user.restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -65,11 +68,10 @@ def mark_order_completed(request, order_id):
 @permission_classes([IsAuthenticated])
 def get_customer_orders(request):
     try:
-        customer = request.user.customer
-
+        customer = request.user.customer  # request.user is CustomUser here
     except:
         return Response(
-            {"error": "Manager or restaurant not found"},
+            {"error": "Customer not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
 

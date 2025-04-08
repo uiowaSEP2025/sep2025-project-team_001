@@ -6,8 +6,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from ..models.customer_models import CustomUser, Manager
+from ..models.customer_models import CustomUser
 from ..models.restaurant_models import Restaurant
+from ..models.worker_models import Worker
 
 
 def get_tokens_for_user(user):
@@ -32,6 +33,8 @@ def register_user(request):
             "phone",
             "business_name",
             "business_address",
+            "restaurantImage",
+            "pin",
         ]
         for field in required_fields:
             if not data.get(field):
@@ -64,48 +67,44 @@ def register_user(request):
                 {"message": "Password must be at least 6 characters long."}, status=400
             )
 
-        # Create custom user for username, email, password, and name
-        user = CustomUser.objects.create_user(
+        # Create the user account first
+        custom_user = CustomUser.objects.create_user(
             username=data["username"],
             email=data["email"],
             password=data["password"],
-            first_name=data["name"],
+            first_name=data["name"]
         )
 
-        # Create Manager profile
-        manager = Manager.objects.create(user=user)
-
-        # Create Restaurant and add manager to the restaurant
+        # Then create the restaurant profile tied to that user
         restaurant = Restaurant.objects.create(
+            user=custom_user,
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
-            restaurant_image=data.get("restaurantImage"),
+            restaurant_image=data.get("restaurantImage")
         )
-        restaurant.managers.add(manager)
 
-        tokens = get_tokens_for_user(user)  # Generate JWT tokens
+
+        # Create Worker (Manager role)
+        Worker.objects.create(
+            restaurant=restaurant,
+            pin=data["pin"],
+            role="manager"
+        )
+
+        tokens = get_tokens_for_user(custom_user)  # Generate JWT tokens
 
         return JsonResponse(
             {
                 "message": "User registered successfully",
                 "tokens": tokens,
-                "manager": manager.user.username,
                 "restaurant": restaurant.name,
-                "restaurant_image": (
-                    restaurant.restaurant_image[:30] + "..."
-                    if restaurant.restaurant_image
-                    else None
-                ),
-                "restaurant_managers": [
-                    m.user.username for m in restaurant.managers.all()
-                ],
+                "restaurant_id": restaurant.id,
             },
             status=201,
         )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 @csrf_exempt
 def login_user(request):
@@ -115,27 +114,24 @@ def login_user(request):
         password = data.get("password")
 
         user = authenticate(username=username, password=password)
-        if user is not None:
-            tokens = get_tokens_for_user(user)  # Generate JWT tokens
-            try:
-                manager = Manager.objects.get(user=user)
-                restaurant = Restaurant.objects.filter(managers=manager).first()
-                bar_name = restaurant.name if restaurant else None
-                restaurant_id = restaurant.id if restaurant else None
-            except Manager.DoesNotExist:
-                bar_name = None
-                restaurant_id = None
 
-            return JsonResponse(
-                {
-                    "message": "Login successful",
-                    "tokens": tokens,
-                    "bar_name": bar_name,
-                    "restaurant_id": restaurant_id,
-                },
-                status=200,
-            )
-        else:
-            return JsonResponse({"error": "Invalid credentials"}, status=401)
+        if user is not None:
+            try:
+                restaurant = user.restaurant  # works if OneToOneField exists
+                tokens = get_tokens_for_user(user)
+
+                return JsonResponse(
+                    {
+                        "message": "Login successful",
+                        "tokens": tokens,
+                        "bar_name": restaurant.name,
+                        "restaurant_id": restaurant.id,
+                    },
+                    status=200,
+                )
+            except Restaurant.DoesNotExist:
+                return JsonResponse({"error": "This user is not linked to a restaurant."}, status=403)
+
+        return JsonResponse({"error": "Invalid credentials"}, status=401)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
