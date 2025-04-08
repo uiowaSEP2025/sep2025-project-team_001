@@ -10,6 +10,7 @@ import OrdersPage from './pages/OrdersPage';
 import MenuPage from './pages/MenuPage';
 import BartenderLoginPage from './pages/BartenderLoginPage';
 import PrivateRoute from './PrivateRoute';
+import ManagerLoginPage from './pages/ManagerLoginPage';
 
 function AppRoutes() {
   return (
@@ -30,6 +31,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <BartenderLoginPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/manager_login"
+        element={
+          <PrivateRoute>
+            <ManagerLoginPage />
           </PrivateRoute>
         }
       />
