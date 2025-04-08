@@ -34,3 +34,12 @@ class Item(models.Model):
             self.base64_image[:30] + "..." if self.base64_image else "No image"
         )
         return f"{self.name} (Image: {image_preview})"
+
+
+class Ingredient(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ingredients')
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
