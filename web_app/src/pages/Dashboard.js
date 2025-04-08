@@ -1,13 +1,20 @@
 // src/pages/Dashboard.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
+import OwnerAuthModal from '../components/OwnerAuthModal';
 
 function Dashboard() {
   const navigate = useNavigate();
-
+  const [ownerInfo, setOwnerInfo] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const barName = sessionStorage.getItem('barName');
+
+  const handleAuthenticated = (data) => {
+    setOwnerInfo(data);
+    navigate('manager_registration');
+  }
 
   const handleOrderClick = () => {
     navigate('/orders');
@@ -37,6 +44,20 @@ function Dashboard() {
       <Button variant="danger" size="lg" onClick={handleLogOutClick}>
         Log Out
       </Button>
+      <Button
+        variant="warning"
+        size="lg"
+        className="mt-3"
+        onClick={() => setShowAuthModal(true)}
+      >
+        Create Manager
+      </Button>
+      <OwnerAuthModal
+        show={showAuthModal}
+        onHide={() => setShowAuthModal(false)}
+        onOwnerAuthenticated={handleAuthenticated}
+      />
+ 
     </Container>
   );
 }
