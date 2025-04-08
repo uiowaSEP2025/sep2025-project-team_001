@@ -10,12 +10,14 @@ function Dashboard() {
   const [ownerInfo, setOwnerInfo] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const barName = sessionStorage.getItem('barName');
-
+    
   const handleAuthenticated = (data) => {
-    setOwnerInfo(data);
-    navigate('manager_registration');
-  }
-
+    sessionStorage.setItem('accessToken', data.tokens.access);
+    sessionStorage.setItem('refreshToken', data.tokens.refresh);
+    sessionStorage.setItem('barName', data.bar_name);
+    sessionStorage.setItem('restaurantId', data.restaurant_id);
+    navigate('/manager_registration');
+  };
   const handleOrderClick = () => {
     navigate('/orders');
   };

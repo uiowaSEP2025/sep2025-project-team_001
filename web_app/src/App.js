@@ -11,6 +11,7 @@ import MenuPage from './pages/MenuPage';
 import BartenderLoginPage from './pages/BartenderLoginPage';
 import PrivateRoute from './PrivateRoute';
 import ManagerLoginPage from './pages/ManagerLoginPage';
+import ManagerRegistrationPage from './pages/ManagerRegistrationPage';
 
 function AppRoutes() {
   return (
@@ -39,6 +40,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ManagerLoginPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/manager_registration"
+        element={
+          <PrivateRoute>
+            <ManagerRegistrationPage />
           </PrivateRoute>
         }
       />
