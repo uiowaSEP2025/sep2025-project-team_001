@@ -1,4 +1,5 @@
 from django.db import models
+
 from .customer_models import CustomUser
 
 
@@ -42,4 +43,3 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
-
