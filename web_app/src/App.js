@@ -8,6 +8,7 @@ import './auth';
 import Dashboard from './pages/Dashboard';
 import OrdersPage from './pages/OrdersPage';
 import MenuPage from './pages/MenuPage';
+import BartenderLoginPage from './pages/BartenderLoginPage';
 import PrivateRoute from './PrivateRoute';
 
 function AppRoutes() {
@@ -21,6 +22,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/bartender_login"
+        element={
+          <PrivateRoute>
+            <BartenderLoginPage />
           </PrivateRoute>
         }
       />
