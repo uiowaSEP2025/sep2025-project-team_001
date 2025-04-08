@@ -21,14 +21,14 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   bool errorFetching = false;
   List<MenuItem> items = [];
   String selectedCategory = 'All';
-  late String restaurantName;
+  late int restaurantId;
   Map<String, CartItem> cart = {};
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)!.settings.arguments as Map;
-    restaurantName = args['restaurant'].name;
+    restaurantId = args['restaurant'].id;
     _fetchMenuItems();
   }
 
@@ -39,7 +39,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         errorFetching = false;
       });
 
-      items = await fetchMenuItems(restaurantName);
+      items = await fetchMenuItems(restaurantId);
 
       setState(() {
         isLoading = false;

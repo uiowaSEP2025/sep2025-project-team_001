@@ -3,7 +3,7 @@ import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
-Future<List<MenuItem>> fetchMenuItems(String restaurantName) async {
+Future<List<MenuItem>> fetchMenuItems(int restaurantId) async {
   final accessToken = await TokenManager.getAccessToken();
   print(accessToken);
   if (accessToken == null) {
@@ -12,7 +12,7 @@ Future<List<MenuItem>> fetchMenuItems(String restaurantName) async {
 
   final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
   final String endpoint =
-      "${ApiConfig.baseUrl}/restaurants/$restaurantName/menu/";
+      "${ApiConfig.baseUrl}/restaurants/$restaurantId/menu/";
 
   try {
     final response = await dio.get(
