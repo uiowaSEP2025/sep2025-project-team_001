@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import NumberPad from "../components/NumberPad";
 import { Container, Row, Col, Card, Alert} from 'react-bootstrap'
@@ -75,7 +75,7 @@ const BartenderLoginPage = () => {
     
                 <NumberPad
                   onDigitPress={handleDigitPress}
-                  onBackspace={handleDelete}
+                  onDelete={handleDelete}
                   onClear={handleClear}
                 />
               </Card>
