@@ -115,7 +115,7 @@ def login_user(request):
         pin = data.get("pin")
         if pin:
             try:
-                worker = Workers.objects.get(pin=pin)
+                worker = Worker.objects.get(pin=pin)
                 restaurant = worker.restaurant
                 tokens = get_tokens_for_user(restaurant.user)
                 return JsonResponse(
