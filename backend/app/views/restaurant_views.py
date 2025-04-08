@@ -22,4 +22,3 @@ def get_menu_items(request, restaurant_id):
     items = Item.objects.filter(restaurant__id=restaurant_id, available=True)
     serializer = ItemSerializer(items, many=True)
     return Response(serializer.data)
-

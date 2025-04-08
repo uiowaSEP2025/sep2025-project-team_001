@@ -48,7 +48,7 @@ function Registration() {
 
   const handleContinue = () => {
     const { name, username, password, confirmPassword, pin } = formData;
-  
+
     if (!name || !username || !password || !confirmPassword || !pin) {
       toast.error('Please fill out all fields.');
       return;
@@ -66,7 +66,7 @@ function Registration() {
       return;
     }
     setStep(2);
-  };  
+  };
 
   const handleBack = () => setStep(1);
 
@@ -142,7 +142,10 @@ function Registration() {
         </Modal.Header>
         <Modal.Body className="registration-modal-body">
           <Form>
-            <Form.Group controlId="username" className="registration-form-group">
+            <Form.Group
+              controlId="username"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="text"
                 placeholder="Desired Username"
@@ -152,7 +155,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="password" className="registration-form-group">
+            <Form.Group
+              controlId="password"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="password"
                 placeholder="Desired Password"
@@ -162,7 +168,10 @@ function Registration() {
                 className="registration-form-control"
               />
             </Form.Group>
-            <Form.Group controlId="confirmPassword" className="registration-form-group">
+            <Form.Group
+              controlId="confirmPassword"
+              className="registration-form-group"
+            >
               <Form.Control
                 type="password"
                 placeholder="Confirm Password"

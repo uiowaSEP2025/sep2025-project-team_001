@@ -1,10 +1,9 @@
 import json
 
+from app.mobileViews.stripeViews import create_stripe_customer
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
-from app.mobileViews.stripeViews import create_stripe_customer
 
 from ..models import Customer, CustomUser
 from ..views.auth_views import get_tokens_for_user

@@ -68,7 +68,7 @@ docker compose -f ./docker-compose-all-local.yml exec backend python manage.py m
 1. Stop the project (Keep local DB volumes):
 
 ```bash
-docker compose -f ./docker-compose-all-local.yml down 
+docker compose -f ./docker-compose-all-local.yml down
 ```
 
 **OR**

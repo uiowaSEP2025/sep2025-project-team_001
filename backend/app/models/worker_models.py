@@ -1,5 +1,7 @@
 from django.db import models
+
 from ..models.restaurant_models import Restaurant
+
 
 class Worker(models.Model):
     ROLE_CHOICES = [
