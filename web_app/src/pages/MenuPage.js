@@ -177,7 +177,7 @@ const MenuPage = () => {
   );
 
   return (
-    <Box sx={{mt: 4, px: 6, maxWidth: '1440px', mx: 'auto', pb: 10}}>
+    <Box sx={{mt: 4, px: 6, maxWidth: '1460px', mx: 'auto', pb: 10}}>
       {/* Header */}
       <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 3}}>
         <Button onClick={() => navigate('/dashboard')}>Dashboard</Button>
@@ -220,7 +220,7 @@ const MenuPage = () => {
       ) : (
         <>
           {/* Available */}
-          <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
             <Box sx={{display: 'flex', alignItems: 'center'}}>
               <IconButton onClick={() => setShowAvailable((prev) => !prev)}>
                 {showAvailable ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
@@ -230,7 +230,7 @@ const MenuPage = () => {
           </Box>
 
           <Collapse in={showAvailable}>
-            <Box>
+            <Box sx={{ backgroundColor: '#e3f2fd', p: 2, borderRadius: 2 }}>
               {/* Available Beverages */}
               <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                 <IconButton onClick={() => setShowAvailableBeverages((prev) => !prev)}>
@@ -276,7 +276,7 @@ const MenuPage = () => {
           </Box>
 
           <Collapse in={showUnavailable}>
-            <Box>
+            <Box sx={{ backgroundColor: '#ffcdd2', p: 2, borderRadius: 2 }}>
               {/* Unavailable Beverages */}
               <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                 <IconButton onClick={() => setShowUnavailableBeverages((prev) => !prev)}>
