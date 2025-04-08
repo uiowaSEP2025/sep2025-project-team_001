@@ -92,7 +92,7 @@ def register_user(request):
             role="manager"
         )
 
-        tokens = get_tokens_for_user(restaurant)  # Generate JWT tokens
+        tokens = get_tokens_for_user(custom_user)  # Generate JWT tokens
 
         return JsonResponse(
             {

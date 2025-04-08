@@ -12,7 +12,6 @@ Future<List<Restaurant>> fetchCustomerRestaurants() async {
 }
 
 Future<List<Restaurant>> fetchRestaurants() async {
-  //todo move to its own service folder bc it is only accessing the api
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {
