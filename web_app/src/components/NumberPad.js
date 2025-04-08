@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Row, Col } from "react-bootstrap";
 
-const NumberPad = ({ onDigitPress, onDelete, onClear }) => {
+const NumberPad = ({ onDigitPress, onDelete, onClear, onEnter }) => {
     const digits = [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' ];
 
     return (
@@ -50,7 +50,13 @@ const NumberPad = ({ onDigitPress, onDelete, onClear }) => {
                     </Button>
                 </Col>
             </Row>
-
+            <Row className="mb-2">
+                <Col>
+                    <Button variant="success" className="w-100" onClick={onEnter}>
+                    Enter
+                    </Button>
+                </Col>
+            </Row>    
         </div>
     )
 };
