@@ -112,7 +112,23 @@ def login_user(request):
         data = json.loads(request.body)
         username = data.get("username")
         password = data.get("password")
-
+        pin = data.get("pin")
+        if pin:
+            try:
+                worker = Workers.objects.get(pin=pin)
+                restaurant = worker.restaurant
+                tokens = get_tokens_for_user(restaurant.user)
+                return JsonResponse(
+                    {
+                        "message": "Login successful",
+                        "tokens": tokens,
+                        "bar_name": restaurant.name,
+                        "restaurant_id": restaurant.id,
+                        "role": worker.role,
+                    },
+                    status=200)
+            except Worker.DoesNotExist:
+                return JsonResponse({"error": "Invalid pin"}, status=401)
         user = authenticate(username=username, password=password)
 
         if user is not None:
