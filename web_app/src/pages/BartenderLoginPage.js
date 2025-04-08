@@ -1,13 +1,22 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Image, Alert} from 'react-bootstrap'
+import NumberPad from "../components/NumberPad";
+import { Container, Row, Col, Card, Alert} from 'react-bootstrap'
 
 const BartenderLoginPage = () => {
     const [pin, setPin] = useState("");
     const [error, setError] = useState("");
+    const [barName, setBarName] = useState("");
     const navigate = useNavigate();
 
-    const handleDigitPres = (digit) => {
+    useEffect(() => {
+        const name = sessionStorage.getItem('barName');
+        if (name) {
+            setBarName(name);
+        }
+    }, []);
+
+    const handleDigitPress = (digit) => {
         if (pin.length < 4) {
             setPin(prev => pin + digit);
         }
@@ -22,7 +31,7 @@ const BartenderLoginPage = () => {
 
     const loginWithPin = async () => {
         try{
-            const response = await fetch('/login/', {
+            const response = await fetch('${process.env.REACT_APP_API_URL}/login/', {
                 method : 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -43,14 +52,38 @@ const BartenderLoginPage = () => {
         }
     };
 
-    React.useEffect(() => {
-
+    useEffect(() => {
         if (pin.length === 4) {
             loginWithPin();
         }
     }
     , [pin]);
 
-};
-export default BartenderLoginPage;
+    return (
+        <Container className="mt-5">
+          <Row className="justify-content-center">
+            <Col md={6}>
+              <Card className="text-center p-4">
+                <h3>{barName || 'Your Bar'}</h3>
+                <h4>Bartender Login</h4>
+    
+                <div className="mb-3">
+                  <h4>{'*'.repeat(pin.length)}</h4>
+                </div>
+    
+                {error && <Alert variant="danger">{error}</Alert>}
+    
+                <NumberPad
+                  onDigitPress={handleDigitPress}
+                  onBackspace={handleDelete}
+                  onClear={handleClear}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      );
+    };
+    
+    export default BartenderLoginPage;
     
