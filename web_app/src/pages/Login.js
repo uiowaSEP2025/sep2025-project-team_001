@@ -58,7 +58,7 @@ function Login() {
             Back
           </button>
           <Modal.Title className="login-modal-title w-100 text-center">
-            Login
+            Restaurant Login
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="login-modal-body">
