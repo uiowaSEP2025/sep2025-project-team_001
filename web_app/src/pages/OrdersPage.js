@@ -32,19 +32,35 @@ const OrdersPage = () => {
   };
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/retrieve/orders/`)
-      .then((response) => {
-        setOrders(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/retrieve/orders/`
+        );
+        const newOrders = response.data;
+
+        if (JSON.stringify(newOrders) !== JSON.stringify(orders)) { //checks if orders have changed, if same do nothing
+          setOrders(newOrders);
+        }
+
+        if (loading) {
+          setLoading(false); // Only clear loading on first fetch
+        }
+      } catch (error) {
         console.error('Error fetching orders:', error);
-        setLoading(false);
-      });
+        if (loading) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchOrders(); // On Page entry
+
+    const intervalId = setInterval(fetchOrders, 3000); // Poll every 3s
+    return () => clearInterval(intervalId);
   }, []);
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return (
       <Container className="mt-5 text-center">
         <Spinner animation="border" role="status">
