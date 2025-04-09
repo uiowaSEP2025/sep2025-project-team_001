@@ -27,6 +27,9 @@ function Dashboard() {
   const handleManagerLoginClick = () => {
     navigate('/manager_login');
   }
+  const handleBartenderClick = () => {
+    navigate('/bartender_login')
+  }
   const handleLogOutClick = () => {
     // Clear all relevant auth data from sessionStorage
     sessionStorage.removeItem('accessToken');
@@ -43,6 +46,9 @@ function Dashboard() {
       </Button>
       <Button variant="primary" size="lg" onClick={handleMenuClick}>
         Menu
+      </Button>
+      <Button variant="primary" size="lg" onClick={handleBartenderClick}>
+        Bartender Login
       </Button>
       <Button variant="primary" size="lg" onClick={handleManagerLoginClick}>
         Manager Login

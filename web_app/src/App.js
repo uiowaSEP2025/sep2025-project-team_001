@@ -13,6 +13,7 @@ import PrivateRoute from './PrivateRoute';
 import ManagerLoginPage from './pages/ManagerLoginPage';
 import ManagerRegistrationPage from './pages/ManagerRegistrationPage';
 import ManagerDashboard from './pages/ManagerDashboard';
+import BartenderRegistrationPage from './pages/BartenderRegistrationPage';
 
 function AppRoutes() {
   return (
@@ -33,6 +34,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <BartenderLoginPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/bartender_registration"
+        element={
+          <PrivateRoute>
+            <BartenderRegistrationPage />
           </PrivateRoute>
         }
       />
