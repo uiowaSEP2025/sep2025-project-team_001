@@ -8,6 +8,9 @@ from app.serializers.order_serializer import OrderSerializer
 
 @pytest.mark.django_db
 def test_order_serializer_create(customer, restaurant):
+    """
+    OrderSerializer should validate and save an order with item(s) and unwanted ingredients.
+    """
     item = Item.objects.create(
         restaurant=restaurant,
         name="Burger",
@@ -54,7 +57,9 @@ def test_order_serializer_create(customer, restaurant):
 
 @pytest.mark.django_db
 def test_order_serializer_representation(order, burger_item, ingredients):
-    # Create an order item
+    """
+    Serialized Order output should include item details and unwanted ingredient IDs.
+    """
     order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
     order_item.unwanted_ingredients.set(ingredients)
 
@@ -65,6 +70,7 @@ def test_order_serializer_representation(order, burger_item, ingredients):
     assert data["customer_name"] == order.customer.user.first_name
     assert data["restaurant_name"] == order.restaurant.name
     assert len(data["order_items"]) == 1
+
     item_data = data["order_items"][0]
     assert item_data["item_name"] == burger_item.name
     assert item_data["quantity"] == 1

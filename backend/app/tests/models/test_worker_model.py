@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from app.models.worker_models import Worker
 

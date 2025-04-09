@@ -130,3 +130,13 @@ def manager_user_with_worker():
         "worker": worker,
         "pin": "7777"
     }
+
+
+@pytest.fixture
+def auth_client(api_client):
+    """
+    Returns an authenticated APIClient using a test user.
+    """
+    user = CustomUser.objects.create_user(username="stripeuser", email="stripe@example.com", password="testpass")
+    api_client.force_authenticate(user=user)
+    return api_client

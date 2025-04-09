@@ -8,6 +8,9 @@ from app.serializers.order_serializer import OrderItemSerializer
 
 @pytest.mark.django_db
 def test_order_item_serializer_representation_with_ingredients(customer, restaurant):
+    """
+    OrderItemSerializer should correctly serialize unwanted ingredients in the output.
+    """
     order = Order.objects.create(customer=customer, restaurant=restaurant)
     item = Item.objects.create(
         restaurant=restaurant,
@@ -36,6 +39,9 @@ def test_order_item_serializer_representation_with_ingredients(customer, restaur
 
 @pytest.mark.django_db
 def test_order_item_serializer_deserialization_with_ingredients(customer, restaurant):
+    """
+    OrderItemSerializer should correctly deserialize and validate input with unwanted ingredients.
+    """
     order = Order.objects.create(customer=customer, restaurant=restaurant)
     item = Item.objects.create(
         restaurant=restaurant,

@@ -6,6 +6,9 @@ from app.models.restaurant_models import Ingredient, Item
 
 @pytest.mark.django_db
 def test_item_str_with_image(restaurant):
+    """
+    The string representation should include the item name and truncated base64 image if present.
+    """
     image = "abcdefghijklmnopqrstuvwxyz0123456789"
     item = Item.objects.create(
         restaurant=restaurant,
@@ -22,6 +25,9 @@ def test_item_str_with_image(restaurant):
 
 @pytest.mark.django_db
 def test_item_str_without_image(restaurant):
+    """
+    If no base64 image is present, the string should indicate 'No image'.
+    """
     item = Item.objects.create(
         restaurant=restaurant,
         name="Salad",
@@ -37,6 +43,9 @@ def test_item_str_without_image(restaurant):
 
 @pytest.mark.django_db
 def test_item_relationship(restaurant):
+    """
+    The item's restaurant field should correctly link to the given restaurant.
+    """
     item = Item.objects.create(
         restaurant=restaurant,
         name="Sandwich",
@@ -52,6 +61,9 @@ def test_item_relationship(restaurant):
 
 @pytest.mark.django_db
 def test_item_with_ingredients(restaurant):
+    """
+    Ingredients related to the item should be accessible via the reverse relationship.
+    """
     item = Item.objects.create(
         restaurant=restaurant,
         name="Custom Pizza",

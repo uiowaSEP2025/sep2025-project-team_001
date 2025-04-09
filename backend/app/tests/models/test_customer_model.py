@@ -6,6 +6,9 @@ from app.models.customer_models import Customer, CustomUser
 
 @pytest.mark.django_db
 def test_customer_str_representation():
+    """
+    String representation of a Customer should include the username.
+    """
     user = CustomUser.objects.create_user(username="john", email="john@example.com", password="pass")
     customer = Customer.objects.create(user=user)
 
@@ -14,6 +17,9 @@ def test_customer_str_representation():
 
 @pytest.mark.django_db
 def test_customer_to_dict():
+    """
+    Customer.to_dict should return all expected fields including timestamps.
+    """
     user = CustomUser.objects.create_user(
         username="jane", email="jane@example.com", password="pass"
     )
@@ -29,6 +35,9 @@ def test_customer_to_dict():
 
 @pytest.mark.django_db
 def test_customer_updated_at_changes():
+    """
+    Saving a Customer should update the updated_at timestamp.
+    """
     user = CustomUser.objects.create_user(username="tim", email="tim@example.com", password="pass")
     customer = Customer.objects.create(user=user)
 

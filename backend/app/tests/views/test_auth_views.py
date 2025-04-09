@@ -1,9 +1,10 @@
 import json
 
 import pytest
-from app.models import CustomUser
 
-# --- SHARED REGISTER PAYLOAD ---
+# ------------------------------------------------------------------
+# SHARED: Helper to generate registration data
+# ------------------------------------------------------------------
 
 def base_register_data(**overrides):
     data = {
@@ -21,10 +22,15 @@ def base_register_data(**overrides):
     return data
 
 
-# --- REGISTER TESTS ---
+# ------------------------------------------------------------------
+# POST /register/ - User + restaurant registration
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_register_success(client):
+    """
+    A valid registration should create a user and return tokens.
+    """
     data = base_register_data()
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 201
@@ -35,6 +41,9 @@ def test_register_success(client):
 
 @pytest.mark.django_db
 def test_register_missing_field(client):
+    """
+    Registration missing a required field (e.g. name) should return 400.
+    """
     data = base_register_data()
     del data["name"]
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
@@ -44,13 +53,13 @@ def test_register_missing_field(client):
 
 @pytest.mark.django_db
 def test_register_username_taken(client):
+    """
+    Registering with an already-used username should fail with 400.
+    """
     data = base_register_data()
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
-    data2 = base_register_data(
-        name="Another",
-        email="another@example.com"
-    )
+    data2 = base_register_data(name="Another", email="another@example.com")
     response = client.post("/register/", data=json.dumps(data2), content_type="application/json")
     assert response.status_code == 400
     assert "Username already taken" in response.json().get("message", "")
@@ -58,12 +67,13 @@ def test_register_username_taken(client):
 
 @pytest.mark.django_db
 def test_register_email_registered(client):
+    """
+    Registering with an already-used email should fail with 400.
+    """
     data = base_register_data()
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
-    data2 = base_register_data(
-        username="newuser"
-    )
+    data2 = base_register_data(username="newuser")
     response = client.post("/register/", data=json.dumps(data2), content_type="application/json")
     assert response.status_code == 400
     assert "Email already registered" in response.json().get("message", "")
@@ -71,6 +81,9 @@ def test_register_email_registered(client):
 
 @pytest.mark.django_db
 def test_register_invalid_email(client):
+    """
+    Registering with an invalid email format should return 400.
+    """
     data = base_register_data(email="not-an-email")
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
@@ -79,6 +92,9 @@ def test_register_invalid_email(client):
 
 @pytest.mark.django_db
 def test_register_invalid_phone(client):
+    """
+    Registering with a phone number that's too short should return 400.
+    """
     data = base_register_data(phone="12345")
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
@@ -87,16 +103,24 @@ def test_register_invalid_phone(client):
 
 @pytest.mark.django_db
 def test_register_short_password(client):
+    """
+    Registering with a short password should return 400.
+    """
     data = base_register_data(password="123")
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
     assert "Password must be at least 6 characters long" in response.json().get("message", "")
 
 
-# --- LOGIN TESTS ---
+# ------------------------------------------------------------------
+# POST /login/ - Login via username/password or PIN
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_login_success(client):
+    """
+    A valid username/password login should return tokens and restaurant info.
+    """
     data = base_register_data(username="loginuser", email="login@example.com")
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
@@ -109,6 +133,9 @@ def test_login_success(client):
 
 @pytest.mark.django_db
 def test_login_with_pin_success(api_client, manager_user_with_worker):
+    """
+    A valid PIN login via Worker should return tokens and manager role.
+    """
     pin = manager_user_with_worker["pin"]
     response = api_client.post(
         "/login/", data=json.dumps({"pin": pin}), content_type="application/json"
@@ -121,6 +148,9 @@ def test_login_with_pin_success(api_client, manager_user_with_worker):
 
 @pytest.mark.django_db
 def test_login_with_invalid_pin(client):
+    """
+    An invalid PIN should return a 401 Unauthorized error.
+    """
     login_data = {"pin": "wrongpin"}
     response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 401
@@ -129,6 +159,9 @@ def test_login_with_invalid_pin(client):
 
 @pytest.mark.django_db
 def test_login_invalid_credentials(client):
+    """
+    A valid username with the wrong password should return 401.
+    """
     data = base_register_data(username="bob", email="bob@example.com")
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
@@ -140,6 +173,9 @@ def test_login_invalid_credentials(client):
 
 @pytest.mark.django_db
 def test_login_user_without_restaurant(client, user):
+    """
+    A user that exists but has no linked restaurant should return 403.
+    """
     login_data = {"username": user.username, "password": "testpass"}
     response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 403
@@ -148,6 +184,9 @@ def test_login_user_without_restaurant(client, user):
 
 @pytest.mark.django_db
 def test_login_invalid_method(client):
+    """
+    A GET request to /login/ should return a 400 error.
+    """
     response = client.get("/login/")
     assert response.status_code == 400
     assert "Invalid request" in response.json().get("error", "")

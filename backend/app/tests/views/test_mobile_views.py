@@ -4,13 +4,16 @@ from unittest.mock import patch
 import pytest
 from app.models import Customer, CustomUser
 
-# -------------------------
-# REGISTER TESTS
-# -------------------------
+# ------------------------------------------------------------------
+# POST /mobile/register/ - Register a mobile customer
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 @patch("app.mobileViews.mobileViews.create_stripe_customer", return_value="cus_mocked_123")
 def test_register_customer_success(mock_stripe, api_client):
+    """
+    A valid registration should create a user, customer, and return Stripe customer ID.
+    """
     data = {
         "email": "mobile@example.com",
         "password": "mobilepass",
@@ -31,6 +34,9 @@ def test_register_customer_success(mock_stripe, api_client):
 @pytest.mark.django_db
 @patch("app.mobileViews.mobileViews.create_stripe_customer", return_value="cus_mocked_123")
 def test_register_customer_duplicate_email(mock_stripe, api_client):
+    """
+    Registering a user with an existing email should return 400.
+    """
     data = {
         "email": "duplicate@example.com",
         "password": "pass123",
@@ -50,30 +56,42 @@ def test_register_customer_duplicate_email(mock_stripe, api_client):
 
 @pytest.mark.django_db
 def test_register_customer_missing_fields(api_client):
+    """
+    Registration missing a required field should return 500 (handled inside try/except).
+    """
     response = api_client.post("/mobile/register/", data=json.dumps({"email": "missing@example.com"}), content_type="application/json")
     assert response.status_code == 500
     assert "error" in response.json()
 
 
 def test_register_customer_invalid_json(api_client):
+    """
+    Invalid JSON payload should return 400 or 500 depending on handling.
+    """
     response = api_client.post("/mobile/register/", data="not-json", content_type="application/json")
     assert response.status_code in [400, 500]
 
 
 @pytest.mark.django_db
 def test_register_customer_invalid_method(api_client):
+    """
+    GET request to /mobile/register/ should return 400.
+    """
     response = api_client.get("/mobile/register/")
     assert response.status_code == 400
     assert "Invalid request" in response.json().get("error", "")
 
 
-# -------------------------
-# LOGIN TESTS
-# -------------------------
+# ------------------------------------------------------------------
+# POST /mobile/login/ - Authenticate a mobile customer
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 @patch("app.mobileViews.mobileViews.create_stripe_customer", return_value="cus_mocked_123")
 def test_login_customer_success(mock_stripe, api_client):
+    """
+    A valid email/password login should return JWT tokens and customer info.
+    """
     reg_data = {
         "email": "login@example.com",
         "password": "loginpass",
@@ -97,6 +115,9 @@ def test_login_customer_success(mock_stripe, api_client):
 @pytest.mark.django_db
 @patch("app.mobileViews.mobileViews.create_stripe_customer", return_value="cus_mocked_123")
 def test_login_customer_invalid_credentials(mock_stripe, api_client):
+    """
+    Logging in with an incorrect password should return 401 Unauthorized.
+    """
     reg_data = {
         "email": "wronglogin@example.com",
         "password": "correctpass",
@@ -115,6 +136,9 @@ def test_login_customer_invalid_credentials(mock_stripe, api_client):
 
 @pytest.mark.django_db
 def test_login_customer_nonexistent_user(api_client):
+    """
+    Logging in with an email that doesn't exist should return 401.
+    """
     login_data = {"username": "nonexistent@example.com", "password": "anything"}
     response = api_client.post("/mobile/login/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 401
@@ -123,6 +147,9 @@ def test_login_customer_nonexistent_user(api_client):
 
 @pytest.mark.django_db
 def test_login_customer_invalid_method(api_client):
+    """
+    GET request to /mobile/login/ should return 400.
+    """
     response = api_client.get("/mobile/login/")
     assert response.status_code == 400
     assert "Invalid request" in response.json().get("error", "")

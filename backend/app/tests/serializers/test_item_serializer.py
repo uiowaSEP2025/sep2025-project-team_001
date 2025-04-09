@@ -7,6 +7,9 @@ from app.serializers.item_serializer import ItemSerializer
 
 @pytest.mark.django_db
 def test_item_serializer_representation_with_ingredients(restaurant):
+    """
+    ItemSerializer should return correct serialized data including nested ingredients.
+    """
     item = Item.objects.create(
         restaurant=restaurant,
         name="Loaded Burger",
@@ -42,6 +45,9 @@ def test_item_serializer_representation_with_ingredients(restaurant):
 
 @pytest.mark.django_db
 def test_item_serializer_deserialization_valid(restaurant):
+    """
+    Valid input data should deserialize correctly and produce a new Item instance.
+    """
     data = {
         "restaurant": restaurant.pk,
         "name": "Test Sandwich",
@@ -68,6 +74,9 @@ def test_item_serializer_deserialization_valid(restaurant):
 
 @pytest.mark.django_db
 def test_item_serializer_deserialization_invalid(restaurant):
+    """
+    Missing required fields (name, price) should trigger serializer validation errors.
+    """
     data = {
         "restaurant": restaurant.pk,
         "description": "Missing name and price",

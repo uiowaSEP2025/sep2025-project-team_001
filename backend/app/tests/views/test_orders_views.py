@@ -1,11 +1,9 @@
 import json
-from decimal import Decimal
 
 import pytest
-from app.models import Customer, CustomUser
+from app.models import CustomUser
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Ingredient
-from rest_framework.test import APIClient
 
 
 @pytest.fixture
@@ -16,10 +14,15 @@ def restaurant_with_user(restaurant):
     return restaurant, user
 
 
-# --- CREATE ORDER TESTS ---
+# ------------------------------------------------------------------
+# POST /order/new/ - Create a new order
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_create_order_success(api_client, customer, restaurant, item):
+    """
+    Creates an order with one item. Should return 201 and success message.
+    """
     api_client.force_authenticate(user=customer.user)
     data = {
         "customer_id": customer.pk,
@@ -33,6 +36,9 @@ def test_create_order_success(api_client, customer, restaurant, item):
 
 @pytest.mark.django_db
 def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant, item):
+    """
+    Creates an order and stores unwanted ingredients in the order item.
+    """
     ing1 = Ingredient.objects.create(item=item, name="Pickles")
     ing2 = Ingredient.objects.create(item=item, name="Onions")
     api_client.force_authenticate(user=customer.user)
@@ -55,11 +61,13 @@ def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant
 
 @pytest.mark.django_db
 def test_create_order_invalid_data(api_client, customer, restaurant):
+    """
+    Omits order_items from payload. Should return 400.
+    """
     api_client.force_authenticate(user=customer.user)
     data = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk
-        # missing order_items
     }
     response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
@@ -67,6 +75,9 @@ def test_create_order_invalid_data(api_client, customer, restaurant):
 
 @pytest.mark.django_db
 def test_create_order_invalid_quantity_type(api_client, customer, restaurant, item):
+    """
+    Passes quantity as string instead of integer. Should return 400.
+    """
     api_client.force_authenticate(user=customer.user)
     data = {
         "customer_id": customer.pk,
@@ -79,6 +90,9 @@ def test_create_order_invalid_quantity_type(api_client, customer, restaurant, it
 
 @pytest.mark.django_db
 def test_create_order_unauthenticated(api_client, customer, restaurant):
+    """
+    Unauthenticated user should receive 401 when placing order.
+    """
     data = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
@@ -88,10 +102,15 @@ def test_create_order_unauthenticated(api_client, customer, restaurant):
     assert response.status_code == 401
 
 
-# --- RETRIEVE ACTIVE ORDERS ---
+# ------------------------------------------------------------------
+# GET /retrieve/orders/ - Manager views active orders
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_success(api_client, restaurant_with_user, customer, item):
+    """
+    Manager should receive list of active orders for their restaurant.
+    """
     restaurant, user = restaurant_with_user
     api_client.force_authenticate(user=user)
 
@@ -106,6 +125,9 @@ def test_retrieve_active_orders_success(api_client, restaurant_with_user, custom
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_none_exist(api_client, restaurant_with_user):
+    """
+    Restaurant has no active orders. Should return an empty list.
+    """
     _, user = restaurant_with_user
     api_client.force_authenticate(user=user)
     response = api_client.get("/retrieve/orders/")
@@ -115,16 +137,24 @@ def test_retrieve_active_orders_none_exist(api_client, restaurant_with_user):
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_unauthorized(api_client):
+    """
+    User without linked restaurant should receive 403.
+    """
     user = CustomUser.objects.create_user(username="unauth", email="unauth@example.com", password="pass")
     api_client.force_authenticate(user=user)
     response = api_client.get("/retrieve/orders/")
     assert response.status_code == 403
 
 
-# --- MARK ORDER COMPLETED ---
+# ------------------------------------------------------------------
+# PATCH /orders/<id>/complete/ - Mark an order as completed
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_mark_order_completed_success(api_client, restaurant_with_user, customer, item):
+    """
+    Marks an order as completed. Should return 200 and update status.
+    """
     restaurant, user = restaurant_with_user
     api_client.force_authenticate(user=user)
 
@@ -137,16 +167,24 @@ def test_mark_order_completed_success(api_client, restaurant_with_user, customer
 
 @pytest.mark.django_db
 def test_mark_order_completed_not_found(api_client, restaurant_with_user):
+    """
+    Tries to complete a non-existent order. Should return 404.
+    """
     _, user = restaurant_with_user
     api_client.force_authenticate(user=user)
     response = api_client.patch("/orders/9999/complete/", data={}, format="json")
     assert response.status_code == 404
 
 
-# --- CUSTOMER ORDER RETRIEVAL ---
+# ------------------------------------------------------------------
+# GET /order/customer/ - Customer views their own orders
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
 def test_get_customer_orders_success(api_client, customer, restaurant, item):
+    """
+    Customer should receive list of their own orders.
+    """
     api_client.force_authenticate(user=customer.user)
     order = Order.objects.create(customer=customer, restaurant=restaurant, status="pending", total_price=0)
     OrderItem.objects.create(order=order, item=item, quantity=1)
@@ -157,6 +195,9 @@ def test_get_customer_orders_success(api_client, customer, restaurant, item):
 
 @pytest.mark.django_db
 def test_get_customer_orders_none_exist(api_client, customer):
+    """
+    Customer with no orders should get an empty list.
+    """
     api_client.force_authenticate(user=customer.user)
     response = api_client.get("/order/customer/")
     assert response.status_code == 200
@@ -165,6 +206,9 @@ def test_get_customer_orders_none_exist(api_client, customer):
 
 @pytest.mark.django_db
 def test_get_customer_orders_not_customer(api_client):
+    """
+    Non-customer user should receive 404 on customer orders endpoint.
+    """
     user = CustomUser.objects.create_user(username="notcust", email="x@example.com", password="pass")
     api_client.force_authenticate(user=user)
     response = api_client.get("/order/customer/")

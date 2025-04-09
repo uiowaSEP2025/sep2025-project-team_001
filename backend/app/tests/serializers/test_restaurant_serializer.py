@@ -5,6 +5,9 @@ from app.serializers.restaurant_serializer import RestaurantSerializer
 
 @pytest.mark.django_db
 def test_restaurant_serializer_serialization(restaurant):
+    """
+    RestaurantSerializer should correctly serialize a restaurant instance.
+    """
     serializer = RestaurantSerializer(restaurant)
     data = serializer.data
     assert data["id"] == restaurant.id
@@ -17,6 +20,9 @@ def test_restaurant_serializer_serialization(restaurant):
 
 @pytest.mark.django_db
 def test_restaurant_serializer_deserialization_valid():
+    """
+    Valid input data should deserialize into a Restaurant instance.
+    """
     user = CustomUser.objects.create_user(username="owner", email="owner@example.com", password="testpass")
     data = {
         "user": user.pk,
@@ -37,7 +43,9 @@ def test_restaurant_serializer_deserialization_valid():
 
 @pytest.mark.django_db
 def test_restaurant_serializer_deserialization_invalid():
-    # Missing required 'name' field
+    """
+    Missing required field (name) should cause validation failure.
+    """
     user = CustomUser.objects.create_user(username="owner2", email="owner2@example.com", password="pass")
     data = {
         "user": user.pk,

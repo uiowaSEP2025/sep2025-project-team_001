@@ -5,6 +5,9 @@ from app.serializers.worker_serializer import WorkerSerializer
 
 @pytest.mark.django_db
 def test_worker_serializer_output(restaurant):
+    """
+    WorkerSerializer should correctly serialize a Worker instance.
+    """
     worker = Worker.objects.create(
         restaurant=restaurant,
         pin="1234",
@@ -21,6 +24,9 @@ def test_worker_serializer_output(restaurant):
 
 @pytest.mark.django_db
 def test_worker_serializer_input_valid(restaurant):
+    """
+    Valid input should create a Worker instance through deserialization.
+    """
     payload = {
         "restaurant": restaurant.id,
         "pin": "5678",
@@ -37,6 +43,9 @@ def test_worker_serializer_input_valid(restaurant):
 
 @pytest.mark.django_db
 def test_worker_serializer_invalid_role(restaurant):
+    """
+    Invalid role value should cause validation to fail.
+    """
     payload = {
         "restaurant": restaurant.id,
         "pin": "0000",
