@@ -1,7 +1,9 @@
-import pytest
 from decimal import Decimal
-from app.models.customer_models import CustomUser, Customer
-from app.models.restaurant_models import Restaurant, Item
+
+import pytest
+from app.models import Order
+from app.models.customer_models import Customer, CustomUser
+from app.models.restaurant_models import Item, Restaurant
 from app.models.worker_models import Worker
 
 
@@ -51,3 +53,28 @@ def item(restaurant):
         available=True,
         base64_image="base64-encoded-image"
     )
+
+@pytest.fixture
+def order(customer, restaurant):
+    return Order.objects.create(customer=customer, restaurant=restaurant)
+
+
+@pytest.fixture
+def burger_item(restaurant):
+    return Item.objects.create(
+        restaurant=restaurant,
+        name="Burger",
+        description="Delicious beef burger",
+        price=Decimal("9.99"),
+        category="Food",
+        stock=10,
+        available=True,
+        base64_image="fake-image"
+    )
+
+
+@pytest.fixture
+def ingredients(burger_item):
+    pickles = Ingredient.objects.create(item=burger_item, name="Pickles")
+    onions = Ingredient.objects.create(item=burger_item, name="Onions")
+    return [pickles, onions]
