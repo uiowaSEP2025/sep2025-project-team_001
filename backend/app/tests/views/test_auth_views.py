@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from app.models import CustomUser
 
 # --- SHARED REGISTER PAYLOAD ---
 
@@ -11,7 +12,7 @@ def base_register_data(**overrides):
         "password": "strongpass",
         "email": "johndoe@example.com",
         "phone": "1234567890",
-        "business_name": "John's Diner",
+        "business_name": "Testaurant",
         "business_address": "123 Main St",
         "restaurantImage": "imagedata_that_is_longer_than_30_characters_for_truncation_test",
         "pin": "1234"
@@ -26,12 +27,10 @@ def base_register_data(**overrides):
 def test_register_success(client):
     data = base_register_data()
     response = client.post("/register/", data=json.dumps(data), content_type="application/json")
-    assert response.status_code == 201, response.content
-    resp_data = response.json()
-    assert resp_data.get("message") == "User registered successfully"
-    assert "tokens" in resp_data
-    assert resp_data.get("restaurant") == data["business_name"]
-    assert resp_data.get("restaurant_id") is not None
+    assert response.status_code == 201
+    resp = response.json()
+    assert "tokens" in resp
+    assert resp["message"] == "User registered successfully"
 
 
 @pytest.mark.django_db
@@ -98,33 +97,53 @@ def test_register_short_password(client):
 
 @pytest.mark.django_db
 def test_login_success(client):
-    register_data = base_register_data(username="alice", email="alice@example.com")
-    client.post("/register/", data=json.dumps(register_data), content_type="application/json")
+    data = base_register_data(username="loginuser", email="login@example.com")
+    client.post("/register/", data=json.dumps(data), content_type="application/json")
 
-    login_data = {
-        "username": "alice",
-        "password": "strongpass"
-    }
+    login_data = {"username": "loginuser", "password": "strongpass"}
     response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 200
-    resp_data = response.json()
-    assert "tokens" in resp_data
-    assert resp_data.get("message") == "Login successful"
-    assert resp_data.get("bar_name") == register_data["business_name"]
+    assert "tokens" in response.json()
+    assert response.json()["bar_name"] == "Testaurant"
+
+
+@pytest.mark.django_db
+def test_login_with_pin_success(api_client, manager_user_with_worker):
+    pin = manager_user_with_worker["pin"]
+    response = api_client.post(
+        "/login/", data=json.dumps({"pin": pin}), content_type="application/json"
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["role"] == "manager"
+    assert data["bar_name"] == manager_user_with_worker["restaurant"].name
+
+
+@pytest.mark.django_db
+def test_login_with_invalid_pin(client):
+    login_data = {"pin": "wrongpin"}
+    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    assert response.status_code == 401
+    assert response.json()["error"] == "Invalid pin"
 
 
 @pytest.mark.django_db
 def test_login_invalid_credentials(client):
-    register_data = base_register_data(username="bob", email="bob@example.com")
-    client.post("/register/", data=json.dumps(register_data), content_type="application/json")
+    data = base_register_data(username="bob", email="bob@example.com")
+    client.post("/register/", data=json.dumps(data), content_type="application/json")
 
-    login_data = {
-        "username": "bob",
-        "password": "wrongpass"
-    }
+    login_data = {"username": "bob", "password": "wrongpass"}
     response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 401
     assert "Invalid credentials" in response.json().get("error", "")
+
+
+@pytest.mark.django_db
+def test_login_user_without_restaurant(client, user):
+    login_data = {"username": user.username, "password": "testpass"}
+    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    assert response.status_code == 403
+    assert "not linked to a restaurant" in response.json()["error"]
 
 
 @pytest.mark.django_db

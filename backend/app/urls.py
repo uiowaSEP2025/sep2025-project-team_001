@@ -37,5 +37,5 @@ urlpatterns = [
         mark_order_completed,
         name="mark_order_completed",
     ),
-    path("create_worker/", create_worker, name="create_worker"),
+    path("create-worker/", create_worker, name="create_worker"),
 ]

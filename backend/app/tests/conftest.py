@@ -95,3 +95,38 @@ def ingredients(burger_item):
     pickles = Ingredient.objects.create(item=burger_item, name="Pickles")
     onions = Ingredient.objects.create(item=burger_item, name="Onions")
     return [pickles, onions]
+
+
+@pytest.fixture
+def manager_user_with_worker():
+    """
+    Returns a dict: {
+        user: CustomUser,
+        restaurant: Restaurant,
+        worker: Worker,
+        pin: str
+    }
+    """
+    user = CustomUser.objects.create_user(
+        username="manageruser",
+        email="manager@example.com",
+        password="securepass"
+    )
+    restaurant = Restaurant.objects.create(
+        user=user,
+        name="PinTestaurant",
+        address="123 Pin St",
+        phone="999-888-7777",
+        restaurant_image="restaurant-img"
+    )
+    worker = Worker.objects.create(
+        restaurant=restaurant,
+        pin="7777",
+        role="manager"
+    )
+    return {
+        "user": user,
+        "restaurant": restaurant,
+        "worker": worker,
+        "pin": "7777"
+    }
