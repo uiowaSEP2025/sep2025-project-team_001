@@ -1,7 +1,7 @@
 from django.db import models
 
 from .customer_models import Customer
-from .restaurant_models import Item, Restaurant, Ingredient
+from .restaurant_models import Ingredient, Item, Restaurant
 
 
 class Order(models.Model):

@@ -1,5 +1,6 @@
-import pytest
 import time
+
+import pytest
 from app.models.customer_models import Customer, CustomUser
 
 

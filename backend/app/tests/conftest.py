@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from app.models import Order
 from app.models.customer_models import Customer, CustomUser
-from app.models.restaurant_models import Item, Restaurant, Ingredient
+from app.models.restaurant_models import Ingredient, Item, Restaurant
 from app.models.worker_models import Worker
 
 

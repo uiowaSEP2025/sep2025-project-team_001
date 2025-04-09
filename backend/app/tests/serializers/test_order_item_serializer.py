@@ -2,23 +2,14 @@ from decimal import Decimal
 
 import pytest
 from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Item
+from app.models.restaurant_models import Ingredient, Item
 from app.serializers.order_serializer import OrderItemSerializer
 
 
 @pytest.mark.django_db
-def test_order_item_serializer_representation(customer, restaurant):
-    """
-    Test that OrderItemSerializer returns the expected output for an existing OrderItem.
-    """
-    # Create an Order and an Item.
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    item_instance = Item.objects.create(
+def test_order_item_serializer_representation_with_ingredients(customer, restaurant):
+    order = Order.objects.create(customer=customer, restaurant=restaurant)
+    item = Item.objects.create(
         restaurant=restaurant,
         name="Burger",
         description="Tasty burger",
@@ -28,28 +19,25 @@ def test_order_item_serializer_representation(customer, restaurant):
         available=True,
         base64_image="dummyimage",
     )
-    # Create an OrderItem.
-    order_item = OrderItem.objects.create(order=order, item=item_instance, quantity=2)
+
+    pickle = Ingredient.objects.create(item=item, name="Pickles")
+    onions = Ingredient.objects.create(item=item, name="Onions")
+
+    order_item = OrderItem.objects.create(order=order, item=item, quantity=1)
+    order_item.unwanted_ingredients.set([pickle, onions])
+
     serializer = OrderItemSerializer(order_item)
     data = serializer.data
-    assert "item_name" in data
+
     assert data["item_name"] == "Burger"
-    assert data["quantity"] == 2
+    assert data["quantity"] == 1
+    assert sorted(data["unwanted_ingredients"]) == sorted([pickle.id, onions.id])
 
 
 @pytest.mark.django_db
-def test_order_item_serializer_deserialization(customer, restaurant):
-    """
-    Test direct validation of OrderItemSerializer input data.
-    """
-    # Create an Order and an Item.
-    Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    item_instance = Item.objects.create(
+def test_order_item_serializer_deserialization_with_ingredients(customer, restaurant):
+    order = Order.objects.create(customer=customer, restaurant=restaurant)
+    item = Item.objects.create(
         restaurant=restaurant,
         name="Burger",
         description="Tasty burger",
@@ -59,12 +47,20 @@ def test_order_item_serializer_deserialization(customer, restaurant):
         available=True,
         base64_image="dummyimage",
     )
-    # Prepare input data for OrderItemSerializer.
-    data = {"item_id": item_instance.pk, "quantity": 4}
-    serializer = OrderItemSerializer(data=data)
-    # Validate that the serializer accepts the input.
+
+    ketchup = Ingredient.objects.create(item=item, name="Ketchup")
+    mayo = Ingredient.objects.create(item=item, name="Mayo")
+
+    payload = {
+        "item_id": item.pk,
+        "quantity": 2,
+        "unwanted_ingredients": [ketchup.pk, mayo.pk],
+    }
+
+    serializer = OrderItemSerializer(data=payload)
     assert serializer.is_valid(), serializer.errors
-    validated_data = serializer.validated_data
-    # The validated data should map 'item_id' to the actual item instance via the 'item' field.
-    assert validated_data["item"] == item_instance
-    assert validated_data["quantity"] == 4
+
+    validated = serializer.validated_data
+    assert validated["item"] == item
+    assert validated["quantity"] == 2
+    assert sorted([i.id for i in validated["unwanted_ingredients"]]) == sorted([ketchup.id, mayo.id])

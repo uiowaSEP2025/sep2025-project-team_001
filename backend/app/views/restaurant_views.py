@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from ..models import Restaurant
 from ..models.restaurant_models import Item
 from ..serializers.item_serializer import ItemSerializer
-from ..serializers.restaurant_serializers import RestaurantSerializer
+from ..serializers.restaurant_serializer import RestaurantSerializer
 
 
 @api_view(["GET"])

@@ -1,6 +1,7 @@
-import pytest
 from decimal import Decimal
-from app.models.restaurant_models import Item, Ingredient
+
+import pytest
+from app.models.restaurant_models import Ingredient, Item
 
 
 @pytest.mark.django_db

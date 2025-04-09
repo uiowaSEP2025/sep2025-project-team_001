@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from ..models.customer_models import Customer
 from ..models.order_models import Order, OrderItem
-from ..models.restaurant_models import Item, Restaurant, Ingredient
+from ..models.restaurant_models import Ingredient, Item, Restaurant
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

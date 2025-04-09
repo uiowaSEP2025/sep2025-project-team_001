@@ -1,5 +1,6 @@
-import pytest
 from decimal import Decimal
+
+import pytest
 from app.models.order_models import Order, OrderItem
 from django.utils import timezone
 
