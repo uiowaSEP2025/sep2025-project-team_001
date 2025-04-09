@@ -44,11 +44,22 @@ def retrieve_active_orders(request):
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def mark_order_completed(request, order_id):
+def update_order_status(request, order_id, new_status):
     if not hasattr(request.user, "restaurant"):
         return Response(
             {"error": "Only restaurant accounts can update orders."},
             status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # Normalize status (e.g., 'Picked Up' → 'picked_up')
+    normalized_status = new_status.lower().replace(" ", "_")
+
+    # List of allowed statuses
+    valid_statuses = ["pending", "in_progress", "completed", "picked_up", "cancelled"]
+    if normalized_status not in valid_statuses:
+        return Response(
+            {"error": f"Invalid status '{new_status}'."},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     try:
@@ -56,10 +67,14 @@ def mark_order_completed(request, order_id):
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    order.status = "completed"
+    order.status = normalized_status
     order.save()
     return Response(
-        {"message": "Order marked as completed.", "order_id": order.id},
+        {
+            "message": f"Order status updated to '{normalized_status}'.",
+            "order_id": order.id,
+            "status": normalized_status,
+        },
         status=status.HTTP_200_OK,
     )
 

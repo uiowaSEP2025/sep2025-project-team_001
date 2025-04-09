@@ -9,8 +9,8 @@ from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
     create_order,
     get_customer_orders,
-    update_order_status,
     retrieve_active_orders,
+    update_order_status,
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.worker_views import create_worker
