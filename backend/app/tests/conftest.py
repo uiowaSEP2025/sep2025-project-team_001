@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from app.models import Order
 from app.models.customer_models import Customer, CustomUser
-from app.models.restaurant_models import Item, Restaurant
+from app.models.restaurant_models import Item, Restaurant, Ingredient
 from app.models.worker_models import Worker
 
 
@@ -53,6 +53,7 @@ def item(restaurant):
         available=True,
         base64_image="base64-encoded-image"
     )
+
 
 @pytest.fixture
 def order(customer, restaurant):
