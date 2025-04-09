@@ -5,6 +5,12 @@ from app.models import Order
 from app.models.customer_models import Customer, CustomUser
 from app.models.restaurant_models import Ingredient, Item, Restaurant
 from app.models.worker_models import Worker
+from rest_framework.test import APIClient
+
+
+@pytest.fixture
+def api_client():
+    return APIClient()
 
 
 @pytest.fixture
@@ -30,6 +36,16 @@ def restaurant(user):
         phone="555-555-5555",
         restaurant_image="image-data"
     )
+
+
+@pytest.fixture
+def restaurant_with_user(restaurant):
+    custom_user = CustomUser.objects.create_user(
+        username="linkeduser", email="linked@example.com", password="pass"
+    )
+    restaurant.user = custom_user
+    restaurant.save()
+    return restaurant, custom_user
 
 
 @pytest.fixture

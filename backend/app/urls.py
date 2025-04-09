@@ -3,7 +3,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
-from .mobileViews.stripeViews import create_payment_intent
+from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
 from .views.auth_views import login_user, register_user
 from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
@@ -26,6 +26,7 @@ urlpatterns = [
     path("order/new/", create_order, name="create_order"),
     path("order/customer/", get_customer_orders, name="get_customer_orders"),
     path("order/payment/", create_payment_intent, name="create_payment"),
+    path("order/setup/", create_setup_intent, name="create_setup_intent"),
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),
