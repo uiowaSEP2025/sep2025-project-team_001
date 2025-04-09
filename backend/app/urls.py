@@ -31,10 +31,6 @@ urlpatterns = [
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
-    path(
-        "orders/<int:order_id>/complete/",
-        mark_order_completed,
-        name="mark_order_completed",
-    ),
+    path("orders/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
     path("create_worker/", create_worker, name="create_worker"),
 ]
