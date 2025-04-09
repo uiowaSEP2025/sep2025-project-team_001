@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
@@ -7,6 +11,7 @@ import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
 import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
+import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -128,13 +133,114 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
-                return MenuItemCard(
-                  item: item,
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  horizontalSpacing: horizontalSpacing,
-                  verticalSpacing: verticalSpacing,
-                  onAddToCart: _addToCart,
+                return GestureDetector(
+                  onTap: () {
+                    final base64String = item.base64image!.split(',').last;
+                    Uint8List imageBytes = base64Decode(base64String);
+                    showModalBottomSheet<void>(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(40)),
+                            height: screenHeight * 0.85,
+                            width: screenWidth,
+                            child: Stack(children: [
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: screenHeight * 0.25,
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.vertical(
+                                        bottom: Radius.circular(0)),
+                                  ),
+                                  child: Image.memory(
+                                    imageBytes,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.broken_image,
+                                          size: 40, color: Colors.grey);
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: SingleChildScrollView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: screenHeight * 0.25,
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            top: verticalSpacing * .5,
+                                            left: horizontalSpacing,
+                                            right: horizontalSpacing),
+                                        color: Colors.white,
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item.name,
+                                                textAlign: TextAlign.left,
+                                                style: AppTextStyles
+                                                    .bigBoldLetters(
+                                                        screenHeight * 0.7,
+                                                        Colors.black),
+                                              ),
+                                              SizedBox(
+                                                height: verticalSpacing * 0.5,
+                                              ),
+                                              Text(
+                                                item.description,
+                                                textAlign: TextAlign.left,
+                                                style: AppTextStyles
+                                                    .subtitleParagraph(
+                                                        screenHeight,
+                                                        AppColors
+                                                            .paragraphText),
+                                              ),
+                                              SizedBox(
+                                                height: verticalSpacing * 0.5,
+                                              ),
+                                              Text(
+                                               "Ingredients:",
+                                                textAlign: TextAlign.left,
+                                                style: AppTextStyles
+                                                    .buttonText(
+                                                        screenHeight,
+                                                        AppColors.paragraphText),
+                                              ),
+                                          
+
+                                            ]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ]),
+                          );
+                        });
+                  },
+                  child: MenuItemCard(
+                    item: item,
+                    screenHeight: screenHeight,
+                    screenWidth: screenWidth,
+                    horizontalSpacing: horizontalSpacing,
+                    verticalSpacing: verticalSpacing,
+                    onAddToCart: _addToCart,
+                  ),
                 );
               },
             ),
