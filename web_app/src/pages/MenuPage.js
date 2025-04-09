@@ -179,7 +179,7 @@ const MenuPage = () => {
         <div className="menu-page-container">
           <button
             className="menu-back-button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/manager_dashboard')}
           >
             Dashboard
           </button>

@@ -7,7 +7,6 @@ import OwnerAuthModal from '../components/OwnerAuthModal';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [ownerInfo, setOwnerInfo] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const barName = sessionStorage.getItem('barName');
     
@@ -25,7 +24,9 @@ function Dashboard() {
   const handleMenuClick = () => {
     navigate('/menu');
   };
-
+  const handleManagerLoginClick = () => {
+    navigate('/manager_login');
+  }
   const handleLogOutClick = () => {
     // Clear all relevant auth data from sessionStorage
     sessionStorage.removeItem('accessToken');
@@ -43,8 +44,8 @@ function Dashboard() {
       <Button variant="primary" size="lg" onClick={handleMenuClick}>
         Menu
       </Button>
-      <Button variant="danger" size="lg" onClick={handleLogOutClick}>
-        Log Out
+      <Button variant="primary" size="lg" onClick={handleManagerLoginClick}>
+        Manager Login
       </Button>
       <Button
         variant="warning"
@@ -53,6 +54,9 @@ function Dashboard() {
         onClick={() => setShowAuthModal(true)}
       >
         Create Manager
+      </Button>
+      <Button variant="danger" size="lg" onClick={handleLogOutClick}>
+        Log Out
       </Button>
       <OwnerAuthModal
         show={showAuthModal}

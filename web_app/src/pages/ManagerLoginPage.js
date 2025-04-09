@@ -41,7 +41,7 @@ const ManagerLoginPage = () => {
 
             const data = await response.json();
             if(response.ok){
-                navigate('/orders');
+                navigate('/manager_dashboard');
             } else {
                 setError(data.message || 'Invalid PIN');
             }
