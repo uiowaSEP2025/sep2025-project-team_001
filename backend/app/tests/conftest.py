@@ -1,39 +1,42 @@
-from decimal import Decimal
-
 import pytest
-from app.models.customer_models import Customer, CustomUser, Manager
-from app.models.restaurant_models import Item, Restaurant
+from decimal import Decimal
+from app.models.customer_models import CustomUser, Customer
+from app.models.restaurant_models import Restaurant, Item
+from app.models.worker_models import Worker
 
 
 @pytest.fixture
-def manager():
-    user = CustomUser.objects.create_user(
-        username="manager1", email="manager1@example.com", password="pass"
+def user():
+    return CustomUser.objects.create_user(
+        username="user1",
+        email="user1@example.com",
+        password="testpass",
     )
-    return Manager.objects.create(user=user)
 
 
 @pytest.fixture
-def customer():
-    user = CustomUser.objects.create_user(
-        username="customer1", email="customer1@example.com", password="pass"
-    )
-    # Optionally set additional fields (e.g. phone) if needed.
-    user.phone = "555-555-5555"
-    user.save()
+def customer(user):
     return Customer.objects.create(user=user)
 
 
 @pytest.fixture
-def restaurant(manager):
-    restaurant = Restaurant.objects.create(
+def restaurant(user):
+    return Restaurant.objects.create(
+        user=user,
         name="Testaurant",
         address="123 Main St",
         phone="555-555-5555",
-        restaurant_image="dummy_image_data",
+        restaurant_image="image-data"
     )
-    restaurant.managers.add(manager)
-    return restaurant
+
+
+@pytest.fixture
+def worker(restaurant):
+    return Worker.objects.create(
+        restaurant=restaurant,
+        pin="1234",
+        role="manager"
+    )
 
 
 @pytest.fixture
@@ -41,10 +44,10 @@ def item(restaurant):
     return Item.objects.create(
         restaurant=restaurant,
         name="Test Burger",
-        description="Delicious burger",
-        price=Decimal("9.99"),
+        description="A tasty burger",
+        price=Decimal("8.99"),
         category="Food",
-        stock=100,
+        stock=20,
         available=True,
-        base64_image="dummybase64string",
+        base64_image="base64-encoded-image"
     )
