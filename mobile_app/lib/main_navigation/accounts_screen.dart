@@ -37,7 +37,7 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-    void loadNotificationPreference() async {
+  void loadNotificationPreference() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool enabled = prefs.getBool('notifications_enabled') ?? true;
     setState(() {

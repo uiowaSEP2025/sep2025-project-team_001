@@ -1,7 +1,7 @@
 from django.db import models
 
 from .customer_models import Customer
-from .restaurant_models import Item, Restaurant
+from .restaurant_models import Item, Restaurant, Ingredient
 
 
 class Order(models.Model):
@@ -28,6 +28,9 @@ class OrderItem(models.Model):
     )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    unwanted_ingredients = models.ManyToManyField(
+        Ingredient, blank=True, related_name="excluded_from_order_items"
+    )
 
     def __str__(self):
         return f"{self.quantity}x {self.item.name} (Order #{self.order.id})"

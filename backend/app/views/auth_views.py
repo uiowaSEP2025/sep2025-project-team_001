@@ -84,7 +84,6 @@ def register_user(request):
             restaurant_image=data.get("restaurantImage")
         )
 
-
         # Create Worker (Manager role)
         Worker.objects.create(
             restaurant=restaurant,
@@ -105,6 +104,7 @@ def register_user(request):
         )
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 @csrf_exempt
 def login_user(request):
