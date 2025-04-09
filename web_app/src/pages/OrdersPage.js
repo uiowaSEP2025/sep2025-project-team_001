@@ -84,7 +84,7 @@ const OrdersPage = () => {
           zIndex: 1051,
         }}
       >
-        Dashboard
+        Log Out
       </Button>
 
       <h1>Active Orders</h1>

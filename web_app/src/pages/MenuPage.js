@@ -181,7 +181,7 @@ const MenuPage = () => {
     <Box sx={{ mt: 4, px: 6, maxWidth: '1460px', mx: 'auto', pb: 10 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Button onClick={() => navigate('/dashboard')}>Dashboard</Button>
+        <Button onClick={() => navigate('/manager_dashboard')}>Dashboard</Button>
         <Typography variant="h4">Menu Manager</Typography>
         <Box width={100} />
       </Box>
