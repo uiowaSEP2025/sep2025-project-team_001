@@ -25,6 +25,8 @@ module.exports = [
         FileReader: 'readonly',
         Storage: 'readonly',
         fetch: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {
