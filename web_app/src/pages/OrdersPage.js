@@ -9,25 +9,26 @@ const OrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
 
-  const handleCompleteOrder = async (orderId) => {
+  const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
       const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/orders/${orderId}/complete/`,
+        `${process.env.REACT_APP_API_URL}/orders/${orderId}/${nextStatus}/`
       );
-      console.log(`Order ${response.data.order_id} marked as completed.`);
+      console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
 
-      // Update local state
       const updatedOrders = orders.map((order) =>
-        order.id === orderId ? { ...order, status: 'completed' } : order,
+        order.id === orderId ? { ...order, status: nextStatus } : order
       );
       setOrders(updatedOrders);
 
-      // Update selected order in modal too
-      setSelectedOrder((prev) =>
-        prev ? { ...prev, status: 'completed' } : null,
-      );
+      // Automatically close modal if final status
+      if (nextStatus === 'picked_up') {
+        setSelectedOrder(null);
+      } else {
+        setSelectedOrder((prev) => prev ? { ...prev, status: nextStatus } : null);
+      }
     } catch (error) {
-      console.error('Error marking order as completed:', error);
+      console.error('Error updating order status: ', error);
     }
   };
 
@@ -59,6 +60,36 @@ const OrdersPage = () => {
     const intervalId = setInterval(fetchOrders, 3000); // Poll every 3s
     return () => clearInterval(intervalId);
   }, []);
+
+  const getNextStatus = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'in_progress';
+      case 'in_progress':
+        return 'completed';
+      case 'completed':
+        return 'picked_up';
+      default:
+        return null;
+    }
+  };
+
+  const formatStatus = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'in_progress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      case 'picked_up':
+        return 'Picked Up';
+      case 'cancelled':
+          return 'Cancelled'
+      default:
+        return status;
+    }
+  };  
 
   if (loading && orders.length === 0) {
     return (
@@ -106,7 +137,7 @@ const OrdersPage = () => {
               <td>{order.customer_name}</td>
               <td>{new Date(order.start_time).toLocaleString()}</td>
               <td>${Number(order.total_price).toFixed(2)}</td>
-              <td>{order.status}</td>
+              <td>{formatStatus(order.status)}</td>
             </tr>
           ))}
         </tbody>
@@ -144,12 +175,21 @@ const OrdersPage = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          {selectedOrder?.status !== 'completed' && (
+          {selectedOrder && selectedOrder.status !== 'picked_up' && (
             <Button
               variant="success"
-              onClick={() => handleCompleteOrder(selectedOrder.id)}
+              onClick={() => {
+                const nextStatus = getNextStatus(selectedOrder.status);
+                if (nextStatus) {
+                  handleUpdateOrderStatus(selectedOrder.id, nextStatus);
+                }
+              }}
             >
-              Complete Order
+              {selectedOrder.status === 'pending'
+                ? 'Mark In Progress'
+                : selectedOrder.status === 'in_progress'
+                ? 'Mark Completed'
+                : 'Mark Picked Up'}
             </Button>
           )}
           <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
