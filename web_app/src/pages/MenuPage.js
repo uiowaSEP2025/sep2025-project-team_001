@@ -1,13 +1,34 @@
+// 🟢 HEAD IMPORTS
 import React, { useEffect, useState } from 'react';
-import '../pages/styles/MenuPage.css';
-import ItemCard from '../components/ItemCard.js';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Collapse,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  MenuItem,
+  Modal,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNavigate } from 'react-router-dom';
+import ItemCard from '../components/ItemCard';
 
 const MenuPage = () => {
+  const navigate = useNavigate();
+  const barName = sessionStorage.getItem('barName');
+
   const [items, setItems] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteItemId, setDeleteItemId] = useState(null);
+  const [inputValue, setInputValue] = useState('');
   const [imageBase64, setImageBase64] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -16,9 +37,18 @@ const MenuPage = () => {
     category: '',
     stock: '',
     available: true,
+    ingredients: [],
   });
-  const barName = sessionStorage.getItem('barName');
-  const navigate = useNavigate();
+
+  // Collapse states
+  const [showAvailable, setShowAvailable] = useState(true);
+  const [showUnavailable, setShowUnavailable] = useState(true);
+  const [showAvailableFood, setShowAvailableFood] = useState(true);
+  const [showAvailableBeverages, setShowAvailableBeverages] = useState(true);
+  const [showUnavailableFood, setShowUnavailableFood] = useState(true);
+  const [showUnavailableBeverages, setShowUnavailableBeverages] =
+    useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchItems();
@@ -30,15 +60,56 @@ const MenuPage = () => {
         Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
       },
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
-        setItems(data.items || []);
-      })
-      .catch((error) => {
-        console.error('Error fetching menu items:', error);
+        const normalized = (data.items || []).map((item) => ({
+          ...item,
+          ingredients: item.ingredients.map((ing) =>
+            typeof ing === 'string' ? ing : ing.name,
+          ),
+        }));
+        setItems(normalized);
       });
   };
 
+  const toggleAvailability = (item) => {
+    const updatedItem = {
+      item_id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      stock: item.stock,
+      available: !item.available,
+      image: item.base64_image,
+      ingredients: item.ingredients.map((ing) =>
+        typeof ing === 'string' ? ing : ing.name,
+      ),
+      action: 'update',
+    };
+
+    fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+      },
+      body: JSON.stringify(updatedItem),
+    }).then(() => fetchItems());
+  };
+
+  const handleDelete = (itemId) => {
+    fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+      },
+      body: JSON.stringify({ action: 'delete', item_id: itemId }),
+    }).then(() => fetchItems());
+  };
+
+  // Modal Handlers
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -50,31 +121,28 @@ const MenuPage = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
+    reader.onloadend = () => setImageBase64(reader.result);
+    if (file) reader.readAsDataURL(file);
+  };
 
-    reader.onloadend = () => {
-      setImageBase64(reader.result);
-    };
-
-    if (file) {
-      reader.readAsDataURL(file);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      e.preventDefault();
+      setFormData((prev) => ({
+        ...prev,
+        ingredients: prev.ingredients.includes(inputValue.trim())
+          ? prev.ingredients
+          : [...prev.ingredients, inputValue.trim()],
+      }));
+      setInputValue('');
     }
   };
 
-  const openCreateModal = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      stock: '',
-      available: true,
-    });
-    setImageBase64('');
-    setShowCreateModal(true);
-  };
-
-  const closeCreateModal = () => {
-    setShowCreateModal(false);
+  const handleChipDelete = (ingredientToDelete) => () => {
+    setFormData((prev) => ({
+      ...prev,
+      ingredients: prev.ingredients.filter((i) => i !== ingredientToDelete),
+    }));
   };
 
   const handleCreate = (e) => {
@@ -93,269 +161,346 @@ const MenuPage = () => {
         image: imageBase64,
       }),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Created item:', data); // ← log here
+      .then((res) => res.json())
+      .then(() => {
         setShowCreateModal(false);
         fetchItems();
-      })
-      .catch((error) => {
-        console.error('Error creating item:', error);
       });
   };
 
-  const toggleAvailability = (item) => {
-    const updatedItem = {
-      item_id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      category: item.category,
-      stock: item.stock,
-      available: !item.available,
-      image: item.base64_image,
-      action: 'update',
-    };
-
-    fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
-      },
-      body: JSON.stringify(updatedItem),
-    })
-      .then(() => {
-        fetchItems();
-      })
-      .catch((error) => {
-        console.error('Error updating item availability:', error);
-      });
-  };
-
-  const confirmDelete = (itemId) => {
-    setDeleteItemId(itemId);
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/manage-item/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
-      },
-      body: JSON.stringify({
-        action: 'delete',
-        item_id: deleteItemId,
-      }),
-    })
-      .then(() => {
-        setDeleteItemId(null);
-        setShowDeleteModal(false);
-        fetchItems();
-      })
-      .catch((error) => {
-        console.error('Error deleting item:', error);
-      });
-  };
-
-  const availableBeverages = items.filter(
-    (item) => item.available && item.category.toLowerCase() === 'beverage',
-  );
-  const availableFood = items.filter(
-    (item) => item.available && item.category.toLowerCase() === 'food',
-  );
-  const unavailableBeverages = items.filter(
-    (item) => !item.available && item.category.toLowerCase() === 'beverage',
-  );
-  const unavailableFood = items.filter(
-    (item) => !item.available && item.category.toLowerCase() === 'food',
+  // Filters
+  const availableItems = items.filter((i) => i.available);
+  const unavailableItems = items.filter((i) => !i.available);
+  const byCategory = (list, category) =>
+    list.filter((i) => i.category.toLowerCase() === category);
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div>
-      <div className="menu-page">
-        <div className="menu-page-container">
-          <button
-            className="menu-back-button"
-            onClick={() => navigate('/dashboard')}
+    <Box sx={{ mt: 4, px: 6, maxWidth: '1460px', mx: 'auto', pb: 10 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+        <Button onClick={() => navigate('/dashboard')}>Dashboard</Button>
+        <Typography variant="h4">Menu Manager</Typography>
+        <Box width={100} />
+      </Box>
+
+      {/* Search Bar and Add Item Button */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Button
+          startIcon={<AddCircleOutlineIcon />}
+          variant="contained"
+          onClick={() => setShowCreateModal(true)}
+          sx={{ mr: 1, height: 56, width: 180 }}
+        >
+          Add Item
+        </Button>
+        <TextField
+          label="Search menu items"
+          variant="outlined"
+          fullWidth
+          sx={{ height: 56 }}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </Box>
+
+      {/* If searching, display flat list of filtered items */}
+      {searchTerm ? (
+        <>
+          <Typography variant="h5" mb={2}>
+            Search Results
+          </Typography>
+          <Grid container spacing={2}>
+            {filteredItems.map((item) => (
+              <Grid item xs={12} sm={6} md={3} key={item.id}>
+                <ItemCard
+                  item={item}
+                  onDelete={handleDelete}
+                  onToggle={toggleAvailability}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      ) : (
+        <>
+          {/* Available */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+            }}
           >
-            Dashboard
-          </button>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton onClick={() => setShowAvailable((prev) => !prev)}>
+                {showAvailable ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              </IconButton>
+              <Typography variant="h5">Available Items</Typography>
+            </Box>
+          </Box>
 
-          {barName && <h2> Restaurant: {barName} </h2>}
-          <h2>Menu Manager</h2>
-          <button className="menu-create-button" onClick={openCreateModal}>
-            Create New Item
-          </button>
-        </div>
-
-        <div className="menu-section-header">Available Items</div>
-        <div className="menu-sub-section-header">Beverages</div>
-        {availableBeverages.length === 0 && <p>No available beverages.</p>}
-        {availableBeverages.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onToggle={toggleAvailability}
-            onDelete={confirmDelete}
-          />
-        ))}
-
-        <div className="menu-sub-section-header">Food</div>
-        {availableFood.length === 0 && <p>No available food items.</p>}
-        {availableFood.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onToggle={toggleAvailability}
-            onDelete={confirmDelete}
-          />
-        ))}
-
-        <div className="menu-section-header">Unavailable Items</div>
-        <div className="menu-sub-section-header">Beverages</div>
-        {unavailableBeverages.length === 0 && <p>No unavailable beverages.</p>}
-        {unavailableBeverages.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onToggle={toggleAvailability}
-            onDelete={confirmDelete}
-          />
-        ))}
-
-        <div className="menu-sub-section-header">Food</div>
-        {unavailableFood.length === 0 && <p>No unavailable food items.</p>}
-        {unavailableFood.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            onToggle={toggleAvailability}
-            onDelete={confirmDelete}
-          />
-        ))}
-
-        {/* Create Modal */}
-        {showCreateModal && (
-          <div className="menu-modal-overlay">
-            <div className="menu-modal-content">
-              <h3>Create New Menu Item</h3>
-              <form onSubmit={handleCreate}>
-                <div>
-                  <label>Item Name:</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Description:</label>
-                  <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>Price:</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Category:</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    <option value="beverage">Beverage</option>
-                    <option value="food">Food</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Stock:</label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Available:</label>
-                  <input
-                    type="checkbox"
-                    name="available"
-                    checked={formData.available}
-                    onChange={(e) =>
-                      setFormData({ ...formData, available: e.target.checked })
-                    }
-                  />
-                </div>
-                <div>
-                  <label>Upload Image:</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    required
-                  />
-                </div>
-                {imageBase64 && (
-                  <div className="menu-image-preview-container">
-                    <p>Image Preview:</p>
-                    <img
-                      src={imageBase64}
-                      alt="Preview"
-                      className="menu-image-preview"
-                    />
-                  </div>
-                )}
-                <button type="submit">Create</button>
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={closeCreateModal}
+          <Collapse in={showAvailable}>
+            <Box sx={{ backgroundColor: '#e3f2fd', p: 2, borderRadius: 2 }}>
+              {/* Available Beverages */}
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <IconButton
+                  onClick={() => setShowAvailableBeverages((prev) => !prev)}
                 >
-                  Cancel
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
+                  {showAvailableBeverages ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+                <Typography variant="h6">Beverages</Typography>
+              </Box>
+              <Collapse in={showAvailableBeverages}>
+                <Grid container spacing={2}>
+                  {byCategory(availableItems, 'beverage').map((item) => (
+                    <Grid item xs={12} sm={6} md={3} key={item.id}>
+                      <ItemCard
+                        item={item}
+                        onDelete={handleDelete}
+                        onToggle={toggleAvailability}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Collapse>
 
-        {/* Delete Modal */}
-        {showDeleteModal && (
-          <div className="menu-modal-overlay">
-            <div className="menu-modal-content">
-              <h3>Confirm Delete</h3>
-              <p>Are you sure you want to delete this item?</p>
-              <button onClick={handleDeleteConfirm}>Yes</button>
-              <button
-                className="cancel-button"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+              {/* Available Food */}
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 4, mb: 1 }}>
+                <IconButton
+                  onClick={() => setShowAvailableFood((prev) => !prev)}
+                >
+                  {showAvailableFood ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </IconButton>
+                <Typography variant="h6">Food</Typography>
+              </Box>
+              <Collapse in={showAvailableFood}>
+                <Grid container spacing={2}>
+                  {byCategory(availableItems, 'food').map((item) => (
+                    <Grid item xs={12} sm={6} md={3} key={item.id}>
+                      <ItemCard
+                        item={item}
+                        onDelete={handleDelete}
+                        onToggle={toggleAvailability}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Collapse>
+            </Box>
+          </Collapse>
+
+          {/* Unavailable */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 6, mb: 2 }}>
+            <IconButton onClick={() => setShowUnavailable((prev) => !prev)}>
+              {showUnavailable ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+            <Typography variant="h5">Unavailable Items</Typography>
+          </Box>
+
+          <Collapse in={showUnavailable}>
+            <Box sx={{ backgroundColor: '#ffcdd2', p: 2, borderRadius: 2 }}>
+              {/* Unavailable Beverages */}
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <IconButton
+                  onClick={() => setShowUnavailableBeverages((prev) => !prev)}
+                >
+                  {showUnavailableBeverages ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+                <Typography variant="h6">Beverages</Typography>
+              </Box>
+              <Collapse in={showUnavailableBeverages}>
+                <Grid container spacing={2}>
+                  {byCategory(unavailableItems, 'beverage').map((item) => (
+                    <Grid item xs={12} sm={6} md={3} key={item.id}>
+                      <ItemCard
+                        item={item}
+                        onDelete={handleDelete}
+                        onToggle={toggleAvailability}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Collapse>
+
+              {/* Unavailable Food */}
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 4, mb: 1 }}>
+                <IconButton
+                  onClick={() => setShowUnavailableFood((prev) => !prev)}
+                >
+                  {showUnavailableFood ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </IconButton>
+                <Typography variant="h6">Food</Typography>
+              </Box>
+              <Collapse in={showUnavailableFood}>
+                <Grid container spacing={2}>
+                  {byCategory(unavailableItems, 'food').map((item) => (
+                    <Grid item xs={12} sm={6} md={3} key={item.id}>
+                      <ItemCard
+                        item={item}
+                        onDelete={handleDelete}
+                        onToggle={toggleAvailability}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Collapse>
+            </Box>
+          </Collapse>
+        </>
+      )}
+
+      {/* CREATE ITEM MODAL */}
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)}>
+        <Box
+          component={Paper}
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 500,
+            p: 4,
+            maxHeight: '90vh',
+            overflowY: 'auto',
+          }}
+        >
+          <Typography variant="h6" mb={2}>
+            Create New Menu Item
+          </Typography>
+          <form onSubmit={handleCreate}>
+            <TextField
+              fullWidth
+              label="Item Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              multiline
+              rows={2}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Price"
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Category"
+              name="category"
+              select
+              value={formData.category}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="beverage">Beverage</MenuItem>
+              <MenuItem value="food">Food</MenuItem>
+            </TextField>
+            <TextField
+              fullWidth
+              label="Stock"
+              name="stock"
+              type="number"
+              value={formData.stock}
+              onChange={handleChange}
+              required
+              sx={{ mb: 2 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="available"
+                  checked={formData.available}
+                  onChange={handleChange}
+                />
+              }
+              label="Available"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Add Ingredient"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              sx={{ mb: 1 }}
+            />
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+              {formData.ingredients.map((ing, idx) => (
+                <Chip key={idx} label={ing} onDelete={handleChipDelete(ing)} />
+              ))}
+            </Box>
+            <Button
+              fullWidth
+              component="label"
+              variant="outlined"
+              sx={{ mb: 2 }}
+            >
+              Upload Image
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageUpload}
+              />
+            </Button>
+            {imageBase64 && (
+              <Box sx={{ mb: 2, textAlign: 'center' }}>
+                <img
+                  src={imageBase64}
+                  alt="Preview"
+                  style={{ maxHeight: 150, maxWidth: '100%', borderRadius: 4 }}
+                />
+              </Box>
+            )}
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button variant="contained" type="submit">
+                Create
+              </Button>
+              <Button onClick={() => setShowCreateModal(false)}>Cancel</Button>
+            </Stack>
+          </form>
+        </Box>
+      </Modal>
+    </Box>
   );
 };
+
 export default MenuPage;

@@ -1,11 +1,11 @@
-from django.http import JsonResponse
+from app.serializers.item_serializer import ItemSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models.restaurant_models import Item, Restaurant
+from ..models.restaurant_models import Ingredient, Item
 
 
 @api_view(["GET"])
@@ -16,8 +16,9 @@ def menu_items_api(request):
             return Response({"error": "Only restaurant accounts can access this."}, status=403)
 
         restaurant = request.user.restaurant
-        items = Item.objects.filter(restaurant=restaurant).values()
-        return Response({"items": list(items)}, status=200)
+        items = Item.objects.filter(restaurant=restaurant)
+        serialized = ItemSerializer(items, many=True)
+        return Response({"items": serialized.data}, status=200)
 
     return Response({"error": "Method not allowed"}, status=405)
 
@@ -52,11 +53,16 @@ def manage_menu_item(request):
             available=data.get("available", False),
             base64_image=data.get("image"),
         )
+
+        for name in data.get("ingredients", []):
+            Ingredient.objects.create(item=item, name=name)
+
+        serialized = ItemSerializer(item)
+
         return Response(
             {
                 "message": "Item created successfully",
-                "item_id": item.id,
-                "item_str": str(item),
+                "item": serialized.data,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -73,8 +79,23 @@ def manage_menu_item(request):
         item.base64_image = data.get("image", item.base64_image)
         item.save()
 
+        if "ingredients" in data:
+            item.ingredients.all().delete()
+            for ing in data.get("ingredients", []):
+                if isinstance(ing, str):
+                    Ingredient.objects.create(item=item, name=ing)
+                elif isinstance(ing, dict) and "name" in ing:
+                    Ingredient.objects.create(item=item, name=ing["name"])
+                else:
+                    return Response({"error": f"Invalid ingredient format: {ing}"}, status=400)
+
+        serialized = ItemSerializer(item)
         return Response(
-            {"message": "Item updated successfully"}, status=status.HTTP_200_OK
+            {
+                "message": "Item updated successfully",
+                "item": serialized.data,
+            },
+            status=status.HTTP_200_OK,
         )
 
     elif action == "delete" and item_id:

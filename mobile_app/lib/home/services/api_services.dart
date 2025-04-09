@@ -131,7 +131,8 @@ Future<String> createPaymentIntent(double amountInDollars) async {
   try {
     final response = await dio.post(
       endpoint,
-      data: jsonEncode({'amount': (amountInDollars * 100).toInt()}), //cents for stripe
+      data: jsonEncode(
+          {'amount': (amountInDollars * 100).toInt()}), //cents for stripe
       options: Options(
         headers: {
           "Authorization": "Bearer $accessToken",
@@ -151,4 +152,3 @@ Future<String> createPaymentIntent(double amountInDollars) async {
     throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
   }
 }
-

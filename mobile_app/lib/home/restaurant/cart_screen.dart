@@ -68,58 +68,55 @@ class _CartScreenState extends State<CartScreen> {
     // }
 
     void submitOrder() async {
-  final customerId = await UserManager.getUser();
-  final restaurantId = widget.restaurant.id;
+      final customerId = await UserManager.getUser();
+      final restaurantId = widget.restaurant.id;
 
-  if (customerId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Customer ID not found")),
-    );
-    return;
-  }
+      if (customerId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Customer ID not found")),
+        );
+        return;
+      }
 
-  double total = _cart.values.fold<double>(
-      0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
+      double total = _cart.values.fold<double>(
+          0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
 
-  try {
-    final clientSecret = await createPaymentIntent(total); //todo now setup payment intent to save payment methods
+      try {
+        final clientSecret = await createPaymentIntent(
+            total); //todo now setup payment intent to save payment methods
 
-    await Stripe.instance.initPaymentSheet(
-      paymentSheetParameters: SetupPaymentSheetParameters(
-        paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: 'Streamline',
-      ),
-    );
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: clientSecret,
+            merchantDisplayName: 'Streamline',
+          ),
+        );
 
-    await Stripe.instance.presentPaymentSheet();
+        await Stripe.instance.presentPaymentSheet();
 
-    final orderId = await placeOrder(
-      customerId: customerId,
-      restaurantId: restaurantId,
-      cart: _cart,
-    );
+        final orderId = await placeOrder(
+          customerId: customerId,
+          restaurantId: restaurantId,
+          cart: _cart,
+        );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      
-      SnackBar(content: Text("Order placed with ID $orderId")),
-    );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Order placed with ID $orderId")),
+        );
 
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/home',
-      (route) => false,
-      arguments: {'initialIndex': 1},
-    );
-  } catch (e) {
-    print("Payment/order error: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Payment failed or cancelled")),
-    );
-  }
-}
-
-
-    
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
+          arguments: {'initialIndex': 1},
+        );
+      } catch (e) {
+        print("Payment/order error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Payment failed or cancelled")),
+        );
+      }
+    }
 
     double total = _cart.values.fold<double>(
         0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
