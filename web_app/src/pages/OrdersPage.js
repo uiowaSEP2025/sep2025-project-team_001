@@ -36,11 +36,12 @@ const OrdersPage = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/retrieve/orders/`
+          `${process.env.REACT_APP_API_URL}/retrieve/orders/`,
         );
         const newOrders = response.data;
 
-        if (JSON.stringify(newOrders) !== JSON.stringify(orders)) { //checks if orders have changed, if same do nothing
+        if (JSON.stringify(newOrders) !== JSON.stringify(orders)) {
+          //checks if orders have changed, if same do nothing
           setOrders(newOrders);
         }
 

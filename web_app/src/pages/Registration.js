@@ -110,6 +110,7 @@ function Registration() {
       sessionStorage.setItem('barName', business_name);
       sessionStorage.setItem('accessToken', access);
       sessionStorage.setItem('refreshToken', refresh);
+      sessionStorage.setItem('restaurantId', response.data.restaurant_id);
 
       navigate('/dashboard');
     } catch (error) {

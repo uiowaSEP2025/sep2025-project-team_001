@@ -15,7 +15,7 @@ const OwnerAuthModal = ({ show, onHide, onOwnerAuthenticated }) => {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -49,7 +49,7 @@ const OwnerAuthModal = ({ show, onHide, onOwnerAuthenticated }) => {
             <Form.Control
               type="text"
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </Form.Group>
           <Form.Group controlId="ownerPassword" className="mt-2">
@@ -57,7 +57,7 @@ const OwnerAuthModal = ({ show, onHide, onOwnerAuthenticated }) => {
             <Form.Control
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </Form.Group>
         </Form>

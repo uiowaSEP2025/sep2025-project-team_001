@@ -1,11 +1,11 @@
 # backend/views/worker_views.py
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 import json
 
-from ..models.worker_models import Worker
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from ..models.restaurant_models import Restaurant
-from ..models.customer_models import CustomUser
+from ..models.worker_models import Worker
 
 
 @csrf_exempt

@@ -139,32 +139,47 @@ class _CartScreenState extends State<CartScreen> {
 
             return ListTile(
               title: Text(cartItem.item.name),
-              subtitle: Row(
+              subtitle: Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: () {
-                      if (cartItem.quantity > 1) {
-                        setState(() {
-                          _cart[key] = CartItem(
-                            item: cartItem.item,
-                            quantity: cartItem.quantity - 1,
-                          );
-                        });
-                      }
-                    },
-                  ),
-                  Text('${cartItem.quantity}'),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      setState(() {
-                        _cart[key] = CartItem(
-                          item: cartItem.item,
-                          quantity: cartItem.quantity + 1,
-                        );
-                      });
-                    },
+                  SizedBox(height: verticalSpacing*0.5,),
+                  if (cartItem.unwantedIngredientNames.isNotEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Without: ${cartItem.unwantedIngredientNames.join(', ')}",
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  Row( 
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          if (cartItem.quantity > 1) {
+                            setState(() {
+                              _cart[key] = CartItem(
+                                item: cartItem.item,
+                                quantity: cartItem.quantity - 1,
+                              );
+                            });
+                          }
+                        },
+                      ),
+                      Text('${cartItem.quantity}'),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            _cart[key] = CartItem(
+                              item: cartItem.item,
+                              quantity: cartItem.quantity + 1,
+                            );
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
