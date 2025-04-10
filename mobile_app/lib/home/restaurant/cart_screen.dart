@@ -141,18 +141,21 @@ class _CartScreenState extends State<CartScreen> {
               title: Text(cartItem.item.name),
               subtitle: Column(
                 children: [
-                  SizedBox(height: verticalSpacing*0.5,),
+                  SizedBox(
+                    height: verticalSpacing * 0.5,
+                  ),
                   if (cartItem.unwantedIngredientNames.isNotEmpty)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
                           "Without: ${cartItem.unwantedIngredientNames.join(', ')}",
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ],
                     ),
-                  Row( 
+                  Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove),

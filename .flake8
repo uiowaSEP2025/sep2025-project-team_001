@@ -14,6 +14,4 @@ exclude =
     build,
     dist,
     docs,
-    tests,
-    test_*.py,
     migrations,
