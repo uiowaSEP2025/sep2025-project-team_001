@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -6,6 +7,21 @@ from rest_framework.response import Response
 from ..models.order_models import Order
 from ..serializers.order_serializer import OrderSerializer
 
+from app.scheduler_instance import get_restaurant_scheduler
+from app.utils.eta_calculator import calculate_overall_eta
+
+
+def get_current_time_minutes():
+    """
+    Returns the number of minutes passed since a fixed reference.
+    For this demo, we’ll assume the reference is today at 9:00 AM.
+    """
+    now = timezone.now()
+    reference = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    delta = now - reference
+    # Return minutes as an integer.
+    return int(delta.total_seconds() / 60)
+
 
 @api_view(["POST"])
 def create_order(request):
@@ -13,6 +29,36 @@ def create_order(request):
     if serializer.is_valid():
         order = serializer.save()
         order.total_price = order.get_total()
+        order.save()
+
+        # --- ETA Calculation Integration ---
+
+        # 1. Count the food and beverage items. We assume that items with category "beverage"
+        #    are beverages, and all others are food.
+        num_food_items = 0
+        num_beverage_items = 0
+        for order_item in order.order_items.all():
+            # Assume that the category field is available and non-null.
+            if order_item.item.category and order_item.item.category.lower() == "beverage":
+                num_beverage_items += order_item.quantity
+            else:
+                num_food_items += order_item.quantity
+
+        # 2. Retrieve the correct scheduler for this restaurant.
+        restaurant_id = order.restaurant.id
+        # You can adjust the number of bartenders as needed.
+        scheduler = get_restaurant_scheduler(restaurant_id, num_bartenders=2)
+
+        # 3. Get current time as minutes relative to our reference (e.g., 9:00 AM).
+        current_time_minutes = get_current_time_minutes()
+
+        # 4. Calculate the overall ETA using our utility function.
+        overall_eta = calculate_overall_eta(
+            num_food_items, num_beverage_items, current_time_minutes, scheduler
+        )
+
+        # 5. Set the estimated pickup time based on the ETA.
+        order.estimated_pickup_time = timezone.now() + timezone.timedelta(minutes=overall_eta)
         order.save()
 
         return Response(
