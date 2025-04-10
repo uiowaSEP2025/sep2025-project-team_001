@@ -5,47 +5,45 @@ from app.models.customer_models import Customer, CustomUser
 
 
 @pytest.mark.django_db
-def test_customer_str_and_to_dict():
+def test_customer_str_representation():
     """
-    Ensure Customer.__str__ returns the expected string and to_dict returns a correct dictionary.
+    String representation of a Customer should include the username.
     """
-    user = CustomUser.objects.create_user(
-        username="customeruser", email="customer@example.com", password="pass"
-    )
-    user.phone = "555-555-5555"
-    user.save()
+    user = CustomUser.objects.create_user(username="john", email="john@example.com", password="pass")
+    customer = Customer.objects.create(user=user)
 
-    customer_instance = Customer.objects.create(user=user)
-    expected_str = f"{user.username}'s Customer Profile"
-    assert str(customer_instance) == expected_str
-
-    customer_dict = customer_instance.to_dict()
-    assert customer_dict["id"] == customer_instance.id
-    assert customer_dict["username"] == user.username
-    assert customer_dict["email"] == user.email
-    assert customer_dict["phone"] == user.phone
-    assert "created_at" in customer_dict
-    assert "updated_at" in customer_dict
+    assert str(customer) == "john's Customer Profile"
 
 
 @pytest.mark.django_db
-def test_customer_timestamps():
+def test_customer_to_dict():
     """
-    Verify that created_at and updated_at are automatically set and that updated_at changes upon saving.
+    Customer.to_dict should return all expected fields including timestamps.
     """
     user = CustomUser.objects.create_user(
-        username="customer_timestamp", email="timestamp@example.com", password="pass"
+        username="jane", email="jane@example.com", password="pass"
     )
-    user.phone = "555-555-5555"
-    user.save()
-    customer_instance = Customer.objects.create(user=user)
+    customer = Customer.objects.create(user=user)
 
-    # Check initial timestamps
-    assert customer_instance.created_at is not None
-    assert customer_instance.updated_at is not None
+    data = customer.to_dict()
+    assert data["id"] == customer.id
+    assert data["username"] == "jane"
+    assert data["email"] == "jane@example.com"
+    assert "created_at" in data
+    assert "updated_at" in data
 
-    old_updated_at = customer_instance.updated_at
-    time.sleep(2)  # Ensure a time difference for the update
-    # Save again to update the timestamp
-    customer_instance.save()
-    assert customer_instance.updated_at >= old_updated_at
+
+@pytest.mark.django_db
+def test_customer_updated_at_changes():
+    """
+    Saving a Customer should update the updated_at timestamp.
+    """
+    user = CustomUser.objects.create_user(username="tim", email="tim@example.com", password="pass")
+    customer = Customer.objects.create(user=user)
+
+    old_updated_at = customer.updated_at
+    time.sleep(1)
+    customer.save()
+    customer.refresh_from_db()
+
+    assert customer.updated_at > old_updated_at

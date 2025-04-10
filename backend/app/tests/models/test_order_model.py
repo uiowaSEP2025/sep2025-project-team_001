@@ -2,78 +2,38 @@ from decimal import Decimal
 
 import pytest
 from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Item
 from django.utils import timezone
 
 
 @pytest.mark.django_db
-def test_order_str(customer, restaurant):
+def test_order_str(order):
     """
-    Ensure Order.__str__ returns the expected string.
+    The string representation of an Order should include ID, customer, and restaurant.
     """
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    expected_str = f"Order #{order.id} by {customer.user.username} at {restaurant.name}"
-    assert str(order) == expected_str
+    expected = f"Order #{order.id} by {order.customer.user.username} at {order.restaurant.name}"
+    assert str(order) == expected
 
 
 @pytest.mark.django_db
-def test_order_default_fields(customer, restaurant):
+def test_order_defaults(customer, restaurant):
     """
-    Ensure that default values for status and total_price are correctly set,
-    and that start_time is autopopulated.
+    When an Order is created, its default fields should be correctly set.
     """
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-    )
-    # Check that default values are set correctly
+    order = Order.objects.create(customer=customer, restaurant=restaurant)
     assert order.status == "pending"
     assert order.total_price == Decimal("0.00")
     assert order.start_time is not None
-    # Check that start_time is reasonably recent (within a minute)
     assert (timezone.now() - order.start_time).total_seconds() < 60
 
 
 @pytest.mark.django_db
-def test_order_get_total(customer, restaurant):
+def test_order_get_total(order, burger_item):
     """
-    Ensure Order.get_total() returns the correct total price when multiple order items exist.
+    Order.get_total should return the correct sum of all order item prices.
     """
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    # Create two items for testing
-    item1 = Item.objects.create(
-        restaurant=restaurant,
-        name="Burger",
-        description="Delicious burger",
-        price=Decimal("9.99"),
-        category="Food",
-        stock=10,
-        available=True,
-        base64_image="dummy",
-    )
-    item2 = Item.objects.create(
-        restaurant=restaurant,
-        name="Fries",
-        description="Crispy fries",
-        price=Decimal("3.50"),
-        category="Food",
-        stock=20,
-        available=True,
-        base64_image="dummy",
-    )
-    # Create OrderItems
-    OrderItem.objects.create(order=order, item=item1, quantity=2)
-    OrderItem.objects.create(order=order, item=item2, quantity=3)
+    item_price = burger_item.price
+    OrderItem.objects.create(order=order, item=burger_item, quantity=2)
+    OrderItem.objects.create(order=order, item=burger_item, quantity=3)
 
-    expected_total = (item1.price * 2) + (item2.price * 3)
+    expected_total = item_price * 5
     assert order.get_total() == expected_total

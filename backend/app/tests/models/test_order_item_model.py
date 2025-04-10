@@ -2,64 +2,39 @@ from decimal import Decimal
 
 import pytest
 from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Item
+from app.models.restaurant_models import Ingredient, Item
 
 
 @pytest.mark.django_db
-def test_order_item_str(customer, restaurant):
+def test_order_item_str(order, burger_item):
     """
-    Ensure OrderItem.__str__ returns the correct description.
+    The string representation of an OrderItem should include item name and quantity.
     """
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    item_instance = Item.objects.create(
-        restaurant=restaurant,
-        name="Pasta",
-        description="Yummy pasta",
-        price=Decimal("8.50"),
-        category="Food",
-        stock=10,
-        available=True,
-        base64_image="dummy",
-    )
-    order_item = OrderItem.objects.create(order=order, item=item_instance, quantity=2)
-    expected_str = f"2x {item_instance.name} (Order #{order.id})"
-    assert str(order_item) == expected_str
+    order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=2)
+    assert str(order_item) == f"2x {burger_item.name} (Order #{order.id})"
 
 
 @pytest.mark.django_db
-def test_order_item_multiple_entries(customer, restaurant):
+def test_order_item_multiple(order, burger_item):
     """
-    Ensure that creating multiple OrderItem entries on one Order are correctly linked.
+    Creating multiple OrderItems for the same order should result in multiple linked entries.
     """
-    order = Order.objects.create(
-        customer=customer,
-        restaurant=restaurant,
-        status="pending",
-        total_price=Decimal("0.00"),
-    )
-    item_instance = Item.objects.create(
-        restaurant=restaurant,
-        name="Sandwich",
-        description="Tasty sandwich",
-        price=Decimal("5.00"),
-        category="Food",
-        stock=15,
-        available=True,
-        base64_image="dummy",
-    )
-    # Create two order items for the same order.
-    order_item1 = OrderItem.objects.create(order=order, item=item_instance, quantity=1)
-    order_item2 = OrderItem.objects.create(order=order, item=item_instance, quantity=2)
+    oi1 = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
+    oi2 = OrderItem.objects.create(order=order, item=burger_item, quantity=2)
 
-    # Verify that both items are linked to the order.
-    order_items = order.order_items.all()
-    assert len(order_items) == 2
-    expected_str1 = f"{order_item1.quantity}x {item_instance.name} (Order #{order.id})"
-    expected_str2 = f"{order_item2.quantity}x {item_instance.name} (Order #{order.id})"
-    assert str(order_item1) == expected_str1
-    assert str(order_item2) == expected_str2
+    items = order.order_items.all()
+    assert len(items) == 2
+    assert str(oi1) == f"1x {burger_item.name} (Order #{order.id})"
+    assert str(oi2) == f"2x {burger_item.name} (Order #{order.id})"
+
+
+@pytest.mark.django_db
+def test_order_item_unwanted_ingredients(order, burger_item, ingredients):
+    """
+    Unwanted ingredients should be correctly assigned to the OrderItem.
+    """
+    order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
+    order_item.unwanted_ingredients.set(ingredients)
+
+    unwanted = order_item.unwanted_ingredients.all()
+    assert set(unwanted) == set(ingredients)

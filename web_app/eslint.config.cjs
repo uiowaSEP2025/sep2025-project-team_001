@@ -27,6 +27,7 @@ module.exports = [
         fetch: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        setTimeout: 'readonly',
       },
     },
     plugins: {

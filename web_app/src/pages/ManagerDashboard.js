@@ -38,13 +38,28 @@ function ManagerDashboard() {
       <h1 className="mb-4">Manager Dashboard</h1>
       {barName && <h2 className="mb-4">Restaurant: {barName}</h2>}
 
-      <Button variant="primary" size="lg" onClick={handleMenuClick} className="mb-3">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleMenuClick}
+        className="mb-3"
+      >
         Menu
       </Button>
-      <Button variant="primary" size="lg" onClick={handleOrdersClick} className="mb-3">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleOrdersClick}
+        className="mb-3"
+      >
         Orders
       </Button>
-      <Button variant="primary" size="lg" onClick={handleBartenderClick} className="mb-3">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleBartenderClick}
+        className="mb-3"
+      >
         Create Bartender
       </Button>
       <Button
