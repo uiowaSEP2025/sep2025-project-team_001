@@ -2,11 +2,10 @@ import json
 from decimal import Decimal
 
 import pytest
-from django.utils import timezone
-
 from app.models import CustomUser
 from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Ingredient
+from app.models.restaurant_models import Ingredient, Item
+from django.utils import timezone
 
 
 @pytest.fixture
@@ -160,6 +159,7 @@ def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_it
     Overall ETA is max(17, 10) = 17, rounded to the nearest 5 = 20 minutes.
     """
     from app.models.restaurant_models import Item
+
     # Make sure burger_item remains food.
     burger_item.category = "Food"
     burger_item.save()
@@ -355,3 +355,63 @@ def test_get_customer_orders_not_customer(api_client):
     api_client.force_authenticate(user=user)
     response = api_client.get("/order/customer/")
     assert response.status_code == 404
+
+
+# ------------------------------------------------------------------
+# POST order/estimate/ - Customer requests order ETA estimate
+# ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_estimate_order_eta_food_only(api_client, customer, restaurant, item):
+    """
+    Test order ETA estimation with food items only.
+    """
+    item.category = "Food"
+    item.save()
+    api_client.force_authenticate(user=customer.user)
+    data = {"restaurant_id": restaurant.id, "order_items": [{"item_id": item.id, "quantity": 4}]}
+    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
+    assert resp.status_code == 200
+    body = resp.json()
+    # food ETA = 15 + 2*4 = 23 → round to 25
+    assert body["eta_minutes"] == 25
+
+
+@pytest.mark.django_db
+def test_estimate_order_eta_beverage_only(api_client, customer, restaurant, item):
+    """
+    Test order ETA estimation with beverage items only.
+    """
+    item.category = "beverage"
+    item.save()
+    api_client.force_authenticate(user=customer.user)
+    data = {"restaurant_id": restaurant.id, "order_items": [{"item_id": item.id, "quantity": 3}]}
+    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
+    assert resp.status_code == 200
+    body = resp.json()
+    # beverage ETA = 3, food ETA = 15 → overall 15
+    assert body["eta_minutes"] == 15
+
+
+@pytest.mark.django_db
+def test_estimate_order_eta_mixed(api_client, customer, restaurant, burger_item):
+    """
+    Test order ETA estimation with mixed items.
+    """
+    burger_item.category = "Food"
+    burger_item.save()
+    bev = Item.objects.create(
+        restaurant=restaurant, name="Soda", description="", price=1,
+        category="beverage", stock=10, available=True
+    )
+    api_client.force_authenticate(user=customer.user)
+    data = {
+        "restaurant_id": restaurant.id,
+        "order_items": [
+            {"item_id": burger_item.id, "quantity": 2},  # food ETA=15+4=19→20
+            {"item_id": bev.id, "quantity": 5}  # bev ETA=5
+        ]
+    }
+    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
+    assert resp.status_code == 200
+    assert resp.json()["eta_minutes"] == 20
