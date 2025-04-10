@@ -62,6 +62,7 @@ Future<int> placeOrder({
     return {
       'item_id': cartItem.item.id,
       'quantity': cartItem.quantity,
+      'unwanted_ingredients': cartItem.unwantedIngredientsIds,
     };
   }).toList();
 

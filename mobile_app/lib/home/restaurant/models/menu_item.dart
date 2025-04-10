@@ -6,6 +6,7 @@ class MenuItem {
   final String category;
   final bool available;
   final String? base64image;
+  final List<Ingredient> ingredients;
 
   MenuItem({
     required this.id,
@@ -15,6 +16,7 @@ class MenuItem {
     required this.category,
     required this.available,
     this.base64image,
+    required this.ingredients,
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,24 @@ class MenuItem {
       category: json['category'] ?? 'Other',
       available: json['available'],
       base64image: json['base64_image'],
+      ingredients: (json['ingredients'] as List<dynamic>?)
+              ?.map((i) => Ingredient.fromJson(i))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class Ingredient {
+  final int id;
+  final String name;
+
+  Ingredient({required this.id, required this.name});
+
+  factory Ingredient.fromJson(Map<String, dynamic> json) {
+    return Ingredient(
+      id: json['id'],
+      name: json['name'],
     );
   }
 }
