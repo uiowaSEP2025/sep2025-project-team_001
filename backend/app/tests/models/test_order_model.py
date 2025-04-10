@@ -23,7 +23,22 @@ def test_order_defaults(customer, restaurant):
     assert order.status == "pending"
     assert order.total_price == Decimal("0.00")
     assert order.start_time is not None
+    assert order.estimated_pickup_time is None
     assert (timezone.now() - order.start_time).total_seconds() < 60
+
+
+@pytest.mark.django_db
+def test_order_set_estimated_pickup_time(order):
+    """
+    Tests that we can set and retrieve the estimated_pickup_time on an Order.
+    """
+    now = timezone.now()
+    # Set an ETA 30 minutes from now.
+    eta = now + timezone.timedelta(minutes=30)
+    order.estimated_pickup_time = eta
+    order.save()
+    order.refresh_from_db()
+    assert order.estimated_pickup_time == eta
 
 
 @pytest.mark.django_db

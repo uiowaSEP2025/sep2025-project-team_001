@@ -1,6 +1,9 @@
 import json
+from decimal import Decimal
 
 import pytest
+from django.utils import timezone
+
 from app.models import CustomUser
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Ingredient
@@ -57,6 +60,145 @@ def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant
     order = Order.objects.get(pk=response.json()["order_id"])
     unwanted = list(order.order_items.first().unwanted_ingredients.values_list("id", flat=True))
     assert sorted(unwanted) == sorted([ing1.pk, ing2.pk])
+
+
+@pytest.mark.django_db
+def test_create_order_sets_eta_food_only(api_client, customer, restaurant, item):
+    """
+    Test order creation with food items only.
+    With 3 food items (food ETA = 15 + 2*3 = 21 minutes, rounds to 25 minutes),
+    the order's estimated_pickup_time should be roughly 25 minutes in the future.
+    """
+    # Ensure the item is considered food (its category is not "beverage")
+    item.category = "Food"
+    item.save()
+
+    api_client.force_authenticate(user=customer.user)
+    data = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [{"item_id": item.pk, "quantity": 3}]
+    }
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 201, f"Response data: {response.json()}"
+
+    # Retrieve the order and verify that ETA is set
+    order = Order.objects.get(pk=response.json()["order_id"])
+    assert order.estimated_pickup_time is not None, "ETA not set for food-only order."
+
+    now = timezone.now()
+    expected_eta = now + timezone.timedelta(minutes=25)
+    delta = order.estimated_pickup_time - expected_eta
+    # Allow a small difference (up to 2 minutes) due to processing time
+    assert abs(delta.total_seconds()) < 120, f"ETA off by {delta.total_seconds()} seconds"
+
+
+@pytest.mark.django_db
+def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, item):
+    """
+    Test order creation with beverage items only.
+    For beverage-only orders:
+      - Beverage ETA = beverage quantity * 1 minute each.
+      - Food ETA = base time (15 minutes) since there are no food items.
+    Overall ETA will be max(15, beverage ETA), rounded to nearest 5.
+
+    For example, if 2 beverages are ordered:
+      Beverage ETA = 2 minutes, but overall ETA = max(15,2) = 15 minutes.
+    If 20 beverages are ordered:
+      Beverage ETA = 20 minutes, overall ETA = 20 minutes (rounded to 20).
+    """
+    # Set the item as a beverage.
+    item.category = "beverage"  # Lowercase is preferred.
+    item.save()
+    api_client.force_authenticate(user=customer.user)
+
+    # Test with 2 beverages:
+    data = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [{"item_id": item.pk, "quantity": 2}]
+    }
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 201, f"Response: {response.json()}"
+    order = Order.objects.get(pk=response.json()["order_id"])
+    assert order.estimated_pickup_time is not None, "ETA not set for beverage-only order."
+
+    now = timezone.now()
+    # With 2 beverages: beverage ETA = 2 minutes, food ETA = 15 minutes => Overall ETA = max(15,2)=15.
+    expected_eta = now + timezone.timedelta(minutes=15)
+    delta = order.estimated_pickup_time - expected_eta
+    assert abs(delta.total_seconds()) < 120, f"Beverage-only ETA off by {delta.total_seconds()} seconds"
+
+    # Test with 20 beverages:
+    data = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [{"item_id": item.pk, "quantity": 20}]
+    }
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 201, f"Response: {response.json()}"
+    order = Order.objects.get(pk=response.json()["order_id"])
+
+    now = timezone.now()
+    # With 20 beverages: beverage ETA = 20 minutes, food ETA = 15 minutes, so overall ETA = max(20,15)=20.
+    # Rounded to nearest 5 (20 is already a multiple of 5).
+    expected_eta = now + timezone.timedelta(minutes=20)
+    delta = order.estimated_pickup_time - expected_eta
+    assert abs(delta.total_seconds()) < 120, f"Beverage-only (20 items) ETA off by {delta.total_seconds()} seconds"
+
+
+@pytest.mark.django_db
+def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_item):
+    """
+    Test order creation for an order with both food and beverages.
+    Create one food item and one beverage item.
+
+    Food ETA for 1 food item: 15 + 2*1 = 17 minutes.
+    For beverages: we'll simulate a beverage order by creating a new item with category "beverage".
+    With 10 beverages at 1 minute each and an empty scheduler,
+    beverage ETA = 10 minutes.
+    Overall ETA is max(17, 10) = 17, rounded to the nearest 5 = 20 minutes.
+    """
+    from app.models.restaurant_models import Item
+    # Make sure burger_item remains food.
+    burger_item.category = "Food"
+    burger_item.save()
+
+    # Create a beverage item for this restaurant.
+    beverage_item = Item.objects.create(
+        restaurant=restaurant,
+        name="Test beverage",
+        description="A refreshing beverage",
+        price=Decimal("3.50"),
+        category="beverage",  # Ensure lower-case "beverage" so the view treats it as a beverage order.
+        stock=50,
+        available=True,
+        base64_image="beverage-image"
+    )
+
+    api_client.force_authenticate(user=customer.user)
+    data = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [
+            {"item_id": burger_item.pk, "quantity": 1},
+            {"item_id": beverage_item.pk, "quantity": 10}
+        ]
+    }
+    response = api_client.post("/order/new/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 201, f"Response data: {response.json()}"
+
+    order = Order.objects.get(pk=response.json()["order_id"])
+    assert order.estimated_pickup_time is not None, "ETA not set for mixed order."
+
+    # Expected calculations:
+    # Food ETA = 15 + (2*1) = 17 minutes.
+    # beverage ETA = 10 * 1 = 10 minutes (scheduler has no pre-existing orders).
+    # Overall ETA = max(17,10) = 17, which rounds to 20 minutes.
+    now = timezone.now()
+    expected_eta = now + timezone.timedelta(minutes=20)
+    delta = order.estimated_pickup_time - expected_eta
+    assert abs(delta.total_seconds()) < 120, f"ETA off by {delta.total_seconds()} seconds"
 
 
 @pytest.mark.django_db
@@ -159,7 +301,7 @@ def test_mark_order_completed_success(api_client, restaurant_with_user, customer
     api_client.force_authenticate(user=user)
 
     order = Order.objects.create(customer=customer, restaurant=restaurant, status="pending", total_price=0)
-    response = api_client.patch(f"/orders/{order.id}/complete/", data={}, format="json")
+    response = api_client.patch(f"/orders/{order.id}/completed/", data={}, format="json")
     assert response.status_code == 200
     order.refresh_from_db()
     assert order.status == "completed"
@@ -172,7 +314,7 @@ def test_mark_order_completed_not_found(api_client, restaurant_with_user):
     """
     _, user = restaurant_with_user
     api_client.force_authenticate(user=user)
-    response = api_client.patch("/orders/9999/complete/", data={}, format="json")
+    response = api_client.patch("/orders/9999/completed/", data={}, format="json")
     assert response.status_code == 404
 
 
