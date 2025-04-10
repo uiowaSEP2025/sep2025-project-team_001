@@ -138,7 +138,7 @@ function Registration() {
             Back
           </button>
           <Modal.Title className="modal-title">
-            Manager Registration
+            Restaurant Registration
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="registration-modal-body">

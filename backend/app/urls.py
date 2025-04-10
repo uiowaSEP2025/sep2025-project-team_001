@@ -9,8 +9,8 @@ from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
     create_order,
     get_customer_orders,
-    mark_order_completed,
     retrieve_active_orders,
+    update_order_status,
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.worker_views import create_worker
@@ -32,10 +32,6 @@ urlpatterns = [
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
-    path(
-        "orders/<int:order_id>/complete/",
-        mark_order_completed,
-        name="mark_order_completed",
-    ),
+    path("orders/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
     path("create-worker/", create_worker, name="create_worker"),
 ]
