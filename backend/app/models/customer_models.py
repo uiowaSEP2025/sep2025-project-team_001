@@ -25,7 +25,6 @@ class Customer(models.Model):
             "name": self.user.first_name,
             "username": self.user.username,
             "email": self.user.email,
-            "phone": self.user.phone,
             "stripe_customer_id": self.stripe_customer_id,
             "created_at": self.created_at,
             "updated_at": self.updated_at,

@@ -1,37 +1,48 @@
 from decimal import Decimal
 
 import pytest
-from app.models import CustomUser
-from app.models.restaurant_models import Item, Restaurant
-from rest_framework.test import APIClient
+
+# ------------------------------------------------------------------
+# GET /restaurants/list/ - Public endpoint to retrieve restaurants
+# ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_get_restaurants_authenticated(api_client, user, restaurant):
+    """
+    Authenticated request should return a list of restaurants,
+    including the one linked to the user.
+    """
+    api_client.force_authenticate(user=user)
+    response = api_client.get("/restaurants/list/")
+    assert response.status_code == 200, response.content
+    data = response.json()
+    assert isinstance(data, list)
+    assert any(r["id"] == restaurant.id for r in data)
 
 
-@pytest.fixture
-def api_client():
-    return APIClient()
+@pytest.mark.django_db
+def test_get_restaurants_unauthenticated(api_client):
+    """
+    Unauthenticated request should return a 401 Unauthorized error.
+    """
+    response = api_client.get("/restaurants/list/")
+    assert response.status_code == 401
 
 
-@pytest.fixture
-def user():
-    return CustomUser.objects.create_user(
-        username="testuser", email="test@example.com", password="pass"
-    )
+# ------------------------------------------------------------------
+# GET /restaurants/<id>/menu/ - Returns menu items for a restaurant
+# ------------------------------------------------------------------
 
+@pytest.mark.django_db
+def test_get_menu_items_authenticated(api_client, user, restaurant):
+    """
+    Authenticated request should return available menu items only
+    for the specified restaurant.
+    """
+    api_client.force_authenticate(user=user)
 
-@pytest.fixture
-def restaurant():
-    return Restaurant.objects.create(
-        name="Testaurant",
-        address="123 Main St",
-        phone="555-555-5555",
-        restaurant_image="dummyimage",
-    )
-
-
-@pytest.fixture
-def available_item(restaurant):
-    return Item.objects.create(
-        restaurant=restaurant,
+    # Add one available and one unavailable item to the restaurant
+    restaurant.items.create(
         name="Available Item",
         description="This item is available",
         price=Decimal("9.99"),
@@ -40,12 +51,7 @@ def available_item(restaurant):
         available=True,
         base64_image="dummyimage",
     )
-
-
-@pytest.fixture
-def unavailable_item(restaurant):
-    return Item.objects.create(
-        restaurant=restaurant,
+    restaurant.items.create(
         name="Unavailable Item",
         description="This item is not available",
         price=Decimal("9.99"),
@@ -55,75 +61,32 @@ def unavailable_item(restaurant):
         base64_image="dummyimage",
     )
 
-
-# --- get_restaurants tests ---
-
-
-@pytest.mark.django_db
-def test_get_restaurants_authenticated(api_client, user, restaurant):
-    """
-    When authenticated, get_restaurants should return a list containing the restaurant.
-    """
-    api_client.force_authenticate(user=user)
-    response = api_client.get("/restaurants/list/")
-    assert response.status_code == 200, response.content
-    data = response.json()
-    # Data should be a list and our restaurant should be included.
-    assert isinstance(data, list)
-    assert any(r["id"] == restaurant.id for r in data)
-
-
-@pytest.mark.django_db
-def test_get_restaurants_unauthenticated(api_client):
-    """
-    An unauthenticated request to get_restaurants should return a 401 error.
-    """
-    response = api_client.get("/restaurants/list/")
-    assert response.status_code == 401
-
-
-# --- get_menu_items tests ---
-
-
-@pytest.mark.django_db
-def test_get_menu_items_authenticated(
-    api_client, user, restaurant, available_item, unavailable_item
-):
-    """
-    When authenticated, get_menu_items should return only available items for the given restaurant name.
-    """
-    api_client.force_authenticate(user=user)
-    # URL uses restaurant name as a parameter.
-    url = f"/restaurants/{restaurant.name}/menu/"
+    url = f"/restaurants/{restaurant.id}/menu/"
     response = api_client.get(url)
     assert response.status_code == 200, response.content
     data = response.json()
-    # Expect a list of items.
-    assert isinstance(data, list)
-    # Only available_item should be returned.
-    returned_names = [item["name"] for item in data]
-    assert available_item.name in returned_names
-    assert unavailable_item.name not in returned_names
+    names = [item["name"] for item in data]
+    assert "Available Item" in names
+    assert "Unavailable Item" not in names
 
 
 @pytest.mark.django_db
-def test_get_menu_items_invalid_restaurant(api_client, user):
+def test_get_menu_items_invalid_restaurant_id(api_client, user):
     """
-    When a restaurant with the given name does not exist, get_menu_items should return an empty list.
+    If the restaurant ID does not exist, the view should return an empty list.
     """
     api_client.force_authenticate(user=user)
-    url = "/restaurants/Nonexistent/menu/"
+    url = "/restaurants/9999/menu/"
     response = api_client.get(url)
     assert response.status_code == 200, response.content
-    data = response.json()
-    assert data == []
+    assert response.json() == []
 
 
 @pytest.mark.django_db
 def test_get_menu_items_unauthenticated(api_client, restaurant):
     """
-    An unauthenticated request to get_menu_items should return a 401 error.
+    Unauthenticated request should return a 401 Unauthorized error.
     """
-    url = f"/restaurants/{restaurant.name}/menu/"
+    url = f"/restaurants/{restaurant.id}/menu/"
     response = api_client.get(url)
     assert response.status_code == 401

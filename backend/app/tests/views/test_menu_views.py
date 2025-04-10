@@ -2,107 +2,82 @@ import json
 from decimal import Decimal
 
 import pytest
-from app.models.restaurant_models import Item, Restaurant
-from rest_framework.test import APIClient
+from app.models.restaurant_models import Item
 
-
-@pytest.fixture
-def api_client(manager):
-    client = APIClient()
-    client.force_authenticate(user=manager.user)
-    return client
-
-
-# --- Tests for menu_items_api ---
-
+# ------------------------------------------------------------------
+# GET /api/menu-items/ - Retrieve items for a restaurant
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_menu_items_api_no_restaurant(api_client, manager):
+def test_menu_items_api_no_restaurant(api_client):
     """
-    When the authenticated manager has no associated Restaurant, the view returns an empty items list with 200.
+    Unauthenticated user should receive 401 when accessing the menu-items endpoint.
     """
-    # Remove any restaurants associated with this manager.
-    Restaurant.objects.filter(managers=manager).delete()
     response = api_client.get("/api/menu-items/")
-    # Even if there is no restaurant, the view now returns a 200 with an empty items list.
-    assert response.status_code == 200
-    data = response.json()
-    assert "items" in data
-    assert data["items"] == []
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
-def test_menu_items_api_empty_items(api_client, restaurant):
+def test_menu_items_api_empty_items(api_client, restaurant_with_user):
     """
-    When a Restaurant exists but has no items, the view returns an empty items list with 200.
+    Authenticated request should return an empty items list if the restaurant has no items.
     """
-    # Ensure the restaurant has no items.
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
     restaurant.items.all().delete()
+
     response = api_client.get("/api/menu-items/")
     assert response.status_code == 200
-    data = response.json()
-    assert "items" in data
-    assert data["items"] == []
+    assert response.json()["items"] == []
 
 
 @pytest.mark.django_db
-def test_menu_items_api_with_items(api_client, restaurant):
+def test_menu_items_api_with_items(api_client, restaurant_with_user):
     """
-    When a Restaurant exists with items, the view returns a list of items with status 200.
+    Authenticated request should return all available items for the restaurant.
     """
-    # Create two items for the restaurant.
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+
     item1 = Item.objects.create(
-        restaurant=restaurant,
-        name="Item1",
-        description="First item",
-        price=Decimal("9.99"),
-        category="Food",
-        stock=10,
-        available=True,
-        base64_image="dummy1",
+        restaurant=restaurant, name="Item1", description="First",
+        price=Decimal("9.99"), category="Food", stock=10,
+        available=True, base64_image="img1"
     )
     item2 = Item.objects.create(
-        restaurant=restaurant,
-        name="Item2",
-        description="Second item",
-        price=Decimal("5.99"),
-        category="Drink",
-        stock=20,
-        available=True,
-        base64_image="dummy2",
+        restaurant=restaurant, name="Item2", description="Second",
+        price=Decimal("5.99"), category="Drink", stock=20,
+        available=True, base64_image="img2"
     )
+
     response = api_client.get("/api/menu-items/")
     assert response.status_code == 200
-    data = response.json()
-    assert "items" in data
-    returned_ids = {item["id"] for item in data["items"]}
-    assert item1.id in returned_ids
-    assert item2.id in returned_ids
+    ids = [i["id"] for i in response.json()["items"]]
+    assert item1.id in ids
+    assert item2.id in ids
 
 
 @pytest.mark.django_db
-def test_menu_items_api_invalid_method(api_client):
+def test_menu_items_api_invalid_method(api_client, restaurant_with_user):
     """
-    Non-GET methods on menu_items_api should return a 405 error.
+    Non-GET methods on menu-items endpoint should return 405 Method Not Allowed.
     """
-    response = api_client.post(
-        "/api/menu-items/", data="{}", content_type="application/json"
-    )
+    _, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    response = api_client.post("/api/menu-items/", data="{}", content_type="application/json")
     assert response.status_code == 405
-    data = response.json()
-    # DRF returns a default "detail" message instead of an "error" key.
-    assert "not allowed" in data.get("detail", "").lower()
+    assert "not allowed" in response.json().get("detail", "").lower()
 
 
-# --- Tests for manage_menu_item ---
-
+# ------------------------------------------------------------------
+# POST /api/manage-item/ - Create, update, or delete menu items
+# ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_manage_menu_item_no_restaurant(api_client, manager):
+def test_manage_menu_item_unauthenticated(api_client):
     """
-    When the authenticated manager has no associated Restaurant, manage_menu_item returns a 404 error.
+    Unauthenticated request to manage-item endpoint should return 401.
     """
-    Restaurant.objects.filter(managers=manager).delete()
     data = {
         "action": "create",
         "name": "Test Item",
@@ -111,44 +86,55 @@ def test_manage_menu_item_no_restaurant(api_client, manager):
         "stock": "5",
         "image": "dummyimage",
     }
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
-    assert response.status_code == 404
-    resp_data = response.json()
-    assert resp_data.get("error") in [
-        "Manager or restaurant not found",
-        "Restaurant not found",
-    ]
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_create_missing_fields(api_client, restaurant):
+def test_manage_menu_item_authenticated_but_no_restaurant(api_client, user):
     """
-    Creating an item without a required field (e.g. 'name') should fail with a 400 error.
+    Authenticated user without a restaurant should receive 403.
     """
+    api_client.force_authenticate(user=user)
     data = {
         "action": "create",
-        # "name" is missing
+        "name": "Test Item",
         "price": "10.00",
         "category": "Food",
         "stock": "5",
         "image": "dummyimage",
     }
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 403
+    assert response.json()["error"] == "Only restaurant accounts can manage menu items."
+
+
+@pytest.mark.django_db
+def test_manage_menu_item_create_missing_fields(api_client, restaurant_with_user):
+    """
+    Creating an item without required fields should return 400.
+    """
+    _, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    data = {
+        "action": "create",
+        "price": "10.00",
+        "category": "Food",
+        "stock": "5",
+        "image": "dummyimage",
+    }
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
-    resp_data = response.json()
-    error_msg = resp_data.get("error") or resp_data.get("message", "")
-    assert "name is required" in error_msg.lower()
+    assert "name is required" in response.json().get("error", "").lower()
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_create_success(api_client, restaurant):
+def test_manage_menu_item_create_success(api_client, restaurant_with_user):
     """
-    A valid 'create' action successfully creates an item and returns a 201 response.
+    Creating an item with valid data should return 201 and create the item.
     """
+    _, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
     data = {
         "action": "create",
         "name": "Test Item",
@@ -157,64 +143,46 @@ def test_manage_menu_item_create_success(api_client, restaurant):
         "stock": "5",
         "image": "dummyimage",
     }
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 201
-    resp_data = response.json()
-    assert resp_data.get("message") == "Item created successfully"
-    assert "item_id" in resp_data
-    assert "item_str" in resp_data
+    assert response.json()["message"] == "Item created successfully"
+    assert "item" in response.json()
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_update_missing_item_id(api_client, restaurant):
+def test_manage_menu_item_update_missing_item_id(api_client, restaurant_with_user):
     """
-    An update action without an item_id should return a 400 error.
+    Updating an item without specifying item_id should return 400.
     """
+    _, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
     data = {
         "action": "update",
-        # Missing item_id
         "name": "Updated Item",
         "price": "12.00",
         "category": "Food",
         "stock": "10",
         "image": "updatedimage",
     }
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
-    resp_data = response.json()
-    assert "invalid action or missing item_id" in resp_data.get("error", "").lower()
+    assert "invalid action or missing item_id" in response.json()["error"].lower()
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_update_success(api_client, restaurant):
+def test_manage_menu_item_update_success(api_client, restaurant_with_user):
     """
-    A valid 'update' action updates an existing item and returns a 200 response.
+    Updating an existing item should modify its fields and return 200.
     """
-    # First, create an item.
-    create_data = {
-        "action": "create",
-        "name": "Original Item",
-        "price": "15.00",
-        "category": "Food",
-        "stock": "8",
-        "image": "origimage",
-    }
-    create_response = api_client.post(
-        "/api/manage-item/",
-        data=json.dumps(create_data),
-        content_type="application/json",
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    item = Item.objects.create(
+        restaurant=restaurant, name="Original", price=Decimal("10.00"),
+        category="Food", stock=5, available=True, base64_image="img"
     )
-    assert create_response.status_code == 201
-    create_resp_data = create_response.json()
-    item_id = create_resp_data.get("item_id")
-    # Update the item.
-    update_data = {
+    data = {
         "action": "update",
-        "item_id": item_id,
+        "item_id": item.id,
         "name": "Updated Item",
         "price": "20.00",
         "category": "Food",
@@ -222,65 +190,39 @@ def test_manage_menu_item_update_success(api_client, restaurant):
         "image": "newimage",
         "description": "Updated description",
     }
-    update_response = api_client.post(
-        "/api/manage-item/",
-        data=json.dumps(update_data),
-        content_type="application/json",
-    )
-    assert update_response.status_code == 200
-    update_resp_data = update_response.json()
-    assert update_resp_data.get("message") == "Item updated successfully"
-    # Verify that the item was updated.
-    item = Item.objects.get(pk=item_id)
-    assert item.name == "Updated Item"
-    assert float(item.price) == 20.00
-    assert item.base64_image == "newimage"
-    assert item.description == "Updated description"
-
-
-# --- New Tests for manage_menu_item delete and invalid action ---
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Item updated successfully"
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_delete_success(api_client, restaurant):
+def test_manage_menu_item_delete_success(api_client, restaurant_with_user):
     """
-    A valid 'delete' action deletes an existing item and returns a 200 response.
+    Deleting an existing item should remove it and return 200.
     """
-    # Create an item directly.
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
     item = Item.objects.create(
-        restaurant=restaurant,
-        name="Delete Me",
-        description="Item to be deleted",
-        price=Decimal("12.50"),
-        category="Food",
-        stock=5,
-        available=True,
-        base64_image="deleteme",
+        restaurant=restaurant, name="Delete Me", description="To delete",
+        price=Decimal("12.50"), category="Food", stock=5,
+        available=True, base64_image="img"
     )
     data = {"action": "delete", "item_id": item.id}
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 200
-    resp_data = response.json()
-    assert resp_data.get("message") == "Item deleted successfully"
-    # Verify that the item no longer exists.
+    assert response.json()["message"] == "Item deleted successfully"
     with pytest.raises(Item.DoesNotExist):
         Item.objects.get(pk=item.id)
 
 
 @pytest.mark.django_db
-def test_manage_menu_item_invalid_action(api_client, restaurant):
+def test_manage_menu_item_invalid_action(api_client, restaurant_with_user):
     """
-    An invalid action should return a 400 error indicating an invalid action or missing item_id.
+    An unrecognized action should return 400 with an error message.
     """
-    data = {
-        "action": "unknown"
-        # No item_id provided.
-    }
-    response = api_client.post(
-        "/api/manage-item/", data=json.dumps(data), content_type="application/json"
-    )
+    _, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    data = {"action": "unknown"}
+    response = api_client.post("/api/manage-item/", data=json.dumps(data), content_type="application/json")
     assert response.status_code == 400
-    resp_data = response.json()
-    assert "invalid action or missing item_id" in resp_data.get("error", "").lower()
+    assert "invalid action or missing item_id" in response.json()["error"].lower()

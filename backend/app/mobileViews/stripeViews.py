@@ -3,9 +3,10 @@ import json
 import stripe
 from django.conf import settings
 from django.http import JsonResponse
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 @api_view(["POST"])
 def create_payment_intent(request):
@@ -38,6 +39,7 @@ def create_setup_intent(request):
         return JsonResponse({'clientSecret': setup_intent.client_secret})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
 
 def create_stripe_customer(email):
     customer = stripe.Customer.create(email=email)

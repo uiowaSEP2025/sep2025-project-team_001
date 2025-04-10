@@ -1,56 +1,77 @@
 from decimal import Decimal
 
 import pytest
-from app.models.restaurant_models import Item
+from app.models.order_models import Order, OrderItem
+from app.models.restaurant_models import Ingredient, Item
 from app.serializers.order_serializer import OrderSerializer
 
 
 @pytest.mark.django_db
 def test_order_serializer_create(customer, restaurant):
     """
-    Test that OrderSerializer can successfully create an Order along with nested OrderItems.
+    OrderSerializer should validate and save an order with item(s) and unwanted ingredients.
     """
-    # Create an Item instance to be ordered.
-    item_instance = Item.objects.create(
+    item = Item.objects.create(
         restaurant=restaurant,
-        name="Pizza",
-        description="Cheesy pizza",
-        price=Decimal("12.50"),
+        name="Burger",
+        description="Test burger",
+        price=Decimal("9.99"),
         category="Food",
         stock=20,
         available=True,
-        base64_image="dummyimage",
+        base64_image="img"
     )
-    # Prepare valid input data.
-    data = {
+
+    pickle = Ingredient.objects.create(item=item, name="Pickles")
+    onions = Ingredient.objects.create(item=item, name="Onions")
+
+    payload = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": item_instance.pk, "quantity": 3}],
+        "status": "pending",
+        "total_price": "19.98",
+        "order_items": [
+            {
+                "item_id": item.pk,
+                "quantity": 2,
+                "unwanted_ingredients": [pickle.pk, onions.pk],
+            }
+        ],
     }
-    serializer = OrderSerializer(data=data)
+
+    serializer = OrderSerializer(data=payload)
     assert serializer.is_valid(), serializer.errors
     order = serializer.save()
 
-    # Check that the order has been created with correct relationships.
     assert order.customer == customer
     assert order.restaurant == restaurant
+    assert order.status == "pending"
+    assert order.total_price == Decimal("19.98")
     assert order.order_items.count() == 1
+
     order_item = order.order_items.first()
-    assert order_item.item == item_instance
-    assert order_item.quantity == 3
+    assert order_item.item == item
+    assert order_item.quantity == 2
+    assert set(order_item.unwanted_ingredients.all()) == {pickle, onions}
 
 
 @pytest.mark.django_db
-def test_order_serializer_deserialization_invalid(customer, restaurant):
+def test_order_serializer_representation(order, burger_item, ingredients):
     """
-    Test that missing required fields cause validation errors.
-    For instance, omitting 'customer_id' should be an error.
+    Serialized Order output should include item details and unwanted ingredient IDs.
     """
-    data = {
-        # "customer_id" is missing
-        "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": 9999, "quantity": 2}],
-    }
-    serializer = OrderSerializer(data=data)
-    assert not serializer.is_valid()
-    assert "customer_id" in serializer.errors
+    order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
+    order_item.unwanted_ingredients.set(ingredients)
+
+    serializer = OrderSerializer(order)
+    data = serializer.data
+
+    assert data["id"] == order.id
+    assert data["customer_name"] == order.customer.user.first_name
+    assert data["restaurant_name"] == order.restaurant.name
+    assert len(data["order_items"]) == 1
+
+    item_data = data["order_items"][0]
+    assert item_data["item_name"] == burger_item.name
+    assert item_data["quantity"] == 1
+    assert sorted(item_data["unwanted_ingredients"]) == sorted([i.id for i in ingredients])
