@@ -141,96 +141,118 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         isScrollControlled: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return Container(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(40)),
-                            height: screenHeight * 0.85,
-                            width: screenWidth,
-                            child: Stack(children: [
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  height: screenHeight * 0.25,
-                                  clipBehavior: Clip.hardEdge,
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.vertical(
-                                        bottom: Radius.circular(0)),
-                                  ),
-                                  child: Image.memory(
-                                    imageBytes,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.broken_image,
-                                          size: 40, color: Colors.grey);
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: SingleChildScrollView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: screenHeight * 0.25,
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(
-                                            top: verticalSpacing * .5,
-                                            left: horizontalSpacing,
-                                            right: horizontalSpacing),
-                                        color: Colors.white,
-                                        child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                item.name,
-                                                textAlign: TextAlign.left,
-                                                style: AppTextStyles
-                                                    .bigBoldLetters(
-                                                        screenHeight * 0.7,
-                                                        Colors.black),
-                                              ),
-                                              SizedBox(
-                                                height: verticalSpacing * 0.5,
-                                              ),
-                                              Text(
-                                                item.description,
-                                                textAlign: TextAlign.left,
-                                                style: AppTextStyles
-                                                    .subtitleParagraph(
-                                                        screenHeight,
-                                                        AppColors
-                                                            .paragraphText),
-                                              ),
-                                              SizedBox(
-                                                height: verticalSpacing * 0.5,
-                                              ),
-                                              Text(
-                                               "Ingredients:",
-                                                textAlign: TextAlign.left,
-                                                style: AppTextStyles
-                                                    .buttonText(
-                                                        screenHeight,
-                                                        AppColors.paragraphText),
-                                              ),
-                                          
-
-                                            ]),
-                                      ),
-                                    ],
+                          List<bool> ingredientSelections = List.generate(
+                              item.ingredients.length, (_) => true);
+                          return StatefulBuilder(builder: (context, setState) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(40)),
+                              height: screenHeight * 0.85,
+                              width: screenWidth,
+                              child: Stack(children: [
+                                Positioned(
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    height: screenHeight * 0.25,
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.vertical(
+                                          bottom: Radius.circular(0)),
+                                    ),
+                                    child: Image.memory(
+                                      imageBytes,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return const Icon(Icons.broken_image,
+                                            size: 40, color: Colors.grey);
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ]),
-                          );
+                                Positioned.fill(
+                                  child: SingleChildScrollView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: screenHeight * 0.25,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.only(
+                                              top: verticalSpacing * .5,
+                                              left: horizontalSpacing,
+                                              right: horizontalSpacing),
+                                          color: Colors.white,
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  item.name,
+                                                  textAlign: TextAlign.left,
+                                                  style: AppTextStyles
+                                                      .bigBoldLetters(
+                                                          screenHeight * 0.7,
+                                                          Colors.black),
+                                                ),
+                                                SizedBox(
+                                                  height: verticalSpacing * 0.5,
+                                                ),
+                                                Text(
+                                                  item.description,
+                                                  textAlign: TextAlign.left,
+                                                  maxLines: 4,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: AppTextStyles
+                                                      .subtitleParagraph(
+                                                          screenHeight,
+                                                          AppColors
+                                                              .paragraphText),
+                                                ),
+                                                SizedBox(
+                                                  height: verticalSpacing * 0.5,
+                                                ),
+                                                
+                                                Text("Ingredients:",
+                                                    style: AppTextStyles
+                                                        .buttonText(
+                                                            screenHeight,
+                                                            AppColors
+                                                                .paragraphText)),
+                                                ...List.generate(
+                                                    item.ingredients.length,
+                                                    (index) {
+                                                  final ingredient =
+                                                      item.ingredients[index];
+                                                  return CheckboxListTile(
+                                                    title:
+                                                        Text(ingredient.name),
+                                                    value: ingredientSelections[
+                                                        index],
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        ingredientSelections[
+                                                            index] = value!;
+                                                      });
+                                                    },
+                                                  );
+                                                }),
+                                              ]),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ]),
+                            );
+                          });
                         });
                   },
                   child: MenuItemCard(
