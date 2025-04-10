@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -137,123 +138,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                   onTap: () {
                     final base64String = item.base64image!.split(',').last;
                     Uint8List imageBytes = base64Decode(base64String);
-                    showModalBottomSheet<void>(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          List<bool> ingredientSelections = List.generate(
-                              item.ingredients.length, (_) => true);
-                          return StatefulBuilder(builder: (context, setState) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(40)),
-                              height: screenHeight * 0.85,
-                              width: screenWidth,
-                              child: Stack(children: [
-                                Positioned(
-                                  top: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    height: screenHeight * 0.25,
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: const BoxDecoration(
-                                      borderRadius: BorderRadius.vertical(
-                                          bottom: Radius.circular(0)),
-                                    ),
-                                    child: Image.memory(
-                                      imageBytes,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Icon(Icons.broken_image,
-                                            size: 40, color: Colors.grey);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                Positioned.fill(
-                                  child: SingleChildScrollView(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: screenHeight * 0.25,
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              top: verticalSpacing * .5,
-                                              left: horizontalSpacing,
-                                              right: horizontalSpacing),
-                                          color: Colors.white,
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  item.name,
-                                                  textAlign: TextAlign.left,
-                                                  style: AppTextStyles
-                                                      .bigBoldLetters(
-                                                          screenHeight * 0.7,
-                                                          Colors.black),
-                                                ),
-                                                SizedBox(
-                                                  height: verticalSpacing * 0.5,
-                                                ),
-                                                Text(
-                                                  item.description,
-                                                  textAlign: TextAlign.left,
-                                                  maxLines: 4,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: AppTextStyles
-                                                      .subtitleParagraph(
-                                                          screenHeight,
-                                                          AppColors
-                                                              .paragraphText),
-                                                ),
-                                                SizedBox(
-                                                  height: verticalSpacing * 0.5,
-                                                ),
-                                                
-                                                Text("Ingredients:",
-                                                    style: AppTextStyles
-                                                        .buttonText(
-                                                            screenHeight,
-                                                            AppColors
-                                                                .paragraphText)),
-                                                ...List.generate(
-                                                    item.ingredients.length,
-                                                    (index) {
-                                                  final ingredient =
-                                                      item.ingredients[index];
-                                                  return CheckboxListTile(
-                                                    title:
-                                                        Text(ingredient.name),
-                                                    value: ingredientSelections[
-                                                        index],
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        ingredientSelections[
-                                                            index] = value!;
-                                                      });
-                                                    },
-                                                  );
-                                                }),
-                                              ]),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                            );
-                          });
-                        });
+                    _openItemModal(context, item, screenHeight, screenWidth,
+                        imageBytes, verticalSpacing, horizontalSpacing);
                   },
                   child: MenuItemCard(
                     item: item,
@@ -261,7 +147,13 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     screenWidth: screenWidth,
                     horizontalSpacing: horizontalSpacing,
                     verticalSpacing: verticalSpacing,
-                    onAddToCart: _addToCart,
+                    onAddToCart: (menuItem) {
+                      final base64String =
+                          menuItem.base64image!.split(',').last;
+                      Uint8List imageBytes = base64Decode(base64String);
+                      _openItemModal(context, item, screenHeight, screenWidth,
+                          imageBytes, verticalSpacing, horizontalSpacing);
+                    },
                   ),
                 );
               },
@@ -309,5 +201,181 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
             )
           : null,
     );
+  }
+
+  Future<void> _openItemModal(
+      BuildContext context,
+      MenuItem item,
+      double screenHeight,
+      double screenWidth,
+      Uint8List imageBytes,
+      double verticalSpacing,
+      double horizontalSpacing) {
+    return showModalBottomSheet<void>(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+        ),
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) {
+          List<bool> ingredientSelections =
+              List.generate(item.ingredients.length, (_) => true);
+
+          bool expandDescription = false;
+          return StatefulBuilder(builder: (context, setState) {
+            return ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(40)),
+              child: Container(
+                color: Colors.white,
+                height: screenHeight,
+                width: screenWidth,
+                child: Stack(children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(30)),
+                      child: SizedBox(
+                        height: screenHeight * 0.4,
+                        child: Image.memory(
+                          imageBytes,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.broken_image,
+                                size: 40, color: Colors.grey);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: screenHeight * 0.4,
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(
+                                top: verticalSpacing * .5,
+                                left: horizontalSpacing,
+                                right: horizontalSpacing),
+                            color: Colors.white,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    textAlign: TextAlign.left,
+                                    style: AppTextStyles.bigBoldLetters(
+                                        screenHeight * 0.7, Colors.black),
+                                  ),
+                                  SizedBox(
+                                    height: verticalSpacing * 0.5,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        expandDescription = !expandDescription;
+                                      });
+                                    },
+                                    child: Text(
+                                      item.description,
+                                      textAlign: TextAlign.left,
+                                      maxLines: expandDescription ? null : 4,
+                                      overflow: expandDescription
+                                          ? TextOverflow.visible
+                                          : TextOverflow.ellipsis,
+                                      style: AppTextStyles.subtitleParagraph(
+                                          screenHeight,
+                                          AppColors.paragraphText),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: verticalSpacing * 0.5,
+                                  ),
+                                  Text("Ingredients:",
+                                      style: AppTextStyles.buttonText(
+                                          screenHeight,
+                                          AppColors.paragraphText)),
+                                  ...List.generate(item.ingredients.length,
+                                      (index) {
+                                    final ingredient = item.ingredients[index];
+                                    return CheckboxListTile(
+                                      title: Text(ingredient.name),
+                                      value: ingredientSelections[index],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          ingredientSelections[index] = value!;
+                                        });
+                                      },
+                                    );
+                                  }),
+                                  SizedBox(
+                                    height: verticalSpacing,
+                                  )
+                                ]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 24,
+                    left: 24,
+                    right: 24,
+                    child: SizedBox(
+                      height: screenWidth * 0.12,
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _addToCart(item);
+                        },
+                        icon: const Icon(Icons.add_shopping_cart,
+                            color: Colors.white),
+                        label: Text(
+                          "Add to Cart",
+                          style: AppTextStyles.buttonText(
+                              screenHeight, Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 60,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: screenWidth * 0.1,
+                        height: screenWidth * 0.1,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child:
+                              Icon(Icons.close, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            );
+          });
+        });
   }
 }
