@@ -59,12 +59,20 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     }
   }
 
-  void _addToCart(MenuItem item) {
+  String _generateCartKey(MenuItem item, List<int> unwantedIngredientIds) {
+    final sortedIds = List.from(unwantedIngredientIds)..sort();
+    return '${item.id}_${sortedIds.join("_")}';
+  }
+
+  void _addToCart(MenuItem item, List<int> unwantedIngredientsIds, List<String> unwantedIngredientsNames) {
+    final key = _generateCartKey(item, unwantedIngredientsIds);
+
     setState(() {
-      if (cart.containsKey(item.name)) {
-        cart[item.name]!.quantity += 1;
+      if (cart.containsKey(key)) {
+        cart[key]!.quantity += 1;
       } else {
-        cart[item.name] = CartItem(item: item);
+        cart[key] = CartItem(
+            item: item, unwantedIngredientsIds: unwantedIngredientsIds, unwantedIngredientNames: unwantedIngredientsNames);
       }
     });
   }
@@ -341,7 +349,22 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
-                          _addToCart(item);
+
+                          final unwantedIngredientsIds = <int>[];
+                          final unwantedIngredientsNames = <String>[];
+
+                          for (int i = 0;
+                              i < ingredientSelections.length;
+                              i++) {
+                            if (!ingredientSelections[i]) {
+                              unwantedIngredientsIds
+                                  .add(item.ingredients[i].id);
+                              unwantedIngredientsNames
+                                  .add(item.ingredients[i].name);
+                            } //todo asegurarme de que todos los cart items tengan el unwanted ingredient ids para que si se suman o restan items estos sean especificos de un ingrediente entonces cada item en la cart screen va a ser un cart item
+                          }
+                          _addToCart(item, unwantedIngredientsIds,
+                              unwantedIngredientsNames);
                         },
                         icon: const Icon(Icons.add_shopping_cart,
                             color: Colors.white),
