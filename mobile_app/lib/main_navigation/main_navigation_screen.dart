@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/home/restaurant_selection_screen.dart';
 import 'package:mobile_app/main_navigation/accounts_screen.dart';
-import 'package:mobile_app/main_navigation/orders_screen.dart';
+import 'package:mobile_app/main_navigation/orders/orders_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final int initialIndex;

@@ -17,7 +17,7 @@ class Order {
         id: json['id'],
         startTime: json['start_time'],
         items: json['order_items'] ?? [],
-        status: json['status'] ?? 'pending',
+        status: json['status'],
         totalPrice: json['total_price']);
   }
 }
