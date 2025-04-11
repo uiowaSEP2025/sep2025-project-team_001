@@ -152,7 +152,7 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ],
                     ),
-                  Row( 
+                  Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove),

@@ -27,15 +27,15 @@ class OrderSerializer(serializers.ModelSerializer):
     restaurant_id = serializers.PrimaryKeyRelatedField(
         queryset=Restaurant.objects.all(), source="restaurant", write_only=True
     )
-    
-    
-    
+
+
+
     # Fields for displaying orders
     customer_name = serializers.CharField(
         source="customer.user.first_name", read_only=True
     )
     restaurant_name = serializers.CharField(source="restaurant.name", read_only=True)
-    
+
     restaurant_id_read = serializers.IntegerField(source="restaurant.id", read_only=True)
 
     order_items = OrderItemSerializer(many=True)

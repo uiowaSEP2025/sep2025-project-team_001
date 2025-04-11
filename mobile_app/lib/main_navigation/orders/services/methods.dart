@@ -64,7 +64,7 @@ Widget buildOrderTile(Order order) {
               Text("${order.items.length} items"),
             ],
           ),
-          
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

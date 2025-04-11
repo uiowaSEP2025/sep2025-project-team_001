@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ..models.order_models import Order
-
 from ..serializers.order_serializer import OrderSerializer
 
 
@@ -55,7 +54,7 @@ def update_order_status(request, order_id, new_status, restaurant_id):
 
     # Normalize status (e.g., 'Picked Up' → 'picked_up')
     normalized_status = new_status.lower().replace(" ", "_")
-    
+
     # List of allowed statuses
     valid_statuses = ["pending", "in_progress", "completed", "picked_up", "cancelled"]
     if normalized_status not in valid_statuses:
@@ -73,7 +72,7 @@ def update_order_status(request, order_id, new_status, restaurant_id):
     )
 
     try:
-        
+
         order = Order.objects.get(pk=order_id, restaurant=restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)

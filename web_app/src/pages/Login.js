@@ -24,14 +24,17 @@ function Login() {
           password,
         },
       );
-  
+
       const { access, refresh } = response.data.tokens;
-  
-      sessionStorage.setItem('barName', response.data.bar_name || 'Error retrieving bar name');
+
+      sessionStorage.setItem(
+        'barName',
+        response.data.bar_name || 'Error retrieving bar name',
+      );
       sessionStorage.setItem('accessToken', access);
       sessionStorage.setItem('refreshToken', refresh);
       sessionStorage.setItem('restaurantId', response.data.restaurant_id);
-  
+
       navigate('/dashboard');
     } catch (error) {
       toast.error('Invalid username or password. Please try again.');

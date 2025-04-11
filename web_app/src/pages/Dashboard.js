@@ -37,21 +37,24 @@ function Dashboard() {
 
   const loginWithPin = async () => {
     try {
-      const restaurantId = sessionStorage.getItem("restaurantId");
-  
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/login_user/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pin, restaurant_id: restaurantId }),
-      });
-  
+      const restaurantId = sessionStorage.getItem('restaurantId');
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/login_user/`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin: pin, restaurant_id: restaurantId }),
+        },
+      );
+
       const data = await response.json();
       if (response.ok) {
         sessionStorage.setItem('accessToken', data.tokens.access);
         sessionStorage.setItem('refreshToken', data.tokens.refresh);
         sessionStorage.setItem('barName', data.bar_name);
         sessionStorage.setItem('restaurantId', data.restaurant_id);
-  
+
         if (data.role === 'manager') {
           navigate('/manager_dashboard');
         } else if (data.role === 'bartender') {
@@ -75,44 +78,44 @@ function Dashboard() {
   }, [pin]);
 
   return (
-      <div style={{ position: 'relative' }}>
-    <Button
-      variant="outline-danger"
-      size="sm"
-      style={{
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 1000,
-      }}
-      onClick={logout}
-    >
-      Logout
-    </Button>
+    <div style={{ position: 'relative' }}>
+      <Button
+        variant="outline-danger"
+        size="sm"
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 1000,
+        }}
+        onClick={logout}
+      >
+        Logout
+      </Button>
 
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <Card className="text-center p-4">
-            <h3>{barName || 'Welcome'}</h3>
-            <h4>Enter PIN</h4>
+      <Container className="mt-5">
+        <Row className="justify-content-center">
+          <Col md={6}>
+            <Card className="text-center p-4">
+              <h3>{barName || 'Welcome'}</h3>
+              <h4>Enter PIN</h4>
 
-            <div className="mb-3">
-              <h4>{'*'.repeat(pin.length)}</h4>
-            </div>
+              <div className="mb-3">
+                <h4>{'*'.repeat(pin.length)}</h4>
+              </div>
 
-            {error && <Alert variant="danger">{error}</Alert>}
+              {error && <Alert variant="danger">{error}</Alert>}
 
-            <NumberPad
-              onDigitPress={handleDigitPress}
-              onDelete={handleDelete}
-              onClear={handleClear}
-            />
-          </Card>
-        </Col>
-      </Row>
-    </Container>
-  </div>
+              <NumberPad
+                onDigitPress={handleDigitPress}
+                onDelete={handleDelete}
+                onClear={handleClear}
+              />
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }
 
