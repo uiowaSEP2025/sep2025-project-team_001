@@ -4,14 +4,15 @@ import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 Future<int> cancelOrder({
-  required int orderId
+  required int orderId,
+  required int restaurantId
 }) async {
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {
     throw Exception('Access token not found');
   }
-  final String endpoint = "${ApiConfig.baseUrl}/orders/$orderId/cancelled";
+  final String endpoint = "${ApiConfig.baseUrl}/orders/$restaurantId/$orderId/cancelled";
   final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
   try {

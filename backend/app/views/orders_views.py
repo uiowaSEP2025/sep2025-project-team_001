@@ -44,7 +44,7 @@ def retrieve_active_orders(request):
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def update_order_status(request, order_id, new_status):
+def update_order_status(request, order_id, new_status, restaurant_id):
     # if not hasattr(request.user, "restaurant"):
     #     return Response(
     #         {"error": "Only restaurant accounts can update orders."},
@@ -61,11 +61,18 @@ def update_order_status(request, order_id, new_status):
             {"error": f"Invalid status '{new_status}'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-        
-    
 
     try:
-        order = Order.objects.get(pk=order_id, restaurant=request.user.restaurant)
+        restaurant = Restaurant.objects.get(pk=restaurant_id)
+    except Restaurant.DoesNotExist:
+        return Response(
+            {"error": "Restaurant not found."},
+            status=status.HTTP_404_NOT_FOUND,
+    )
+
+    try:
+        
+        order = Order.objects.get(pk=order_id, restaurant=restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
 

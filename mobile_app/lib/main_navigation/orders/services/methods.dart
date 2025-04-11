@@ -59,7 +59,7 @@ Widget buildOrderTile(Order order) {
         children: [
           Column(
             children: [
-              Text("Order #${order.id}"),
+              Text("Order #${order.id} for ${order.restaurantName}"),
               SizedBox(height: screenHeight*0.01),
               Text("${order.items.length} items"),
             ],
@@ -70,7 +70,7 @@ Widget buildOrderTile(Order order) {
             children: [
               Text("\$${order.totalPrice}"),
               TextButton(
-                onPressed: () => cancelOrder(orderId: order.id),
+                onPressed: () => cancelOrder(orderId: order.id, restaurantId: order.restaurantId),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text("Cancel"),
               ),
