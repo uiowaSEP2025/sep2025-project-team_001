@@ -87,7 +87,7 @@ const OrdersPage = () => {
       case 'picked_up':
         return 'Picked Up';
       case 'cancelled':
-          return 'Cancelled'
+          return 'Cancelled';
       default:
         return status;
     }

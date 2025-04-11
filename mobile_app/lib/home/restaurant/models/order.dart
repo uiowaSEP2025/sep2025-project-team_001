@@ -25,7 +25,7 @@ class Order {
         items: json['order_items'] ?? [],
         status: json['status'],
         totalPrice: json['total_price'],
-        restaurantId: json['restaurant_id'],
+        restaurantId: json['restaurant_id_read'],
         restaurantName: json['restaurant_name']);
   }
 }

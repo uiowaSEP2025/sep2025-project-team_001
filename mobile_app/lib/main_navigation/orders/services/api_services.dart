@@ -12,7 +12,7 @@ Future<int> cancelOrder({
   if (accessToken == null) {
     throw Exception('Access token not found');
   }
-  final String endpoint = "${ApiConfig.baseUrl}/orders/$restaurantId/$orderId/cancelled";
+  final String endpoint = "${ApiConfig.baseUrl}/orders/$restaurantId/$orderId/cancelled/";
   final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
   try {
@@ -26,7 +26,7 @@ Future<int> cancelOrder({
       ),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print("Order cancelled! ID: ${response.data['order_id']}");
       final orderId = response.data['order_id'];
       return orderId;
