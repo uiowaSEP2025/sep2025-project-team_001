@@ -1,5 +1,8 @@
  import 'package:flutter/material.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
+import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
+import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 
 Widget buildOrderTile(Order order) {
     return ExpansionTile(
@@ -38,3 +41,52 @@ Widget buildOrderTile(Order order) {
     }
     return total;
   }
+
+
+    Widget buildPendingOrderTile(Order order, double screenHeight, double screenWidth) {
+    return CustomExpandableTile(
+      screenHeight: screenHeight,
+  collapsedChild: Container(
+    decoration: BoxDecoration(
+      color: AppColors.secondary,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Padding(
+      padding:  EdgeInsets.all(screenHeight*0.01),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              Text("Order #${order.id}"),
+              SizedBox(height: screenHeight*0.01),
+              Text("${order.items.length} items"),
+            ],
+          ),
+          
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text("\$${order.totalPrice}"),
+              TextButton(
+                onPressed: () => cancelOrder(orderId: order.id),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text("Cancel"),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+  expandedChild: Column(
+    children: order.items.map((item) {
+      return ListTile(
+        title: Text(item['item_name'] ?? ''),
+        subtitle: Text("Qty: ${item['quantity']}"),
+      );
+    }).toList(),
+  ),
+);}
+

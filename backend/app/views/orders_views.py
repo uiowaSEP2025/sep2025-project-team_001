@@ -45,15 +45,15 @@ def retrieve_active_orders(request):
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_order_status(request, order_id, new_status):
-    if not hasattr(request.user, "restaurant"):
-        return Response(
-            {"error": "Only restaurant accounts can update orders."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+    # if not hasattr(request.user, "restaurant"):
+    #     return Response(
+    #         {"error": "Only restaurant accounts can update orders."},
+    #         status=status.HTTP_403_FORBIDDEN,
+    #     )
 
     # Normalize status (e.g., 'Picked Up' → 'picked_up')
     normalized_status = new_status.lower().replace(" ", "_")
-
+    
     # List of allowed statuses
     valid_statuses = ["pending", "in_progress", "completed", "picked_up", "cancelled"]
     if normalized_status not in valid_statuses:
@@ -61,11 +61,19 @@ def update_order_status(request, order_id, new_status):
             {"error": f"Invalid status '{new_status}'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+        
+    
 
     try:
         order = Order.objects.get(pk=order_id, restaurant=request.user.restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if normalized_status == "cancelled" and order.status != "pending":
+        return Response(
+            {"error": f"Invalid status '{new_status}'."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     order.status = normalized_status
     order.save()

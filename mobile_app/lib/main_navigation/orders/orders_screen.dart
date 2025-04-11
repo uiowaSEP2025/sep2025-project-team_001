@@ -6,6 +6,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/services/api_services.dart';
 import 'package:mobile_app/main_navigation/orders/services/methods.dart';
+import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -107,35 +108,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return true;
   }
 
-  Widget buildPendingOrderTile(Order order, double screenHeight) {
-    return ExpansionTile(
-      title: Text("Order #${order.id}"),
-      subtitle: Text("Placed on ${order.startTime}"),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text("${getTotalItems(order.items)} items"),
-          SizedBox(height: screenHeight * 0.015),
-          Text(
-            "\$${order.totalPrice.toStringAsFixed(2)}",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Cancel"),
-          ),
-        ],
-      ),
-      children: order.items.map((item) {
-        return ListTile(
-          title: Text(item['item_name'] ?? 'Unnamed item'),
-          subtitle: Text("Quantity: ${item['quantity']}"),
-          visualDensity: VisualDensity.compact,
-        );
-      }).toList(),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -176,13 +149,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         if (pendingOrders.isNotEmpty) ...[
                           Padding(
-                            padding: EdgeInsets.all(verticalSpacing),
+                            padding: EdgeInsets.only(top: verticalSpacing/2, bottom: verticalSpacing/2, left: horizontalSpacing),
                             child: Text("Pending Orders",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
                           ...pendingOrders.map((order) =>
-                              buildPendingOrderTile(order, screenHeight)),
+                              Padding(
+                                padding:  EdgeInsets.all(horizontalSpacing*0.5),
+                                child: buildPendingOrderTile(order, screenHeight, screenWidth),
+                              )),
                         ],
                         if (completedOrders.isNotEmpty) ...[
                           Padding(
