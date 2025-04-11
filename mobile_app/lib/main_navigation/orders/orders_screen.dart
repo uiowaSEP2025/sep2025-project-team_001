@@ -109,27 +109,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget buildPendingOrderTile(Order order, double screenHeight) {
     return ExpansionTile(
-      title: Container(height: 200, child: Text("Order #${order.id}")),
+      title: Text("Order #${order.id}"),
       subtitle: Text("Placed on ${order.startTime}"),
-      trailing: Container(
-        height: 600,
-        color: AppColors.primaryColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text("${getTotalItems(order.items)} items"),
-             SizedBox(height: screenHeight*0.015),
-            Text(
-              "\$${order.totalPrice.toStringAsFixed(2)}",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("Cancel"),
-            ),
-          ],
-        ),
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text("${getTotalItems(order.items)} items"),
+          SizedBox(height: screenHeight * 0.015),
+          Text(
+            "\$${order.totalPrice.toStringAsFixed(2)}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextButton(
+            onPressed: () {},
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text("Cancel"),
+          ),
+        ],
       ),
       children: order.items.map((item) {
         return ListTile(
@@ -156,14 +152,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
             style: AppTextStyles.appBarText(screenHeight, Colors.black),
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.history),
-              tooltip: 'Order History',
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 Navigator.pushNamed(context, '/orders/order_history',
                     arguments: {'orders': pickedUpOrders});
               },
-            ),
+              child: Row(children: [
+                Text("History"),
+                SizedBox(width: horizontalSpacing*0.25),
+                Icon(Icons.history),
+                SizedBox(width: horizontalSpacing*0.25),
+              ]),
+            )
           ]),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -175,17 +175,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   : ListView(
                       children: [
                         if (pendingOrders.isNotEmpty) ...[
-                           Padding(
+                          Padding(
                             padding: EdgeInsets.all(verticalSpacing),
                             child: Text("Pending Orders",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...pendingOrders
-                              .map((order) => buildPendingOrderTile(order, screenHeight)),
+                          ...pendingOrders.map((order) =>
+                              buildPendingOrderTile(order, screenHeight)),
                         ],
                         if (completedOrders.isNotEmpty) ...[
-                           Padding(
+                          Padding(
                             padding: EdgeInsets.all(verticalSpacing),
                             child: Text("Completed",
                                 style: TextStyle(
@@ -195,7 +195,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               .map((order) => buildOrderTile(order)),
                         ],
                         if (inProgressOrders.isNotEmpty) ...[
-                           Padding(
+                          Padding(
                             padding: EdgeInsets.all(verticalSpacing),
                             child: Text("In Progress",
                                 style: TextStyle(
