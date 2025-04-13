@@ -9,7 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from ..models.customer_models import CustomUser
 from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
-from ..serializers import RestaurantSerializer, WorkerSerializer
+from ..serializers.restaurant_serializer import RestaurantSerializer
+from ..serializers.worker_serializer import WorkerSerializer
 
 
 def get_tokens_for_user(user):
