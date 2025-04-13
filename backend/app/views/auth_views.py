@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from ..models.customer_models import CustomUser
 from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
+from ..serializers import RestaurantSerializer, WorkerSerializer
 
 
 def get_tokens_for_user(user):
@@ -84,12 +85,15 @@ def register_user(request):
         )
 
         # Create Worker (Manager role)
-        Worker.objects.create(
+        worker = Worker.objects.create(
             restaurant=restaurant,
             name=data["name"],
             pin=data["pin"],
             role="manager"
         )
+
+        restaurant_data = RestaurantSerializer(restaurant).data
+        worker_data = WorkerSerializer(worker).data
 
         tokens = get_tokens_for_user(custom_user)  # Generate JWT tokens
 
@@ -97,7 +101,8 @@ def register_user(request):
             {
                 "message": "User registered successfully",
                 "tokens": tokens,
-                "restaurant": restaurant.name,
+                "restaurant": restaurant,
+                "worker": worker,
                 "restaurant_id": restaurant.id,
             },
             status=201,
