@@ -72,7 +72,6 @@ def register_user(request):
             username=data["username"],
             email=data["email"],
             password=data["password"],
-            first_name=data["name"]
         )
 
         # Then create the restaurant profile tied to that user
@@ -87,6 +86,7 @@ def register_user(request):
         # Create Worker (Manager role)
         Worker.objects.create(
             restaurant=restaurant,
+            name=data["name"],
             pin=data["pin"],
             role="manager"
         )

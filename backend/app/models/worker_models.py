@@ -10,6 +10,7 @@ class Worker(models.Model):
     ]
 
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='workers')
+    name = models.CharField(max_length=100)
     pin = models.CharField(max_length=4)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
 
