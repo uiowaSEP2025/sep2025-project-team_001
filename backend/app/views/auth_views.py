@@ -102,8 +102,8 @@ def register_user(request):
             {
                 "message": "User registered successfully",
                 "tokens": tokens,
-                "restaurant": restaurant,
-                "worker": worker,
+                "restaurant": restaurant_data,
+                "worker": worker_data,
                 "restaurant_id": restaurant.id,
             },
             status=201,
