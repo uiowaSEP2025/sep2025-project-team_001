@@ -1,3 +1,4 @@
+from app.models.restaurant_models import Restaurant
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -44,12 +45,12 @@ def retrieve_active_orders(request):
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def update_order_status(request, order_id, new_status):
-    if not hasattr(request.user, "restaurant"):
-        return Response(
-            {"error": "Only restaurant accounts can update orders."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+def update_order_status(request, order_id, new_status, restaurant_id):
+    # if not hasattr(request.user, "restaurant"):
+    #     return Response(
+    #         {"error": "Only restaurant accounts can update orders."},
+    #         status=status.HTTP_403_FORBIDDEN,
+    #     )
 
     # Normalize status (e.g., 'Picked Up' → 'picked_up')
     normalized_status = new_status.lower().replace(" ", "_")
@@ -63,9 +64,24 @@ def update_order_status(request, order_id, new_status):
         )
 
     try:
-        order = Order.objects.get(pk=order_id, restaurant=request.user.restaurant)
+        restaurant = Restaurant.objects.get(pk=restaurant_id)
+    except Restaurant.DoesNotExist:
+        return Response(
+            {"error": "Restaurant not found."},
+            status=status.HTTP_404_NOT_FOUND,
+    )
+
+    try:
+
+        order = Order.objects.get(pk=order_id, restaurant=restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if normalized_status == "cancelled" and order.status != "pending":
+        return Response(
+            {"error": f"Invalid status '{new_status}'."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     order.status = normalized_status
     order.save()

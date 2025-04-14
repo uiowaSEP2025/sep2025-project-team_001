@@ -18,7 +18,7 @@ function Login() {
     event.preventDefault();
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/login/`,
+        `${process.env.REACT_APP_API_URL}/login_restaurant/`,
         {
           username,
           password,
@@ -27,16 +27,13 @@ function Login() {
 
       const { access, refresh } = response.data.tokens;
 
-      //Log restaurant ID
-      console.log('Logged-in Restaurant ID:', response.data.restaurant_id);
-
-      if (response.data.bar_name) {
-        sessionStorage.setItem('barName', response.data.bar_name);
-      } else {
-        sessionStorage.setItem('barName', 'Error retrieving bar name');
-      }
+      sessionStorage.setItem(
+        'barName',
+        response.data.bar_name || 'Error retrieving bar name',
+      );
       sessionStorage.setItem('accessToken', access);
       sessionStorage.setItem('refreshToken', refresh);
+      sessionStorage.setItem('restaurantId', response.data.restaurant_id);
 
       navigate('/dashboard');
     } catch (error) {
