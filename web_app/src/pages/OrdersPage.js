@@ -11,13 +11,14 @@ const OrdersPage = () => {
 
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
+      const restaurantId = sessionStorage.getItem('restaurantId');
       const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/orders/${orderId}/${nextStatus}/`
+        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
       );
       console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
 
       const updatedOrders = orders.map((order) =>
-        order.id === orderId ? { ...order, status: nextStatus } : order
+        order.id === orderId ? { ...order, status: nextStatus } : order,
       );
       setOrders(updatedOrders);
 
@@ -25,7 +26,9 @@ const OrdersPage = () => {
       if (nextStatus === 'picked_up') {
         setSelectedOrder(null);
       } else {
-        setSelectedOrder((prev) => prev ? { ...prev, status: nextStatus } : null);
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, status: nextStatus } : null,
+        );
       }
     } catch (error) {
       console.error('Error updating order status: ', error);
@@ -86,11 +89,11 @@ const OrdersPage = () => {
       case 'picked_up':
         return 'Picked Up';
       case 'cancelled':
-          return 'Cancelled'
+        return 'Cancelled';
       default:
         return status;
     }
-  };  
+  };
 
   if (loading && orders.length === 0) {
     return (
@@ -189,8 +192,8 @@ const OrdersPage = () => {
               {selectedOrder.status === 'pending'
                 ? 'Mark In Progress'
                 : selectedOrder.status === 'in_progress'
-                ? 'Mark Completed'
-                : 'Mark Picked Up'}
+                  ? 'Mark Completed'
+                  : 'Mark Picked Up'}
             </Button>
           )}
           <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
