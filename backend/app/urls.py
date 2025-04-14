@@ -1,5 +1,6 @@
 # urls.py
 from django.urls import path
+from app.views.webhook_views import orders_webhook
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
@@ -29,6 +30,8 @@ urlpatterns = [
     path("order/customer/", get_customer_orders, name="get_customer_orders"),
     path("order/payment/", create_payment_intent, name="create_payment"),
     path("order/setup/", create_setup_intent, name="create_setup_intent"),
+    path("orders/webhook/", orders_webhook, name="orders_webhook"),
+    
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),

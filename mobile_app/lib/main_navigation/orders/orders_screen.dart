@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -31,8 +32,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.data['type'] == 'ORDER_UPDATE') {
+        _loadOrders();
+      }
+    });
+
     _loadOrders();
-    _startPolling();
+    // _startPolling();
   }
 
   @override
@@ -108,8 +116,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return true;
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -132,9 +138,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
               },
               child: Row(children: [
                 Text("History"),
-                SizedBox(width: horizontalSpacing*0.25),
+                SizedBox(width: horizontalSpacing * 0.25),
                 Icon(Icons.history),
-                SizedBox(width: horizontalSpacing*0.25),
+                SizedBox(width: horizontalSpacing * 0.25),
               ]),
             )
           ]),
@@ -149,15 +155,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         if (pendingOrders.isNotEmpty) ...[
                           Padding(
-                            padding: EdgeInsets.only(top: verticalSpacing/2, bottom: verticalSpacing/2, left: horizontalSpacing),
+                            padding: EdgeInsets.only(
+                                top: verticalSpacing / 2,
+                                bottom: verticalSpacing / 2,
+                                left: horizontalSpacing),
                             child: Text("Pending Orders",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...pendingOrders.map((order) =>
-                              Padding(
-                                padding:  EdgeInsets.all(horizontalSpacing*0.5),
-                                child: buildPendingOrderTile(order, screenHeight, screenWidth),
+                          ...pendingOrders.map((order) => Padding(
+                                padding:
+                                    EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildPendingOrderTile(
+                                    order, screenHeight, screenWidth),
                               )),
                         ],
                         if (completedOrders.isNotEmpty) ...[
