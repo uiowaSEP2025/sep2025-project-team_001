@@ -71,11 +71,11 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    if (pin.length === 4) {
-      loginWithPin();
-    }
-  }, [pin]);
+  // useEffect(() => {
+  //   if (pin.length === 4) {
+  //     loginWithPin();
+  //   }
+  // }, [pin]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -132,6 +132,7 @@ function Dashboard() {
                 onDigitPress={handleDigitPress}
                 onDelete={handleDelete}
                 onClear={handleClear}
+                onEnter={loginWithPin}
               />
             </Card>
           </Col>
