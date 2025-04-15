@@ -11,8 +11,9 @@ const OrdersPage = () => {
 
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
+      const restaurantId = sessionStorage.getItem('restaurantId');
       const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/orders/${orderId}/${nextStatus}/`,
+        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
       );
       console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
 

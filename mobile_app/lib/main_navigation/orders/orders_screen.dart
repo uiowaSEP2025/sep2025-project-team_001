@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/services/api_services.dart';
+import 'package:mobile_app/main_navigation/orders/services/methods.dart';
+import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -22,6 +25,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
   bool errorFetching = false;
   List<Order> pendingOrders = [];
   List<Order> completedOrders = [];
+  List<Order> inProgressOrders = [];
+  List<Order> pickedUpOrders = [];
 
   @override
   void initState() {
@@ -37,7 +42,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       _loadOrders();
     });
   }
@@ -57,15 +62,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final fetchedOrders = await fetchUserOrders(userId);
 
       final newPending =
-          fetchedOrders.where((o) => o.status != 'completed').toList();
+          fetchedOrders.where((o) => o.status == 'pending').toList();
       final newCompleted =
           fetchedOrders.where((o) => o.status == 'completed').toList();
+      final newInProgress =
+          fetchedOrders.where((o) => o.status == 'in_progress').toList();
+      final newPickedUp =
+          fetchedOrders.where((o) => o.status == 'picked_up').toList();
 
       if (!_listEquals(pendingOrders, newPending) ||
-          !_listEquals(completedOrders, newCompleted)) {
+          !_listEquals(completedOrders, newCompleted) ||
+          !_listEquals(inProgressOrders, newInProgress) ||
+          !_listEquals(pickedUpOrders, newPickedUp)) {
         setState(() {
           pendingOrders = newPending;
           completedOrders = newCompleted;
+          inProgressOrders = newInProgress;
+          pickedUpOrders = newPickedUp;
         });
       }
     } catch (e) {
@@ -95,65 +108,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return true;
   }
 
-  // Widget _buildOrderTile(Order order) {
-  //   return ListTile(
-  //     title: Text("Order #${order.id}"),
-  //     //subtitle: Text("Placed on ${order.startTime}"),
-  //     trailing: Text("${order.items.length} items"),
-  //   );
-  // }
 
-  // Widget _buildOrderTile(Order order) {
-  //   return ExpansionTile(
-  //     title: Text("Order #${order.id}"),
-  //     subtitle: Text("Placed on ${order.startTime}"),
-  //     trailing: Text("${_getTotalItems(order.items)} items"),
-  //     children: order.items.map((item) {
-  //       return ListTile(
-  //         title: Text(item['item_name'] ?? 'Unnamed item'),
-  //         subtitle: Text("Quantity: ${item['quantity']}"),
-  //         visualDensity: VisualDensity.compact,
-  //       );
-  //     }).toList(),
-  //   );
-  // }
-  Widget _buildOrderTile(Order order) {
-    return ExpansionTile(
-      title: Text("Order #${order.id}"),
-      subtitle: Text("Placed on ${order.startTime}"),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text("${_getTotalItems(order.items)} items"),
-          const SizedBox(height: 4),
-          Text(
-            "\$${order.totalPrice.toStringAsFixed(2)}",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-      children: order.items.map((item) {
-        return ListTile(
-          title: Text(item['item_name'] ?? 'Unnamed item'),
-          subtitle: Text("Quantity: ${item['quantity']}"),
-          visualDensity: VisualDensity.compact,
-        );
-      }).toList(),
-    );
-  }
-
-  int _getTotalItems(List<dynamic> items) {
-    int total = 0;
-    for (var item in items) {
-      final quantity = item['quantity'];
-      if (quantity is int && quantity > 0) {
-        total += quantity;
-      } else {
-        total += 1;
-      }
-    }
-    return total;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,8 +120,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text('Your Orders',
-              style: AppTextStyles.appBarText(screenHeight, Colors.black))),
+          title: Text(
+            'Your Orders',
+            style: AppTextStyles.appBarText(screenHeight, Colors.black),
+          ),
+          actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/orders/order_history',
+                    arguments: {'orders': pickedUpOrders});
+              },
+              child: Row(children: [
+                Text("History"),
+                SizedBox(width: horizontalSpacing*0.25),
+                Icon(Icons.history),
+                SizedBox(width: horizontalSpacing*0.25),
+              ]),
+            )
+          ]),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorFetching
@@ -177,25 +148,38 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   : ListView(
                       children: [
                         if (pendingOrders.isNotEmpty) ...[
-                          const Padding(
-                            padding: EdgeInsets.all(8),
+                          Padding(
+                            padding: EdgeInsets.only(top: verticalSpacing/2, bottom: verticalSpacing/2, left: horizontalSpacing),
                             child: Text("Pending Orders",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...pendingOrders
-                              .map((order) => _buildOrderTile(order)),
+                          ...pendingOrders.map((order) =>
+                              Padding(
+                                padding:  EdgeInsets.all(horizontalSpacing*0.5),
+                                child: buildPendingOrderTile(order, screenHeight, screenWidth),
+                              )),
                         ],
                         if (completedOrders.isNotEmpty) ...[
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text("Completed Orders",
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("Completed",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
                           ...completedOrders
-                              .map((order) => _buildOrderTile(order)),
-                        ]
+                              .map((order) => buildOrderTile(order)),
+                        ],
+                        if (inProgressOrders.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("In Progress",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          ...inProgressOrders
+                              .map((order) => buildOrderTile(order)),
+                        ],
                       ],
                     ),
     );

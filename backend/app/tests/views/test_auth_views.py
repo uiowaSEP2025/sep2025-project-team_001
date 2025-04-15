@@ -126,7 +126,7 @@ def test_login_success(client):
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
     login_data = {"username": "loginuser", "password": "strongpass"}
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    response = client.post("/login_restaurant/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 200
     assert "tokens" in response.json()
     assert response.json()["bar_name"] == "Testaurant"
