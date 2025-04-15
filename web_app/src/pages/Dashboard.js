@@ -77,6 +77,28 @@ function Dashboard() {
     }
   }, [pin]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const { key } = event;
+  
+      if (/^\d$/.test(key)) {
+        // If it's a digit (0-9)
+        handleDigitPress(key);
+      } else if (key === 'Backspace') {
+        handleDelete();
+      } else if (key === 'Enter') {
+        loginWithPin();
+      } else if (key.toLowerCase() === 'c') {
+        handleClear();
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [pin]);
+
   return (
     <div style={{ position: 'relative' }}>
       <Button
