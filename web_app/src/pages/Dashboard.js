@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button } from 'react-bootstrap';
 import NumberPad from '../components/NumberPad';
+import './styles/Dashboard.css';
 
 function Dashboard() {
   const [pin, setPin] = useState('');
@@ -104,12 +105,7 @@ function Dashboard() {
       <Button
         variant="outline-danger"
         size="sm"
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          zIndex: 1000,
-        }}
+        className="logout-btn"
         onClick={logout}
       >
         Logout
@@ -122,8 +118,10 @@ function Dashboard() {
               <h3>{barName || 'Welcome'}</h3>
               <h4>Enter PIN</h4>
 
-              <div className="mb-3">
-                <h4>{'*'.repeat(pin.length)}</h4>
+              <div className="pin-display">
+                <h4 style={{ margin: 0 }}>
+                  {pin.length > 0 ? '*'.repeat(pin.length) : '\u00A0'}
+                </h4>
               </div>
 
               {error && <Alert variant="danger">{error}</Alert>}
