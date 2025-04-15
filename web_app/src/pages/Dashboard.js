@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Alert,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Alert, Button } from 'react-bootstrap';
 import NumberPad from '../components/NumberPad';
-import './styles/Dashboard.css';
 
-function Dashboard() {
+const Dashboard = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [barName, setBarName] = useState('');
@@ -18,8 +23,8 @@ function Dashboard() {
   }, []);
 
   const logout = () => {
-    sessionStorage.clear(); // Remove all session data
-    navigate('/'); // Redirect to home page
+    sessionStorage.clear();
+    navigate('/');
   };
 
   const handleDigitPress = (digit) => {
@@ -45,8 +50,8 @@ function Dashboard() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: pin, restaurant_id: restaurantId }),
-        },
+          body: JSON.stringify({ pin, restaurant_id: restaurantId }),
+        }
       );
 
       const data = await response.json();
@@ -72,72 +77,66 @@ function Dashboard() {
     }
   };
 
-  // useEffect(() => {
-  //   if (pin.length === 4) {
-  //     loginWithPin();
-  //   }
-  // }, [pin]);
-
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
-  
-      if (/^\d$/.test(key)) {
-        // If it's a digit (0-9)
-        handleDigitPress(key);
-      } else if (key === 'Backspace') {
-        handleDelete();
-      } else if (key === 'Enter') {
-        loginWithPin();
-      } else if (key.toLowerCase() === 'c') {
-        handleClear();
-      }
+      if (/^\d$/.test(key)) handleDigitPress(key);
+      else if (key === 'Backspace') handleDelete();
+      else if (key === 'Enter') loginWithPin();
+      else if (key.toLowerCase() === 'c') handleClear();
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [pin]);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: '#1e3c72',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 3,
+      }}
+    >
       <Button
-        variant="outline-danger"
-        size="sm"
-        className="logout-btn"
+        color="error"
+        size="large"
         onClick={logout}
+        sx={{ position: 'absolute', top: 20, right: 20 }}
       >
         Logout
       </Button>
 
-      <Container className="mt-5">
-        <Row className="justify-content-center">
-          <Col md={6}>
-            <Card className="text-center p-4">
-              <h3>{barName || 'Welcome'}</h3>
-              <h4>Enter PIN</h4>
+      <Paper elevation={6} sx={{ p: 4, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom>
+          {barName || 'Welcome'}
+        </Typography>
+        <Typography variant="h6" gutterBottom>
+          Enter PIN
+        </Typography>
 
-              <div className="pin-display">
-                <h4 style={{ margin: 0 }}>
-                  {pin.length > 0 ? '*'.repeat(pin.length) : '\u00A0'}
-                </h4>
-              </div>
+        <Box sx={{ minHeight: '2.5rem', mb: 2 }}>
+          <Typography variant="h4">
+            {pin.length > 0 ? '*'.repeat(pin.length) : '\u00A0'}
+          </Typography>
+        </Box>
 
-              {error && <Alert variant="danger">{error}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
 
-              <NumberPad
-                onDigitPress={handleDigitPress}
-                onDelete={handleDelete}
-                onClear={handleClear}
-                onEnter={loginWithPin}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+        <Box mt={2}>
+          <NumberPad
+            onDigitPress={handleDigitPress}
+            onDelete={handleDelete}
+            onClear={handleClear}
+            onEnter={loginWithPin}
+          />
+        </Box>
+      </Paper>
+    </Box>
   );
-}
+};
 
 export default Dashboard;
