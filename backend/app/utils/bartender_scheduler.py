@@ -1,5 +1,3 @@
-# app/utils/bartender_scheduler.py
-
 from datetime import timedelta
 
 

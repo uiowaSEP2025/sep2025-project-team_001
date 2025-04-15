@@ -1,5 +1,3 @@
-# app/utils/multi_bartender_scheduler.py
-
 class MultiBartenderScheduler:
     def __init__(self, num_bartenders=1):
         from app.utils.bartender_scheduler import BartenderScheduler
