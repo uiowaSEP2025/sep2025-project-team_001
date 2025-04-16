@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from ..models.order_models import Order
 from ..serializers.order_serializer import OrderSerializer
+from ..models.worker_models import Worker
 
 
 @api_view(["POST"])
@@ -72,7 +73,6 @@ def update_order_status(request, order_id, new_status, restaurant_id):
     )
 
     try:
-
         order = Order.objects.get(pk=order_id, restaurant=restaurant)
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -82,6 +82,17 @@ def update_order_status(request, order_id, new_status, restaurant_id):
             {"error": f"Invalid status '{new_status}'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+    
+    if normalized_status == "in_progress" and order.status == "pending":
+        worker_id = request.data.get("worker_id")
+        if not worker_id:
+            return Response({"error": "Missing worker ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            worker = Worker.objects.get(id=worker_id)
+            order.worker = worker
+        except Worker.DoesNotExist:
+            return Response({"error": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
 
     order.status = normalized_status
     order.save()

@@ -54,6 +54,7 @@ function Dashboard() {
         sessionStorage.setItem('refreshToken', data.tokens.refresh);
         sessionStorage.setItem('barName', data.bar_name);
         sessionStorage.setItem('restaurantId', data.restaurant_id);
+        sessionStorage.setItem('workerId', data.worker_id);
 
         if (data.role === 'manager') {
           navigate('/manager_dashboard');
