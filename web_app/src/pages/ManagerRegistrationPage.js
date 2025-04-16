@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Alert, Card } from 'react-bootstrap';
+import axios from 'axios';
 
 function ManagerRegistrationPage() {
   const navigate = useNavigate();
@@ -24,33 +25,29 @@ function ManagerRegistrationPage() {
     }
 
     try {
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/create-worker/`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            pin,
-            restaurant_id: restaurantId,
-            role: 'manager',
-          }),
-        },
+          pin,
+          name,
+          restaurant_id: restaurantId,
+          role: 'manager',
+        }
       );
+  
+      console.log(response.data);
 
-      const data = await response.json();
-      if (response.ok) {
-        setSuccess('Manager created successfully.');
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000);
-      } else {
-        setError(data.error || 'Failed to create manager.');
-      }
+      setSuccess('Manager created successfully.');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error:', error);
-      setError('An error occurred while creating manager.');
+      if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError('An error occurred while creating manager.');
+      }
     }
   };
 
