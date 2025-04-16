@@ -42,3 +42,14 @@ def create_worker(request):
         "name": worker.name
     }, status=status.HTTP_201_CREATED)
 
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_workers(request):
+    try:
+        restaurant = request.user.restaurant
+    except Restaurant.DoesNotExist:
+        return Response({"error": "Restaurant not found for this user"}, status=status.HTTP_404_NOT_FOUND)
+
+    workers = Worker.objects.filter(restaurant=restaurant).values("id", "name", "pin", "role")
+    return Response(list(workers), status=status.HTTP_200_OK)

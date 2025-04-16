@@ -13,7 +13,7 @@ from .views.orders_views import (
     update_order_status,
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
-from .views.worker_views import create_worker
+from .views.worker_views import create_worker, get_workers
 
 urlpatterns = [
     path("login_restaurant/", login_restaurant, name="login_restaurant"),
@@ -35,4 +35,5 @@ urlpatterns = [
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
     path("orders/<int:restaurant_id>/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
     path("create-worker/", create_worker, name="create_worker"),
+    path("get-workers/", get_workers, name="get_workers"),
 ]
