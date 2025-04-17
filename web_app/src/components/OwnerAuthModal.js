@@ -48,7 +48,7 @@ const OwnerAuthModal = ({ show, onHide, onOwnerAuthenticated }) => {
         {authError && <Alert variant="danger">{authError}</Alert>}
         <Form>
           <Form.Group controlId="ownerUsername">
-            <Form.Label>Username</Form.Label>
+            <Form.Label>Restaurant Username</Form.Label>
             <Form.Control
               type="text"
               value={username}
@@ -56,7 +56,7 @@ const OwnerAuthModal = ({ show, onHide, onOwnerAuthenticated }) => {
             />
           </Form.Group>
           <Form.Group controlId="ownerPassword" className="mt-2">
-            <Form.Label>Password</Form.Label>
+            <Form.Label> Restaurant Password</Form.Label>
             <Form.Control
               type="password"
               value={password}

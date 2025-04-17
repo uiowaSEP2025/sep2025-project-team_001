@@ -18,10 +18,16 @@ function ManagerDashboard() {
   const barName = sessionStorage.getItem('barName');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [workers, setWorkers] = useState({ managers: [], bartenders: [] });
-  const [newName, setNewName] = useState('');
-  const [newPin, setNewPin] = useState('');
-  const [inlineError, setInlineError] = useState('');
-  const [inlineSuccess, setInlineSuccess] = useState('');
+  const [bartenderName, setBartenderName] = useState('');
+  const [bartenderPin, setBartenderPin] = useState('');
+  const [bartenderError, setBartenderError] = useState('');
+  const [bartenderSuccess, setBartenderSuccess] = useState('');
+  const [managerName, setManagerName] = useState('');
+  const [managerPin, setManagerPin] = useState('');
+  const [showManagerAuthModal, setShowManagerAuthModal] = useState(false);
+  const [managerError, setManagerError] = useState('');
+  const [managerSuccess, setManagerSuccess] = useState('');
+
 
 
   const handleAuthenticated = (data) => {
@@ -66,32 +72,34 @@ function ManagerDashboard() {
     fetchWorkers();
   }, []);  
 
-  const handleInlineBartenderCreate = async () => {
+  const handleCreateBartender = async () => {
     const restaurantId = sessionStorage.getItem('restaurantId');
-    setInlineError('');
-    setInlineSuccess('');
+    setBartenderError('');
+    setBartenderSuccess('');
   
     if (!restaurantId) {
-      setInlineError('Restaurant ID not found.');
+      setBartenderError('Restaurant ID not found.');
       return;
     }
   
-    if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-      setInlineError('PIN must be exactly 4 digits.');
+    if (bartenderPin.length !== 4 || !/^\d{4}$/.test(bartenderPin)) {
+      setBartenderError('PIN must be exactly 4 digits.');
       return;
     }
   
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
-        pin: newPin,
-        name: newName,
+        pin: bartenderPin,
+        name: bartenderName,
         restaurant_id: restaurantId,
         role: 'bartender',
       });
   
-      setInlineSuccess('Bartender created!');
-      setNewName('');
-      setNewPin('');
+      console.log(response.data);
+
+      setBartenderSuccess('Bartender created!');
+      setBartenderName('');
+      setBartenderPin('');
 
       // Re-fetch the list after new bartender is added
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/get-workers/`);
@@ -102,11 +110,58 @@ function ManagerDashboard() {
     } catch (error) {
       console.error(error);
       if (error.response?.data?.error) {
-        setInlineError(error.response.data.error);
+        setBartenderError(error.response.data.error);
       } else {
-        setInlineError('Failed to create bartender.');
+        setBartenderError('Failed to create bartender.');
       }
     }
+  };
+
+
+  const handleCreateManager = async () => {
+    const restaurantId = sessionStorage.getItem('restaurantId');
+  
+    if (!restaurantId) {
+      setManagerError('Restaurant ID not found.');
+      return;
+    }
+  
+    if (managerPin.length !== 4 || !/^\d{4}$/.test(managerPin)) {
+      setManagerError('PIN must be exactly 4 digits.');
+      return;
+    }
+  
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
+        pin: managerPin,
+        name: managerName,
+        restaurant_id: restaurantId,
+        role: 'manager',
+      });
+  
+      console.log(response.data)
+      
+      setManagerSuccess('Manager created!');
+      setManagerName('');
+      setManagerPin('');
+      setShowManagerAuthModal(false);
+  
+      // Refresh worker list
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/get-workers/`);
+      const allWorkers = res.data;
+      const managers = allWorkers.filter((w) => w.role === 'manager');
+      const bartenders = allWorkers.filter((w) => w.role === 'bartender');
+      setWorkers({ managers, bartenders });
+    } catch (error) {
+      console.error(error);
+      setManagerError(error.response?.data?.error || 'Failed to create manager.');
+    }
+  };
+  
+  const handleManagerAddClick = () => {
+    setManagerError('');
+    setManagerSuccess('');
+    setShowManagerAuthModal(true);
   };  
 
   return (
@@ -140,21 +195,57 @@ function ManagerDashboard() {
         onOwnerAuthenticated={handleAuthenticated}
       />
       {/* Managers */}
-      <div className="mt-4">
-        <h3>Managers</h3>
-        {workers.managers.length > 0 ? (
-          <ul className="list-unstyled">
+      <Box className="mt-4" sx={{ maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h5" gutterBottom>Managers</Typography>
+
+        <Paper elevation={2} sx={{ p: 2 }}>
+          <Stack spacing={1}>
+            {/* Table Header */}
+            <Box sx={{ display: 'flex', fontWeight: 'bold' }}>
+              <Box sx={{ width: '40%' }}>Name</Box>
+              <Box sx={{ width: '30%' }}>Role</Box>
+              <Box sx={{ width: '30%' }}>PIN</Box>
+            </Box>
+
+            {/* Manager List */}
             {workers.managers.map((worker) => (
-              <li key={worker.id}>
-                {worker.name} - {worker.role} (PIN: {worker.pin})
-              </li>
+              <Box key={worker.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '40%' }}>{worker.name}</Box>
+                <Box sx={{ width: '30%' }}>{worker.role}</Box>
+                <Box sx={{ width: '30%' }}>{worker.pin}</Box>
+              </Box>
             ))}
-          </ul>
-        ) : (
-          <p>No managers found.</p>
-        )}
-      </div>
-  
+
+            {/* Input Row */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <TextField
+                label="Name"
+                size="small"
+                value={managerName}
+                onChange={(e) => setManagerName(e.target.value)}
+                sx={{ width: '40%', mr: 1 }}
+              />
+              <TextField
+                label="4-digit PIN"
+                size="small"
+                type="password"
+                value={managerPin}
+                onChange={(e) => setManagerPin(e.target.value)}
+                sx={{ width: '30%', mr: 1 }}
+              />
+              <MuiButton variant="contained" onClick={handleManagerAddClick}>
+                + Add
+              </MuiButton>
+            </Box>
+
+            {/* Messages */}
+            {managerError && <Typography color="error">{managerError}</Typography>}
+            {managerSuccess && (
+              <Typography color="success.main">{managerSuccess}</Typography>
+            )}
+          </Stack>
+        </Paper>
+      </Box>
       {/*Bartenders*/}
       <Box className="mt-4" sx={{ maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>Bartenders</Typography>
@@ -181,30 +272,35 @@ function ManagerDashboard() {
               <TextField
                 label="Name"
                 size="small"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
+                value={bartenderName}
+                onChange={(e) => setBartenderName(e.target.value)}
                 sx={{ width: '40%', mr: 1 }}
               />
               <TextField
                 label="4-digit PIN"
                 size="small"
                 type="password"
-                value={newPin}
-                onChange={(e) => setNewPin(e.target.value)}
+                value={bartenderPin}
+                onChange={(e) => setBartenderPin(e.target.value)}
                 sx={{ width: '30%', mr: 1 }}
               />
-              <MuiButton variant="contained" onClick={handleInlineBartenderCreate}>
+              <MuiButton variant="contained" onClick={handleCreateBartender}>
                 + Add
               </MuiButton>
             </Box>
-            
-            {inlineError && <Typography color="error">{inlineError}</Typography>}
-            {inlineSuccess && (
-              <Typography color="success.main">{inlineSuccess}</Typography>
+
+            {bartenderError && <Typography color="error">{bartenderError}</Typography>}
+            {bartenderSuccess && (
+              <Typography color="success.main">{bartenderSuccess}</Typography>
             )}
           </Stack>
         </Paper>
       </Box>
+      <OwnerAuthModal
+        show={showManagerAuthModal}
+        onHide={() => setShowManagerAuthModal(false)}
+        onOwnerAuthenticated={handleCreateManager}
+      />
     </Container>
   );  
 }
