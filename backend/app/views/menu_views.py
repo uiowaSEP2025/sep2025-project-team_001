@@ -22,6 +22,20 @@ def menu_items_api(request):
 
     return Response({"error": "Method not allowed"}, status=405)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_item_statistics(request):
+    if not hasattr(request.user, "restaurant"):
+        return Response({"error": "Unauthorized"}, status=403)
+
+    restaurant = request.user.restaurant
+    items = (
+        Item.objects.filter(restaurant=restaurant)
+        .order_by("-times_ordered")
+        .values("name", "price", "times_ordered")
+    )
+
+    return Response({"items": list(items)}, status=200)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
 from .views.auth_views import login_restaurant, login_user, register_user
-from .views.menu_views import manage_menu_item, menu_items_api
+from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
 from .views.orders_views import (
     create_order,
     get_customer_orders,
@@ -35,4 +35,5 @@ urlpatterns = [
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
     path("orders/<int:restaurant_id>/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
     path("create-worker/", create_worker, name="create_worker"),
+    path('api/statistics/', get_item_statistics, name="get_item_statistics"),
 ]
