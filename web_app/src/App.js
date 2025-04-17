@@ -12,6 +12,7 @@ import PrivateRoute from './PrivateRoute';
 import ManagerRegistrationPage from './pages/ManagerRegistrationPage';
 import ManagerDashboard from './pages/ManagerDashboard';
 import BartenderRegistrationPage from './pages/BartenderRegistrationPage';
+import ProductStatisticsPage from './pages/ProductStatisticsPage';
 
 function AppRoutes() {
   return (
@@ -56,6 +57,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <OrdersPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/product_statistics"
+        element={
+          <PrivateRoute>
+            <ProductStatisticsPage />
           </PrivateRoute>
         }
       />
