@@ -9,12 +9,12 @@ from rest_framework.test import APIClient
 
 
 @pytest.fixture
-def api_client():
+def api_client(db):
     return APIClient()
 
 
 @pytest.fixture
-def user():
+def user(db):
     return CustomUser.objects.create_user(
         username="user1",
         email="user1@example.com",
@@ -23,12 +23,12 @@ def user():
 
 
 @pytest.fixture
-def customer(user):
+def customer(db, user):
     return Customer.objects.create(user=user)
 
 
 @pytest.fixture
-def restaurant(user):
+def restaurant(db, user):
     return Restaurant.objects.create(
         user=user,
         name="Testaurant",
@@ -39,7 +39,7 @@ def restaurant(user):
 
 
 @pytest.fixture
-def restaurant_with_user(restaurant):
+def restaurant_with_user(db, restaurant):
     custom_user = CustomUser.objects.create_user(
         username="linkeduser", email="linked@example.com", password="pass"
     )
@@ -49,7 +49,7 @@ def restaurant_with_user(restaurant):
 
 
 @pytest.fixture
-def worker(restaurant):
+def worker(db, restaurant):
     return Worker.objects.create(
         restaurant=restaurant,
         pin="1234",
@@ -58,7 +58,7 @@ def worker(restaurant):
 
 
 @pytest.fixture
-def item(restaurant):
+def item(db, restaurant):
     return Item.objects.create(
         restaurant=restaurant,
         name="Test Burger",
@@ -72,12 +72,12 @@ def item(restaurant):
 
 
 @pytest.fixture
-def order(customer, restaurant):
+def order(db, customer, restaurant):
     return Order.objects.create(customer=customer, restaurant=restaurant)
 
 
 @pytest.fixture
-def burger_item(restaurant):
+def burger_item(db, restaurant):
     return Item.objects.create(
         restaurant=restaurant,
         name="Burger",
@@ -91,14 +91,14 @@ def burger_item(restaurant):
 
 
 @pytest.fixture
-def ingredients(burger_item):
+def ingredients(db, burger_item):
     pickles = Ingredient.objects.create(item=burger_item, name="Pickles")
     onions = Ingredient.objects.create(item=burger_item, name="Onions")
     return [pickles, onions]
 
 
 @pytest.fixture
-def manager_user_with_worker():
+def manager_user_with_worker(db):
     """
     Returns a dict: {
         user: CustomUser,
@@ -133,7 +133,7 @@ def manager_user_with_worker():
 
 
 @pytest.fixture
-def auth_client(api_client):
+def auth_client(db, api_client):
     """
     Returns an authenticated APIClient using a test user.
     """

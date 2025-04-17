@@ -42,7 +42,7 @@ def test_order_item_serializer_deserialization_with_ingredients(customer, restau
     """
     OrderItemSerializer should correctly deserialize and validate input with unwanted ingredients.
     """
-    order = Order.objects.create(customer=customer, restaurant=restaurant)
+    Order.objects.create(customer=customer, restaurant=restaurant)
     item = Item.objects.create(
         restaurant=restaurant,
         name="Burger",

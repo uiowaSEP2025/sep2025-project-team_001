@@ -6,15 +6,18 @@ class CartItem {
   List<int> unwantedIngredientsIds;
   List<String> unwantedIngredientNames;
 
+  CartItem(
+      {required this.item,
+      this.quantity = 1,
+      this.unwantedIngredientsIds = const [],
+      this.unwantedIngredientNames = const []});
 
-  CartItem({required this.item, this.quantity = 1, this.unwantedIngredientsIds = const [], this.unwantedIngredientNames = const []});
-
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-       'item_id': item.id,
+      'item_id': item.id,
       'quantity': quantity,
       'unwanted_ingredients_ids': unwantedIngredientsIds,
-      'unwanted_ingredients_names' : unwantedIngredientNames
+      'unwanted_ingredients_names': unwantedIngredientNames
     };
   }
 }

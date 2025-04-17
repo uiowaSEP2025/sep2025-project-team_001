@@ -8,10 +8,7 @@ class Base64ImageWithFallback extends StatelessWidget {
   final double? width;
 
   const Base64ImageWithFallback(
-      {super.key,
-      required this.base64ImageString,
-       this.height,
-       this.width});
+      {super.key, required this.base64ImageString, this.height, this.width});
 
   @override
   Widget build(BuildContext context) {

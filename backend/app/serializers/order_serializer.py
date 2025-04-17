@@ -28,8 +28,6 @@ class OrderSerializer(serializers.ModelSerializer):
         queryset=Restaurant.objects.all(), source="restaurant", write_only=True
     )
 
-
-
     # Fields for displaying orders
     customer_name = serializers.CharField(
         source="customer.user.first_name", read_only=True
@@ -39,6 +37,12 @@ class OrderSerializer(serializers.ModelSerializer):
     restaurant_id_read = serializers.IntegerField(source="restaurant.id", read_only=True)
 
     order_items = OrderItemSerializer(many=True)
+
+    food_eta_minutes = serializers.IntegerField(read_only=True)
+    beverage_eta_minutes = serializers.IntegerField(read_only=True)
+
+    estimated_food_ready_time = serializers.DateTimeField(read_only=True)
+    estimated_beverage_ready_time = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Order
@@ -53,6 +57,10 @@ class OrderSerializer(serializers.ModelSerializer):
             "status",
             "total_price",
             "order_items",
+            "estimated_food_ready_time",
+            "estimated_beverage_ready_time",
+            "food_eta_minutes",
+            "beverage_eta_minutes",
         ]
 
     def create(self, validated_data):

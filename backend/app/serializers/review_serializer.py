@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from ..models.review_models import Review
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='order.customer.user.first_name', read_only=True)

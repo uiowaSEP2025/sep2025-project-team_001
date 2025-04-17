@@ -6,6 +6,7 @@ force-exclude = [
 
 [tool.isort]
 profile = "black"
+lines_after_imports = 2
 skip_glob = [
     "*/migrations/*",
     "*/__init__.py",

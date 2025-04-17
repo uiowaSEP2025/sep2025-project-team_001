@@ -103,6 +103,7 @@ def register_user(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+
 @csrf_exempt
 def login_restaurant(request):
     if request.method == "POST":

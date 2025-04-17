@@ -425,7 +425,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               ),
             ),
           ]),
-
         ),
       ),
     );

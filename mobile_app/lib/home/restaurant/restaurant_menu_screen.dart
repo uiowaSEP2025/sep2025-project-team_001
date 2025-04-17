@@ -64,7 +64,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     return '${item.id}_${sortedIds.join("_")}';
   }
 
-  void _addToCart(MenuItem item, List<int> unwantedIngredientsIds, List<String> unwantedIngredientsNames) {
+  void _addToCart(MenuItem item, List<int> unwantedIngredientsIds,
+      List<String> unwantedIngredientsNames) {
     final key = _generateCartKey(item, unwantedIngredientsIds);
 
     setState(() {
@@ -72,7 +73,9 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
         cart[key]!.quantity += 1;
       } else {
         cart[key] = CartItem(
-            item: item, unwantedIngredientsIds: unwantedIngredientsIds, unwantedIngredientNames: unwantedIngredientsNames);
+            item: item,
+            unwantedIngredientsIds: unwantedIngredientsIds,
+            unwantedIngredientNames: unwantedIngredientsNames);
       }
     });
   }

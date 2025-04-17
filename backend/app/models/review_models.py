@@ -1,5 +1,7 @@
 from django.db import models
+
 from .order_models import Order
+
 
 class Review(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='review')

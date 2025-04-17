@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+
 # ------------------------------------------------------------------
 # SHARED: Helper to generate registration data
 # ------------------------------------------------------------------
@@ -137,8 +138,9 @@ def test_login_with_pin_success(api_client, manager_user_with_worker):
     A valid PIN login via Worker should return tokens and manager role.
     """
     pin = manager_user_with_worker["pin"]
+    restaurant_id = manager_user_with_worker["restaurant"].id
     response = api_client.post(
-        "/login/", data=json.dumps({"pin": pin}), content_type="application/json"
+        "/login/", data=json.dumps({"pin": pin, "restaurant_id": restaurant_id}), content_type="application/json"
     )
     assert response.status_code == 200
     data = response.json()
