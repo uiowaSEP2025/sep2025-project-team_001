@@ -46,10 +46,12 @@ def create_worker(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_workers(request):
-    try:
-        restaurant = request.user.restaurant
-    except Restaurant.DoesNotExist:
-        return Response({"error": "Restaurant not found for this user"}, status=status.HTTP_404_NOT_FOUND)
+    if not hasattr(request.user, "restaurant"):
+        return Response(
+            {"error": "Only restaurant accounts can view workers."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
+    restaurant = request.user.restaurant
     workers = Worker.objects.filter(restaurant=restaurant).values("id", "name", "pin", "role")
     return Response(list(workers), status=status.HTTP_200_OK)

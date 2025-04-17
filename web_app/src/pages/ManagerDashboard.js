@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import OwnerAuthModal from '../components/OwnerAuthModal';
+import axios from 'axios';
 
 function ManagerDashboard() {
   const navigate = useNavigate();
   const barName = sessionStorage.getItem('barName');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [workers, setWorkers] = useState([]);
 
   const handleAuthenticated = (data) => {
     sessionStorage.setItem('accessToken', data.tokens.access);
@@ -32,6 +34,20 @@ function ManagerDashboard() {
   const handleLogOutClick = () => {
     navigate('/dashboard');
   };
+
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-workers/`);
+
+        setWorkers(response.data);
+      } catch (error) {
+        console.error('Error fetching workers:', error);
+      }
+    };
+  
+    fetchWorkers();
+  }, []);
 
   return (
     <Container className="text-center mt-5">
@@ -78,6 +94,21 @@ function ManagerDashboard() {
         onHide={() => setShowAuthModal(false)}
         onOwnerAuthenticated={handleAuthenticated}
       />
+      <div className="mt-4">
+        <h3>Workers</h3>
+        {workers.length > 0 ? (
+          <ul className="list-unstyled">
+            {workers.map((worker) => (
+              <li key={worker.id}>
+                {worker.name} - {worker.role} (PIN: {worker.pin})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No workers found.</p>
+        )}
+      </div>
+
     </Container>
   );
 }
