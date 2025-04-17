@@ -1,18 +1,22 @@
 from datetime import timedelta
 
+from app.scheduler_instance import get_restaurant_scheduler
+from app.utils.eta_calculator import (
+    calculate_beverage_eta_multibartender,
+    calculate_food_eta,
+    round_to_nearest_five,
+)
+from app.utils.order_eta_utils import recalculate_pending_etas
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.scheduler_instance import get_restaurant_scheduler
-from app.utils.eta_calculator import round_to_nearest_five, calculate_food_eta, calculate_beverage_eta_multibartender
-from app.utils.order_eta_utils import recalculate_pending_etas
-from ..models import Restaurant, Item
+from ..models import Item, Restaurant
 from ..models.order_models import Order
-from ..serializers.order_serializer import OrderSerializer
 from ..models.worker_models import Worker
+from ..serializers.order_serializer import OrderSerializer
 
 
 @api_view(["POST"])
@@ -21,31 +25,49 @@ def create_order(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # 1) Persist order and its items, then update total_price
+    # 1) Persist the order & items, then set total_price
     order = serializer.save()
     order.total_price = order.get_total()
     order.save(update_fields=["total_price"])
 
-    # 2) Recalculate ETAs using shared logic, reload exact‑minute timestamps
+    # 2) Recalculate ETAs (they get rounded/floored inside order_eta_utils)
     recalculate_pending_etas(order.restaurant.id)
     order.refresh_from_db()
 
-    # 3) Floor both now and ETAs to minute precision
+    # 3) Floor everything to the minute
     now = timezone.now().replace(second=0, microsecond=0)
-    food_ready = order.estimated_food_ready_time.replace(second=0, microsecond=0)
-    bev_ready = order.estimated_beverage_ready_time.replace(second=0, microsecond=0)
 
-    # 4) Compute separate minute deltas
-    food_eta_minutes = int((food_ready - now).total_seconds() / 60)
-    beverage_eta_minutes = int((bev_ready - now).total_seconds() / 60)
+    # 4) Compute separate minute deltas and re‑round to nearest 5
+    if order.estimated_food_ready_time:
+        fr = order.estimated_food_ready_time.replace(second=0, microsecond=0)
+        raw_food_delta = int((fr - now).total_seconds() / 60)
+        food_eta_minutes = round_to_nearest_five(raw_food_delta)
+        food_ready_iso = fr.isoformat()
+    else:
+        food_eta_minutes = None
+        food_ready_iso = None
+
+    if order.estimated_beverage_ready_time:
+        br = order.estimated_beverage_ready_time.replace(second=0, microsecond=0)
+        raw_bev_delta = int((br - now).total_seconds() / 60)
+        beverage_eta_minutes = round_to_nearest_five(raw_bev_delta)
+        bev_ready_iso = br.isoformat()
+    else:
+        beverage_eta_minutes = None
+        bev_ready_iso = None
+
+    # 5) Save the rounded ETAs back onto the order
+    order.food_eta_minutes = food_eta_minutes
+    order.beverage_eta_minutes = beverage_eta_minutes
+    order.save(update_fields=["food_eta_minutes", "beverage_eta_minutes"])
 
     return Response({
         "message": "Order created successfully",
         "order_id": order.id,
         "food_eta_minutes": food_eta_minutes,
         "beverage_eta_minutes": beverage_eta_minutes,
-        "estimated_food_ready_time": food_ready.isoformat(),
-        "estimated_beverage_ready_time": bev_ready.isoformat(),
+        "estimated_food_ready_time": food_ready_iso,
+        "estimated_beverage_ready_time": bev_ready_iso,
     }, status=status.HTTP_201_CREATED)
 
 
@@ -107,7 +129,7 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             {"error": f"Invalid status '{new_status}'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     if normalized_status == "in_progress" and order.status == "pending":
         worker_id = request.data.get("worker_id")
         if not worker_id:

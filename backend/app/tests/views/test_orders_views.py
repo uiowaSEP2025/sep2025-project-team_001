@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
-from django.utils import timezone
-from rest_framework.test import APIClient
-
 from app.models import CustomUser
 from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Ingredient, Item
+from django.utils import timezone
+from rest_framework.test import APIClient
 
 
 @pytest.fixture
@@ -111,13 +110,13 @@ def test_create_order_sets_eta_food_only(api_client, customer, restaurant, item)
     body = resp.json()
 
     assert body["food_eta_minutes"] == 25
-    assert body["beverage_eta_minutes"] == 0
+    assert body["beverage_eta_minutes"] is None
 
     # Parse timestamps
     food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
-    bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
+    bev_dt = body["estimated_beverage_ready_time"]
     assert food_dt == now + timedelta(minutes=25)
-    assert bev_dt == now
+    assert bev_dt is None
 
 
 @pytest.mark.django_db
@@ -141,11 +140,11 @@ def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, i
     assert resp.status_code == 201, resp.json()
     body = resp.json()
 
-    assert body["food_eta_minutes"] == 15
-    assert body["beverage_eta_minutes"] == 2
-    food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
+    assert body["food_eta_minutes"] is None
+    assert body["beverage_eta_minutes"] == 5
+    food_dt = body["estimated_food_ready_time"]
     bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
-    assert food_dt == now + timedelta(minutes=15)
+    assert food_dt is None
     assert bev_dt == now + timedelta(minutes=2)
 
 

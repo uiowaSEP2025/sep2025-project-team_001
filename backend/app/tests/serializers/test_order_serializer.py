@@ -9,7 +9,8 @@ from app.serializers.order_serializer import OrderSerializer
 @pytest.mark.django_db
 def test_order_serializer_create(customer, restaurant):
     """
-    OrderSerializer should validate and save an order with item(s) and unwanted ingredients.
+    OrderSerializer should validate and save an order with item(s) and unwanted ingredients,
+    and leave all ETA fields null by default.
     """
     item = Item.objects.create(
         restaurant=restaurant,
@@ -54,14 +55,18 @@ def test_order_serializer_create(customer, restaurant):
     assert order_item.quantity == 2
     assert set(order_item.unwanted_ingredients.all()) == {pickle, onions}
 
+    # these should still be unset
     assert order.estimated_food_ready_time is None
     assert order.estimated_beverage_ready_time is None
+    assert order.food_eta_minutes is None
+    assert order.beverage_eta_minutes is None
 
 
 @pytest.mark.django_db
 def test_order_serializer_representation(order, burger_item, ingredients):
     """
-    Serialized Order output should include item details and unwanted ingredient IDs.
+    Serialized Order output should include item details, unwanted ingredient IDs,
+    and null ETAs / minute fields when not set.
     """
     order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
     order_item.unwanted_ingredients.set(ingredients)
@@ -83,3 +88,8 @@ def test_order_serializer_representation(order, burger_item, ingredients):
     assert data["estimated_food_ready_time"] is None
     assert "estimated_beverage_ready_time" in data
     assert data["estimated_beverage_ready_time"] is None
+
+    assert "food_eta_minutes" in data
+    assert data["food_eta_minutes"] is None
+    assert "beverage_eta_minutes" in data
+    assert data["beverage_eta_minutes"] is None

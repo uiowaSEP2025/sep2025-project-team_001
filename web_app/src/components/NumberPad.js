@@ -10,7 +10,11 @@ const NumberPad = ({ onDigitPress, onDelete, onClear, onEnter }) => {
       <Row className="mb-2">
         {digits.slice(0, 3).map((digit) => (
           <Col key={digit}>
-            <Button className="number-button" variant="secondary" onClick={() => onDigitPress(digit)}>
+            <Button
+              className="number-button"
+              variant="secondary"
+              onClick={() => onDigitPress(digit)}
+            >
               {digit}
             </Button>
           </Col>
@@ -19,7 +23,11 @@ const NumberPad = ({ onDigitPress, onDelete, onClear, onEnter }) => {
       <Row className="mb-2">
         {digits.slice(3, 6).map((digit) => (
           <Col key={digit}>
-            <Button className="number-button" variant="secondary" onClick={() => onDigitPress(digit)}>
+            <Button
+              className="number-button"
+              variant="secondary"
+              onClick={() => onDigitPress(digit)}
+            >
               {digit}
             </Button>
           </Col>
@@ -28,7 +36,11 @@ const NumberPad = ({ onDigitPress, onDelete, onClear, onEnter }) => {
       <Row className="mb-2">
         {digits.slice(6, 9).map((digit) => (
           <Col key={digit}>
-            <Button className="number-button" variant="secondary" onClick={() => onDigitPress(digit)}>
+            <Button
+              className="number-button"
+              variant="secondary"
+              onClick={() => onDigitPress(digit)}
+            >
               {digit}
             </Button>
           </Col>
@@ -41,19 +53,31 @@ const NumberPad = ({ onDigitPress, onDelete, onClear, onEnter }) => {
           </Button>
         </Col>
         <Col>
-          <Button className="number-button" variant="secondary" onClick={() => onDigitPress('0')}>
+          <Button
+            className="number-button"
+            variant="secondary"
+            onClick={() => onDigitPress('0')}
+          >
             0
           </Button>
         </Col>
         <Col>
-          <Button className="number-button" variant="warning" onClick={onDelete}>
+          <Button
+            className="number-button"
+            variant="warning"
+            onClick={onDelete}
+          >
             ←
           </Button>
         </Col>
       </Row>
       <Row className="mb-2">
         <Col>
-          <Button className="enter-button w-100" variant="success" onClick={onEnter}>
+          <Button
+            className="enter-button w-100"
+            variant="success"
+            onClick={onEnter}
+          >
             Enter
           </Button>
         </Col>

@@ -1,10 +1,9 @@
-import pytest
-from django.utils import timezone
 from datetime import timedelta
 
-from app.models.restaurant_models import Item
 from app.models.order_models import Order, OrderItem
+from app.models.restaurant_models import Item
 from app.utils.order_eta_utils import recalculate_pending_etas
+from django.utils import timezone
 
 
 def make_order(restaurant, customer, food_qty=0, bev_qty=0):
@@ -80,3 +79,29 @@ def test_multiple_orders_with_two_bartenders(restaurant, customer):
     assert o1.estimated_beverage_ready_time == expected3
     assert o2.estimated_beverage_ready_time == expected3
     assert o3.estimated_beverage_ready_time == expected6
+
+
+def test_food_only_order(restaurant, customer):
+    now = timezone.now().replace(second=0, microsecond=0)
+    order = make_order(restaurant, customer, food_qty=3, bev_qty=0)
+    recalculate_pending_etas(restaurant.id, num_bartenders=1)
+    order.refresh_from_db()
+    # food=15+2*3=21→round 25
+    assert order.estimated_food_ready_time == now + timedelta(minutes=25)
+    assert order.food_eta_minutes == 25
+    # no beverages
+    assert order.estimated_beverage_ready_time is None
+    assert order.beverage_eta_minutes is None
+
+
+def test_beverage_only_order(restaurant, customer):
+    now = timezone.now().replace(second=0, microsecond=0)
+    order = make_order(restaurant, customer, food_qty=0, bev_qty=4)
+    recalculate_pending_etas(restaurant.id, num_bartenders=1)
+    order.refresh_from_db()
+    # beverage raw=4 → finish at now+4 → delta=4 → round‐delta stored as raw minutes
+    assert order.estimated_beverage_ready_time == now + timedelta(minutes=4)
+    assert order.beverage_eta_minutes == 4
+    # no food
+    assert order.estimated_food_ready_time is None
+    assert order.food_eta_minutes is None

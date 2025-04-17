@@ -1,14 +1,14 @@
 # app/tests/utils/test_eta_calculator.py
 
+
 import pytest
 from app.utils.eta_calculator import (
-    round_to_nearest_five,
-    calculate_food_eta,
     calculate_beverage_eta_multibartender,
+    calculate_food_eta,
+    round_to_nearest_five,
 )
 from app.utils.multi_bartender_scheduler import MultiBartenderScheduler
 from django.utils import timezone
-from datetime import timedelta
 
 
 @pytest.fixture

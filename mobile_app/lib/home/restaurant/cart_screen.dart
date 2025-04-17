@@ -164,8 +164,10 @@ class _CartScreenState extends State<CartScreen> {
                             setState(() {
                               _cart[key] = CartItem(
                                 item: cartItem.item,
-                                unwantedIngredientsIds: cartItem.unwantedIngredientsIds,
-                                unwantedIngredientNames: cartItem.unwantedIngredientNames,
+                                unwantedIngredientsIds:
+                                    cartItem.unwantedIngredientsIds,
+                                unwantedIngredientNames:
+                                    cartItem.unwantedIngredientNames,
                                 quantity: cartItem.quantity - 1,
                               );
                             });
@@ -179,9 +181,11 @@ class _CartScreenState extends State<CartScreen> {
                           setState(() {
                             _cart[key] = CartItem(
                               item: cartItem.item,
-                                unwantedIngredientsIds: cartItem.unwantedIngredientsIds,
-                                unwantedIngredientNames: cartItem.unwantedIngredientNames,
-                                quantity: cartItem.quantity + 1,
+                              unwantedIngredientsIds:
+                                  cartItem.unwantedIngredientsIds,
+                              unwantedIngredientNames:
+                                  cartItem.unwantedIngredientNames,
+                              quantity: cartItem.quantity + 1,
                             );
                           });
                         },

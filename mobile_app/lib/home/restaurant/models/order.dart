@@ -15,8 +15,8 @@ class Order {
       required this.items,
       required this.status,
       required this.totalPrice,
-       required this.restaurantId,
-       required this.restaurantName});
+      required this.restaurantId,
+      required this.restaurantName});
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(

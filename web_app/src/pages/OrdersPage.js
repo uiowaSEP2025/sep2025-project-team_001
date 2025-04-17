@@ -12,10 +12,11 @@ const OrdersPage = () => {
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
       const restaurantId = sessionStorage.getItem('restaurantId');
-      const workerID = sessionStorage.getItem('workerId')
+      const workerID = sessionStorage.getItem('workerId');
 
       const currentOrder = orders.find((o) => o.id === orderId);
-      const isAssigningWorker = currentOrder.status === 'pending' && nextStatus === 'in_progress';
+      const isAssigningWorker =
+        currentOrder.status === 'pending' && nextStatus === 'in_progress';
 
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,

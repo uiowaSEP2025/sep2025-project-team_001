@@ -1,7 +1,8 @@
 # app/tests/utils/test_multi_bartender_scheduler.py
 
-import pytest
 from datetime import timedelta
+
+import pytest
 from app.utils.multi_bartender_scheduler import MultiBartenderScheduler
 from django.utils import timezone
 

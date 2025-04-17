@@ -38,6 +38,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
     order_items = OrderItemSerializer(many=True)
 
+    food_eta_minutes = serializers.IntegerField(read_only=True)
+    beverage_eta_minutes = serializers.IntegerField(read_only=True)
+
     estimated_food_ready_time = serializers.DateTimeField(read_only=True)
     estimated_beverage_ready_time = serializers.DateTimeField(read_only=True)
 
@@ -56,6 +59,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "order_items",
             "estimated_food_ready_time",
             "estimated_beverage_ready_time",
+            "food_eta_minutes",
+            "beverage_eta_minutes",
         ]
 
     def create(self, validated_data):
