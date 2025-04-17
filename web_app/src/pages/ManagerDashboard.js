@@ -16,7 +16,6 @@ import {
 function ManagerDashboard() {
   const navigate = useNavigate();
   const barName = sessionStorage.getItem('barName');
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [workers, setWorkers] = useState({ managers: [], bartenders: [] });
   const [bartenderName, setBartenderName] = useState('');
   const [bartenderPin, setBartenderPin] = useState('');
@@ -28,26 +27,12 @@ function ManagerDashboard() {
   const [managerError, setManagerError] = useState('');
   const [managerSuccess, setManagerSuccess] = useState('');
 
-
-
-  const handleAuthenticated = (data) => {
-    sessionStorage.setItem('accessToken', data.tokens.access);
-    sessionStorage.setItem('refreshToken', data.tokens.refresh);
-    sessionStorage.setItem('barName', data.bar_name);
-    sessionStorage.setItem('restaurantId', data.restaurant_id);
-    navigate('/manager_registration');
-  };
-
   const handleMenuClick = () => {
     navigate('/menu');
   };
 
   const handleOrdersClick = () => {
     navigate('/orders');
-  };
-
-  const handleBartenderClick = () => {
-    navigate('/bartender_registration');
   };
 
   const handleLogOutClick = () => {
@@ -175,25 +160,9 @@ function ManagerDashboard() {
       <Button variant="primary" size="lg" onClick={handleOrdersClick} className="mb-3">
         Orders
       </Button>
-      <Button variant="primary" size="lg" onClick={handleBartenderClick} className="mb-3">
-        Create Bartender
-      </Button>
-      <Button
-        variant="warning"
-        size="lg"
-        className="mb-3"
-        onClick={() => setShowAuthModal(true)}
-      >
-        Create Manager
-      </Button>
       <Button variant="danger" size="lg" onClick={handleLogOutClick}>
         Log Out
       </Button>
-      <OwnerAuthModal
-        show={showAuthModal}
-        onHide={() => setShowAuthModal(false)}
-        onOwnerAuthenticated={handleAuthenticated}
-      />
       {/* Managers */}
       <Box className="mt-4" sx={{ maxWidth: 600, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom>Managers</Typography>
