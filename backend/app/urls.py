@@ -15,6 +15,7 @@ from .views.orders_views import (
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.worker_views import create_worker
+from .views.review_views import list_reviews, create_review
 
 
 urlpatterns = [
@@ -25,6 +26,7 @@ urlpatterns = [
     # mobile
     path("mobile/register/", register_customer, name="customerRegister"),
     path("mobile/login/", login_customer, name="customerLogin"),
+    path("mobile/review/create", create_review, name="create_review"),
     path("restaurants/list/", get_restaurants, name="get_restaurants"),
     path("restaurants/<int:restaurant_id>/menu/", get_menu_items, name="get_menu_items"),
     path("order/new/", create_order, name="create_order"),
@@ -38,4 +40,5 @@ urlpatterns = [
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
     path("orders/<int:restaurant_id>/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
     path("create-worker/", create_worker, name="create_worker"),
+    path("reviews/", list_reviews, name="list_reviews"),
 ]

@@ -12,6 +12,7 @@ from app.utils.order_eta_utils import recalculate_pending_etas
 from ..models import Restaurant, Item
 from ..models.order_models import Order
 from ..serializers.order_serializer import OrderSerializer
+from ..models.worker_models import Worker
 
 
 @api_view(["POST"])
@@ -106,6 +107,17 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             {"error": f"Invalid status '{new_status}'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+    
+    if normalized_status == "in_progress" and order.status == "pending":
+        worker_id = request.data.get("worker_id")
+        if not worker_id:
+            return Response({"error": "Missing worker ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            worker = Worker.objects.get(id=worker_id)
+            order.worker = worker
+        except Worker.DoesNotExist:
+            return Response({"error": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
 
     order.status = normalized_status
     order.save()
