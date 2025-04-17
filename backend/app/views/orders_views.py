@@ -85,6 +85,11 @@ def update_order_status(request, order_id, new_status, restaurant_id):
 
     order.status = normalized_status
     order.save()
+
+    if normalized_status == "completed":
+        for order_item in order.order_items.all():
+            order_item.item.times_ordered += order_item.quantity
+            order_item.item.save()
     return Response(
         {
             "message": f"Order status updated to '{normalized_status}'.",

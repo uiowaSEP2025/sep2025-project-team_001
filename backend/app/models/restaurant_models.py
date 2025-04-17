@@ -29,6 +29,7 @@ class Item(models.Model):
     stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     base64_image = models.TextField(blank=True, null=True)
+    times_ordered = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         image_preview = (
