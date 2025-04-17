@@ -2,6 +2,7 @@ from django.db import models
 
 from .customer_models import Customer
 from .restaurant_models import Ingredient, Item, Restaurant
+from .worker_models import Worker
 
 
 class Order(models.Model):
@@ -14,6 +15,7 @@ class Order(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, default="pending")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders")
 
     def __str__(self):
         return f"Order #{self.id} by {self.customer.user.username} at {self.restaurant.name}"
