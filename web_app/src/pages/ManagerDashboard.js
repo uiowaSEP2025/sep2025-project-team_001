@@ -17,6 +17,9 @@ function ManagerDashboard() {
     navigate('/manager_registration');
   };
 
+  const handleProductStatsClick = () => {
+    navigate('/product_statistics');
+  }
   const handleMenuClick = () => {
     navigate('/menu');
   };
@@ -53,6 +56,14 @@ function ManagerDashboard() {
         className="mb-3"
       >
         Orders
+      </Button>
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleProductStatsClick}
+        className="mb-3"
+      >
+        Product Statistics
       </Button>
       <Button
         variant="primary"
