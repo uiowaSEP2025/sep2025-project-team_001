@@ -73,7 +73,7 @@ function BartenderRegistrationPage() {
               type="password"
               placeholder="Enter 4-digit PIN"
               value={pin}
-              maxlength={4}
+              maxLength={4}
               onChange={(e) => setPin(e.target.value)}
               required
             />
