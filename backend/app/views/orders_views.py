@@ -1,12 +1,15 @@
-from app.scheduler_instance import get_restaurant_scheduler
-from app.utils.eta_calculator import calculate_overall_eta
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import Restaurant
+from app.scheduler_instance import get_restaurant_scheduler
+from app.utils.eta_calculator import round_to_nearest_five, calculate_food_eta, calculate_beverage_eta_multibartender
+from app.utils.order_eta_utils import recalculate_pending_etas
+from ..models import Restaurant, Item
 from ..models.order_models import Order
 from ..serializers.order_serializer import OrderSerializer
 
@@ -14,47 +17,35 @@ from ..serializers.order_serializer import OrderSerializer
 @api_view(["POST"])
 def create_order(request):
     serializer = OrderSerializer(data=request.data)
-    if serializer.is_valid():
-        order = serializer.save()
-        order.total_price = order.get_total()
-        order.save()
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # --- ETA Calculation Integration ---
+    # 1) Persist order and its items, then update total_price
+    order = serializer.save()
+    order.total_price = order.get_total()
+    order.save(update_fields=["total_price"])
 
-        # 1. Count the food and beverage items. We assume that items with category "beverage"
-        #    are beverages, and all others are food.
-        num_food_items = 0
-        num_beverage_items = 0
-        for order_item in order.order_items.all():
-            # Assume that the category field is available and non-null.
-            if order_item.item.category and order_item.item.category.lower() == "beverage":
-                num_beverage_items += order_item.quantity
-            else:
-                num_food_items += order_item.quantity
+    # 2) Recalculate ETAs using shared logic, reload exact‑minute timestamps
+    recalculate_pending_etas(order.restaurant.id)
+    order.refresh_from_db()
 
-        # 2. Retrieve the correct scheduler for this restaurant.
-        restaurant_id = order.restaurant.id
-        # You can adjust the number of bartenders as needed.
-        scheduler = get_restaurant_scheduler(restaurant_id, num_bartenders=2)
+    # 3) Floor both now and ETAs to minute precision
+    now = timezone.now().replace(second=0, microsecond=0)
+    food_ready = order.estimated_food_ready_time.replace(second=0, microsecond=0)
+    bev_ready = order.estimated_beverage_ready_time.replace(second=0, microsecond=0)
 
-        # 3. Calculate the overall ETA using our utility function.
-        now = timezone.now()
-        overall_eta = calculate_overall_eta(
-            num_food_items,
-            num_beverage_items,
-            now,
-            scheduler
-        )
+    # 4) Compute separate minute deltas
+    food_eta_minutes = int((food_ready - now).total_seconds() / 60)
+    beverage_eta_minutes = int((bev_ready - now).total_seconds() / 60)
 
-        # 4. Set the estimated pickup time based on the ETA.
-        order.estimated_pickup_time = now + timezone.timedelta(minutes=overall_eta)
-        order.save()
-
-        return Response(
-            {"message": "Order created successfully", "order_id": order.id},
-            status=status.HTTP_201_CREATED,
-        )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({
+        "message": "Order created successfully",
+        "order_id": order.id,
+        "food_eta_minutes": food_eta_minutes,
+        "beverage_eta_minutes": beverage_eta_minutes,
+        "estimated_food_ready_time": food_ready.isoformat(),
+        "estimated_beverage_ready_time": bev_ready.isoformat(),
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(["GET"])
@@ -79,12 +70,12 @@ def retrieve_active_orders(request):
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def update_order_status(request, order_id, new_status, restaurant_id):
-    # if not hasattr(request.user, "restaurant"):
-    #     return Response(
-    #         {"error": "Only restaurant accounts can update orders."},
-    #         status=status.HTTP_403_FORBIDDEN,
-    #     )
+def update_order_status(request, restaurant_id, order_id, new_status):
+    if not hasattr(request.user, "restaurant"):
+        return Response(
+            {"error": "Only restaurant accounts can update orders."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     # Normalize status (e.g., 'Picked Up' → 'picked_up')
     normalized_status = new_status.lower().replace(" ", "_")
@@ -103,7 +94,7 @@ def update_order_status(request, order_id, new_status, restaurant_id):
         return Response(
             {"error": "Restaurant not found."},
             status=status.HTTP_404_NOT_FOUND,
-    )
+        )
 
     try:
         order = Order.objects.get(pk=order_id, restaurant=restaurant)
@@ -118,6 +109,7 @@ def update_order_status(request, order_id, new_status, restaurant_id):
 
     order.status = normalized_status
     order.save()
+    recalculate_pending_etas(order.restaurant.id)
     return Response(
         {
             "message": f"Order status updated to '{normalized_status}'.",
@@ -151,13 +143,9 @@ def get_customer_orders(request):
 
 @api_view(["POST"])
 def estimate_order_eta(request):
-    """
-    Given a list of order_items (with item_id and quantity) and restaurant_id,
-    return the ASAP estimated pickup time without creating an order.
-    """
     data = request.data
-    restaurant_id = data.get("restaurant_id")
     order_items = data.get("order_items")
+    restaurant_id = data.get("restaurant_id")
 
     if restaurant_id is None or order_items is None:
         return Response(
@@ -165,32 +153,43 @@ def estimate_order_eta(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Count food vs. beverage
+    # 1) Count food vs. beverage
     num_food = 0
     num_bev = 0
-    # Bulk-fetch items to minimize queries
-    from app.models.restaurant_models import Item
     items = Item.objects.in_bulk([oi["item_id"] for oi in order_items])
     for oi in order_items:
         item = items.get(oi["item_id"])
         qty = oi.get("quantity", 0) or 0
         if not item:
-            return Response({"error": f"Invalid item_id {oi['item_id']}"}, status=400)
+            return Response(
+                {"error": f"Invalid item_id {oi['item_id']}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         if item.category and item.category.lower() == "beverage":
             num_bev += qty
         else:
             num_food += qty
 
-    # Scheduler for this restaurant (does not mutate its state)
+    # Prepare scheduler (does not mutate its state for this estimate)
     scheduler = get_restaurant_scheduler(restaurant_id, num_bartenders=2)
 
-    # Calculate ETA using real clock time
     now = timezone.now()
-    eta_minutes = calculate_overall_eta(num_food, num_bev, now, scheduler)
 
-    # Return both minutes and a human time
-    pickup_time = now + timezone.timedelta(minutes=eta_minutes)
+    # 2) Food ETA: simple formula
+    raw_food = calculate_food_eta(num_food)
+    food_eta = round_to_nearest_five(raw_food)
+    food_ready = now + timedelta(minutes=food_eta)
+
+    # 3) Beverage ETA: scheduler‐based
+    raw_bev, bev_finish_dt, bartender_idx = calculate_beverage_eta_multibartender(
+        num_bev, now, scheduler
+    )
+    bev_eta = round_to_nearest_five(raw_bev)
+    bev_ready = now + timedelta(minutes=bev_eta)
+
     return Response({
-        "eta_minutes": eta_minutes,
-        "estimated_pickup_time": pickup_time.isoformat()
-    })
+        "food_eta_minutes": food_eta,
+        "beverage_eta_minutes": bev_eta,
+        "estimated_food_ready_time": food_ready.isoformat(),
+        "estimated_beverage_ready_time": bev_ready.isoformat(),
+    }, status=status.HTTP_200_OK)

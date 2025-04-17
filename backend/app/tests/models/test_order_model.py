@@ -1,8 +1,13 @@
+# app/tests/utils/test_order_model.py
+
 from decimal import Decimal
 
 import pytest
-from app.models.order_models import Order, OrderItem
 from django.utils import timezone
+from datetime import timedelta
+
+from app.models.order_models import Order, OrderItem
+from app.models.restaurant_models import Item
 
 
 @pytest.mark.django_db
@@ -23,22 +28,32 @@ def test_order_defaults(customer, restaurant):
     assert order.status == "pending"
     assert order.total_price == Decimal("0.00")
     assert order.start_time is not None
-    assert order.estimated_pickup_time is None
+
+    # New ETA fields should default to None
+    assert order.estimated_food_ready_time is None
+    assert order.estimated_beverage_ready_time is None
+
+    # start_time was auto_now_add, so it should be very recent
     assert (timezone.now() - order.start_time).total_seconds() < 60
 
 
 @pytest.mark.django_db
-def test_order_set_estimated_pickup_time(order):
+def test_set_estimated_etas(order):
     """
-    Tests that we can set and retrieve the estimated_pickup_time on an Order.
+    Tests that we can set and retrieve both ETA fields on an Order.
     """
-    now = timezone.now()
-    # Set an ETA 30 minutes from now.
-    eta = now + timezone.timedelta(minutes=30)
-    order.estimated_pickup_time = eta
+    now = timezone.now().replace(second=0, microsecond=0)
+    food_eta = now + timedelta(minutes=30)
+    bev_eta  = now + timedelta(minutes=15)
+
+    # Assign and save
+    order.estimated_food_ready_time = food_eta
+    order.estimated_beverage_ready_time = bev_eta
     order.save()
     order.refresh_from_db()
-    assert order.estimated_pickup_time == eta
+
+    assert order.estimated_food_ready_time == food_eta
+    assert order.estimated_beverage_ready_time == bev_eta
 
 
 @pytest.mark.django_db
@@ -50,5 +65,5 @@ def test_order_get_total(order, burger_item):
     OrderItem.objects.create(order=order, item=burger_item, quantity=2)
     OrderItem.objects.create(order=order, item=burger_item, quantity=3)
 
-    expected_total = item_price * 5
+    expected_total = item_price * Decimal(5)
     assert order.get_total() == expected_total

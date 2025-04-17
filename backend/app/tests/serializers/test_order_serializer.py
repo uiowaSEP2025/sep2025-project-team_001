@@ -54,6 +54,9 @@ def test_order_serializer_create(customer, restaurant):
     assert order_item.quantity == 2
     assert set(order_item.unwanted_ingredients.all()) == {pickle, onions}
 
+    assert order.estimated_food_ready_time is None
+    assert order.estimated_beverage_ready_time is None
+
 
 @pytest.mark.django_db
 def test_order_serializer_representation(order, burger_item, ingredients):
@@ -75,3 +78,8 @@ def test_order_serializer_representation(order, burger_item, ingredients):
     assert item_data["item_name"] == burger_item.name
     assert item_data["quantity"] == 1
     assert sorted(item_data["unwanted_ingredients"]) == sorted([i.id for i in ingredients])
+
+    assert "estimated_food_ready_time" in data
+    assert data["estimated_food_ready_time"] is None
+    assert "estimated_beverage_ready_time" in data
+    assert data["estimated_beverage_ready_time"] is None

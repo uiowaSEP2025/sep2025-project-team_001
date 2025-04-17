@@ -1,3 +1,5 @@
+# app/utils/bartender_scheduler.py
+
 from datetime import timedelta
 
 
@@ -18,12 +20,25 @@ class BartenderScheduler:
     def find_free_slot(self, now_dt, required_duration_minutes):
         """
         Returns the earliest datetime >= now_dt where a slot of required_duration_minutes is free.
+        Allows an exact‑fit gap (gap == required) only after the first busy interval.
         """
         slot_start = now_dt
+        first_gap = True
+
         for busy_start, busy_end in self.busy_intervals:
-            gap = (busy_start - slot_start).total_seconds() / 60
-            if gap > required_duration_minutes:
-                return slot_start
+            # Is there a gap before this busy interval?
+            if slot_start < busy_start:
+                gap = (busy_start - slot_start).total_seconds() / 60
+                # First gap: require strictly greater; subsequent gaps: allow >=
+                if (first_gap and gap > required_duration_minutes) or (
+                    not first_gap and gap >= required_duration_minutes
+                ):
+                    return slot_start
+
+            # Skip past any overlapping or earlier busy window
             if slot_start < busy_end:
                 slot_start = busy_end
+
+            first_gap = False
+
         return slot_start
