@@ -74,8 +74,29 @@ function ManagerDashboard() {
     const worker = [...workers.managers, ...workers.bartenders].find(w => w.id === editing.id);
     if (!worker) return;
 
+    // Prevent saving if no changes were made
+    if (editValue === worker[editing.field]) {
+      setEditing({ id: null, field: null });
+      return;
+    }
+  
+    // PIN validation
+    if (editing.field === 'pin') {
+      if (editValue.length !== 4 || !/^[0-9]{4}$/.test(editValue)) {
+        showFlash('PIN must be exactly 4 digits', 'error');
+        return;
+      }
+  
+      const allWorkers = [...workers.managers, ...workers.bartenders];
+      const duplicate = allWorkers.find(w => w.pin === editValue && w.id !== worker.id);
+      if (duplicate) {
+        showFlash('PIN already in use for this restaurant', 'error');
+        return;
+      }
+    }
+  
     const updatedWorker = { ...worker, [editing.field]: editValue };
-
+  
     try {
       const response = await axios.put(`${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`, updatedWorker);
       console.log(response.data);
@@ -85,8 +106,9 @@ function ManagerDashboard() {
       showFlash('Worker updated successfully!');
     } catch (err) {
       console.error('Update failed:', err);
+      showFlash(err.response?.data?.error || 'Failed to update worker', 'error');
     }
-  };
+  };  
 
   const handleRoleChangeWithAuth = async () => {
     if (creatingManager) {

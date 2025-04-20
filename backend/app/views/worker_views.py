@@ -66,15 +66,22 @@ def update_worker(request, worker_id):
         return Response({"error": "Worker not found"}, status=404)
 
     data = request.data
-    worker.name = data.get("name", worker.name)
-    worker.pin = data.get("pin", worker.pin)
-    valid_roles = ['manager', 'bartender']
-    role = data.get("role")
-    if role and role not in valid_roles:
+    restaurant = worker.restaurant  # Get associated restaurant
+
+    new_pin = data.get("pin", worker.pin)
+    if new_pin != worker.pin:
+        if Worker.objects.filter(pin=new_pin, restaurant=restaurant).exclude(id=worker.id).exists():
+            return Response({"error": "PIN already in use for this restaurant"}, status=400)
+
+    new_role = data.get("role", worker.role)
+    if new_role not in ["manager", "bartender"]:
         return Response({"error": "Invalid role"}, status=400)
-    worker.role = role or worker.role
+
+    worker.name = data.get("name", worker.name)
+    worker.pin = new_pin
+    worker.role = new_role
     worker.save()
-    
+
     return Response({
         "message": "Worker updated successfully",
         "worker": {
