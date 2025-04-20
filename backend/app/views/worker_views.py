@@ -55,3 +55,32 @@ def get_workers(request):
     restaurant = request.user.restaurant
     workers = Worker.objects.filter(restaurant=restaurant).values("id", "name", "pin", "role")
     return Response(list(workers), status=status.HTTP_200_OK)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_worker(request, worker_id):
+    try:
+        worker = Worker.objects.get(id=worker_id)
+    except Worker.DoesNotExist:
+        return Response({"error": "Worker not found"}, status=404)
+
+    data = request.data
+    worker.name = data.get("name", worker.name)
+    worker.pin = data.get("pin", worker.pin)
+    valid_roles = ['manager', 'bartender']
+    role = data.get("role")
+    if role and role not in valid_roles:
+        return Response({"error": "Invalid role"}, status=400)
+    worker.role = role or worker.role
+    worker.save()
+    
+    return Response({
+        "message": "Worker updated successfully",
+        "worker": {
+            "id": worker.id,
+            "name": worker.name,
+            "role": worker.role,
+            "pin": worker.pin
+        }
+    }, status=200)
