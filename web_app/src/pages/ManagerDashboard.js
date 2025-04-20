@@ -25,15 +25,10 @@ function ManagerDashboard() {
   const [editValue, setEditValue] = useState('');
   const [pendingRoleChange, setPendingRoleChange] = useState(null);
 
-  const [bartenderName, setBartenderName] = useState('');
-  const [bartenderPin, setBartenderPin] = useState('');
-  const [bartenderError, setBartenderError] = useState('');
-  const [bartenderSuccess, setBartenderSuccess] = useState('');
-  const [managerName, setManagerName] = useState('');
-  const [managerPin, setManagerPin] = useState('');
+  const [workerName, setWorkerName] = useState('');
+  const [workerPin, setWorkerPin] = useState('');
+  const [workerRole, setWorkerRole] = useState('bartender');
   const [showManagerAuthModal, setShowManagerAuthModal] = useState(false);
-  const [managerError, setManagerError] = useState('');
-  const [managerSuccess, setManagerSuccess] = useState('');
   const [creatingManager, setCreatingManager] = useState(false);
 
   const [flashMessage, setFlashMessage] = useState('');
@@ -77,14 +72,14 @@ function ManagerDashboard() {
       setEditing({ id: null, field: null });
       return;
     }
-  
+
     // PIN validation
     if (editing.field === 'pin') {
       if (editValue.length !== 4 || !/^[0-9]{4}$/.test(editValue)) {
         showFlash('PIN must be exactly 4 digits', 'error');
         return;
       }
-  
+
       const allWorkers = [...workers.managers, ...workers.bartenders];
       const duplicate = allWorkers.find(w => w.pin === editValue && w.id !== worker.id);
       if (duplicate) {
@@ -92,9 +87,9 @@ function ManagerDashboard() {
         return;
       }
     }
-  
+
     const updatedWorker = { ...worker, [editing.field]: editValue };
-  
+
     try {
       const response = await axios.put(`${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`, updatedWorker);
       console.log(response.data);
@@ -106,14 +101,31 @@ function ManagerDashboard() {
       console.error('Update failed:', err);
       showFlash(err.response?.data?.error || 'Failed to update worker', 'error');
     }
-  };  
+  };
 
   const handleRoleChangeWithAuth = async () => {
     if (creatingManager) {
-      await handleCreateManager();
       setCreatingManager(false);
+      try {
+        const restaurantId = sessionStorage.getItem('restaurantId');
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
+          name: workerName,
+          pin: workerPin,
+          role: 'manager',
+          restaurant_id: restaurantId
+        });
+        console.log(response.data);
+        setWorkerName('');
+        setWorkerPin('');
+        setWorkerRole('bartender');
+        setShowManagerAuthModal(false);
+        fetchWorkers();
+        showFlash('Manager created!');
+      } catch (err) {
+        showFlash(err.response?.data?.error || 'Failed to create manager', 'error');
+      }
       return;
-    }
+    }    
 
     if (pendingRoleChange) {
       try {
@@ -154,12 +166,12 @@ function ManagerDashboard() {
                 return;
               }
             }
-            
+
             if (worker.role !== 'manager' && newRole === 'manager') {
               setPendingRoleChange(worker);
               setShowManagerAuthModal(true);
               return;
-            }            
+            }
 
             try {
               const updatedWorker = { ...worker, role: newRole };
@@ -206,55 +218,34 @@ function ManagerDashboard() {
     </Box>
   );
 
-  const handleCreateManager = async () => {
+  const handleCreateWorker = async () => {
     const restaurantId = sessionStorage.getItem('restaurantId');
     if (!restaurantId) return showFlash('Restaurant ID not found.', 'error');
-    if (managerPin.length !== 4 || !/^[0-9]{4}$/.test(managerPin)) return showFlash('PIN must be 4 digits', 'error');
-
+    if (workerPin.length !== 4 || !/^[0-9]{4}$/.test(workerPin)) return showFlash('PIN must be 4 digits', 'error');
+  
+    if (workerRole === 'manager') {
+      setCreatingManager(true);
+      setShowManagerAuthModal(true);
+      return;
+    }
+  
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
-        name: managerName,
-        pin: managerPin,
-        role: 'manager',
+        name: workerName,
+        pin: workerPin,
+        role: workerRole,
         restaurant_id: restaurantId
       });
       console.log(response.data);
-      setManagerName('');
-      setManagerPin('');
-      setShowManagerAuthModal(false);
+      setWorkerName('');
+      setWorkerPin('');
+      setWorkerRole('bartender');
       fetchWorkers();
-      showFlash('Manager created!');
+      showFlash('Employee created!');
     } catch (err) {
-      showFlash(err.response?.data?.error || 'Failed to create manager', 'error');
+      showFlash(err.response?.data?.error || 'Failed to create employee', 'error');
     }
-  };
-
-  const handleCreateManagerWithAuth = () => {
-    setCreatingManager(true);
-    setShowManagerAuthModal(true);
-  };
-
-  const handleCreateBartender = async () => {
-    const restaurantId = sessionStorage.getItem('restaurantId');
-    if (!restaurantId) return showFlash('Restaurant ID not found.', 'error');
-    if (bartenderPin.length !== 4 || !/^[0-9]{4}$/.test(bartenderPin)) return showFlash('PIN must be 4 digits', 'error');
-
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
-        name: bartenderName,
-        pin: bartenderPin,
-        role: 'bartender',
-        restaurant_id: restaurantId
-      });
-      console.log(response.data);
-      setBartenderName('');
-      setBartenderPin('');
-      fetchWorkers();
-      showFlash('Bartender created!');
-    } catch (err) {
-      showFlash(err.response?.data?.error || 'Failed to create bartender', 'error');
-    }
-  };
+  };  
 
   return (
     <Box sx={{ overflowY: 'auto', maxHeight: '100vh', pb: 10 }}>
@@ -266,29 +257,9 @@ function ManagerDashboard() {
         <Button variant="primary" size="lg" onClick={() => navigate('/orders')} className="mb-3">Orders</Button>
         <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')}>Log Out</Button>
 
-        {/* Manager Section */}
-        <Box className="mt-4" sx={{ maxWidth: 600, mx: 'auto' }}>
-          <Typography variant="h5">Managers</Typography>
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <Stack spacing={1}>
-              <Box sx={{ display: 'flex', fontWeight: 'bold' }}>
-                <Box sx={{ width: '40%' }}>Name</Box>
-                <Box sx={{ width: '30%' }}>Role</Box>
-                <Box sx={{ width: '30%' }}>PIN</Box>
-              </Box>
-              {workers.managers.map(renderWorkerRow)}
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <TextField label="Name" size="small" value={managerName} onChange={(e) => setManagerName(e.target.value)} sx={{ width: '40%', mr: 1 }} />
-                <TextField label="4-digit PIN" size="small" type="password" value={managerPin} onChange={(e) => setManagerPin(e.target.value)} sx={{ width: '30%', mr: 1 }} />
-                <MuiButton variant="contained" onClick={handleCreateManagerWithAuth}>+ Add</MuiButton>
-              </Box>
-            </Stack>
-          </Paper>
-        </Box>
-
-        {/* Bartender Section */}
+        {/* Employees Section */}
         <Box className="mt-4 mb-5" sx={{ maxWidth: 600, mx: 'auto' }}>
-          <Typography variant="h5">Bartenders</Typography>
+          <Typography variant="h5">Employees</Typography>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Stack spacing={1}>
               <Box sx={{ display: 'flex', fontWeight: 'bold' }}>
@@ -296,11 +267,15 @@ function ManagerDashboard() {
                 <Box sx={{ width: '30%' }}>Role</Box>
                 <Box sx={{ width: '30%' }}>PIN</Box>
               </Box>
-              {workers.bartenders.map(renderWorkerRow)}
+              {[...workers.managers, ...workers.bartenders].map(renderWorkerRow)}
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <TextField label="Name" size="small" value={bartenderName} onChange={(e) => setBartenderName(e.target.value)} sx={{ width: '40%', mr: 1 }} />
-                <TextField label="4-digit PIN" size="small" type="password" value={bartenderPin} onChange={(e) => setBartenderPin(e.target.value)} sx={{ width: '30%', mr: 1 }} />
-                <MuiButton variant="contained" onClick={handleCreateBartender}>+ Add</MuiButton>
+                <TextField label="Name" size="small" value={workerName} onChange={(e) => setWorkerName(e.target.value)} sx={{ width: '30%', mr: 1 }} />
+                <TextField label="4-digit PIN" size="small" type="password" value={workerPin} onChange={(e) => setWorkerPin(e.target.value)} sx={{ width: '30%', mr: 1 }} />
+                <TextField select label="Role" value={workerRole} onChange={(e) => setWorkerRole(e.target.value)} size="small" sx={{ width: '20%', mr: 1 }}>
+                  <MenuItem value="manager">manager</MenuItem>
+                  <MenuItem value="bartender">bartender</MenuItem>
+                </TextField>
+                <MuiButton variant="contained" onClick={handleCreateWorker}>+ Add</MuiButton>
               </Box>
             </Stack>
           </Paper>
