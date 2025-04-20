@@ -1,5 +1,3 @@
-// Full ManagerDashboard with inline editing fixes + modal auth role update + flash messages
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
