@@ -30,16 +30,22 @@ function ManagerDashboard() {
   const [workerRole, setWorkerRole] = useState('bartender');
   const [showManagerAuthModal, setShowManagerAuthModal] = useState(false);
   const [creatingManager, setCreatingManager] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+
 
   const [flashMessage, setFlashMessage] = useState('');
   const [flashSeverity, setFlashSeverity] = useState('success');
   const [flashOpen, setFlashOpen] = useState(false);
 
   const showFlash = (message, severity = 'success') => {
-    setFlashMessage(message);
-    setFlashSeverity(severity);
-    setFlashOpen(true);
-  };
+    setFlashOpen(false);
+    setTimeout(() => {
+      setFlashMessage(message);
+      setFlashSeverity(severity);
+      setFlashOpen(true);
+    }, 50); // Small delay to ensure re-open works
+  };  
 
   const fetchWorkers = async () => {
     try {
@@ -262,12 +268,40 @@ function ManagerDashboard() {
           <Typography variant="h5">Employees</Typography>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Stack spacing={1}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <TextField
+                  label="Search by name"
+                  size="small"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  sx={{ width: '60%' }}
+                />
+                <TextField
+                  select
+                  label="Filter by role"
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  size="small"
+                  sx={{ width: '35%' }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="manager">Manager</MenuItem>
+                  <MenuItem value="bartender">Bartender</MenuItem>
+                </TextField>
+              </Box>
               <Box sx={{ display: 'flex', fontWeight: 'bold' }}>
                 <Box sx={{ width: '40%' }}>Name</Box>
                 <Box sx={{ width: '30%' }}>Role</Box>
                 <Box sx={{ width: '30%' }}>PIN</Box>
               </Box>
-              {[...workers.managers, ...workers.bartenders].map(renderWorkerRow)}
+              {[...workers.managers, ...workers.bartenders]
+                .sort((a, b) => a.id - b.id)
+                .filter(worker => {
+                  const nameMatch = worker.name.toLowerCase().includes(searchTerm.toLowerCase());
+                  const roleMatch = roleFilter === 'all' || worker.role === roleFilter;
+                  return nameMatch && roleMatch;
+                })
+                .map(renderWorkerRow)}
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <TextField label="Name" size="small" value={workerName} onChange={(e) => setWorkerName(e.target.value)} sx={{ width: '30%', mr: 1 }} />
                 <TextField label="4-digit PIN" size="small" type="password" value={workerPin} onChange={(e) => setWorkerPin(e.target.value)} sx={{ width: '30%', mr: 1 }} />
