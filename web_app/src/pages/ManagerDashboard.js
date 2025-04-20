@@ -149,11 +149,19 @@ function ManagerDashboard() {
           value={editValue}
           onChange={async (e) => {
             const newRole = e.target.value;
+            if (worker.role === 'manager' && newRole === 'bartender') {
+              const numManagers = workers.managers.length;
+              if (numManagers <= 1) {
+                showFlash('At least one manager is required', 'error');
+                return;
+              }
+            }
+            
             if (worker.role !== 'manager' && newRole === 'manager') {
               setPendingRoleChange(worker);
               setShowManagerAuthModal(true);
               return;
-            }
+            }            
 
             try {
               const updatedWorker = { ...worker, role: newRole };
