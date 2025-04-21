@@ -41,7 +41,7 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.2.4
   build_runner: any
-  flutter_stripe: ^11.4.0
+  flutter_stripe: ^9.4.0
   firebase_core: ^2.0.0
   firebase_messaging: ^14.0.0
 
