@@ -13,7 +13,7 @@ from .views.orders_views import (
     update_order_status,
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
-from .views.worker_views import create_worker, get_workers, update_worker
+from .views.worker_views import create_worker, get_workers, update_worker, delete_worker
 from .views.review_views import list_reviews, create_review
 
 urlpatterns = [
@@ -40,4 +40,5 @@ urlpatterns = [
     path("reviews/", list_reviews, name="list_reviews"),
     path("get-workers/", get_workers, name="get_workers"),
     path('update-worker/<int:worker_id>/', update_worker),
+    path("delete-worker/<int:worker_id>/", delete_worker, name="delete_worker"),
 ]

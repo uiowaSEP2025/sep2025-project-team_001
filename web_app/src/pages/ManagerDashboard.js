@@ -12,7 +12,11 @@ import {
   Snackbar,
   Alert,
   Slide,
+  IconButton,
+  Dialog,
+  DialogActions,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import OwnerAuthModal from '../components/OwnerAuthModal';
@@ -32,6 +36,9 @@ function ManagerDashboard() {
   const [creatingManager, setCreatingManager] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [deletingWorker, setDeletingWorker] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
 
 
   const [flashMessage, setFlashMessage] = useState('');
@@ -220,9 +227,27 @@ function ManagerDashboard() {
     <Box key={worker.id} sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '40%' }}>{renderWorkerField(worker, 'name')}</Box>
       <Box sx={{ width: '30%' }}>{renderWorkerField(worker, 'role')}</Box>
-      <Box sx={{ width: '30%' }}>{renderWorkerField(worker, 'pin')}</Box>
+      <Box sx={{ width: '30%', position: 'relative', display: 'flex', justifyContent: 'center' }}>
+        <Box>{renderWorkerField(worker, 'pin')}</Box>
+        <IconButton
+          color="error"
+          size="small"
+          onClick={() => {
+            setDeletingWorker(worker);
+            setConfirmOpen(true);
+          }}
+          sx={{
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Box>
     </Box>
-  );
+  );  
 
   const handleCreateWorker = async () => {
     const restaurantId = sessionStorage.getItem('restaurantId');
@@ -320,6 +345,38 @@ function ManagerDashboard() {
           onHide={() => setShowManagerAuthModal(false)}
           onOwnerAuthenticated={handleRoleChangeWithAuth}
         />
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+          <Box sx={{ p: 2 }}>
+            <Typography>Are you sure you want to remove <strong>{deletingWorker?.name}</strong>?</Typography>
+          </Box>
+          <DialogActions>
+            <MuiButton onClick={() => setConfirmOpen(false)}>Cancel</MuiButton>
+            <MuiButton
+              color="error"
+              onClick={async () => {
+                try {
+                  if (deletingWorker.role === 'manager' && workers.managers.length <= 1) {
+                    showFlash('At least one manager is required.', 'error');
+                    return;
+                  }
+                  const response = await axios.delete(`${process.env.REACT_APP_API_URL}/delete-worker/${deletingWorker.id}/`);
+                  console.log(response.data)
+                  setConfirmOpen(false);
+                  setDeletingWorker(null);
+                  fetchWorkers();
+                  showFlash('Employee removed successfully!');
+                } catch (err) {
+                  console.error('Delete failed:', err);
+                  showFlash('Failed to remove employee.', 'error');
+                }
+              }}
+            >
+              Remove
+            </MuiButton>
+          </DialogActions>
+        </Dialog>
 
         <Snackbar
           open={flashOpen}

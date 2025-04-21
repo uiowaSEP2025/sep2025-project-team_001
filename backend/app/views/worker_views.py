@@ -1,4 +1,3 @@
-# backend/views/worker_views.py
 import json
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
@@ -91,3 +90,24 @@ def update_worker(request, worker_id):
             "pin": worker.pin
         }
     }, status=200)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_worker(request, worker_id):
+    try:
+        worker = Worker.objects.get(id=worker_id)
+    except Worker.DoesNotExist:
+        return Response({"error": "Worker not found"}, status=404)
+
+    # Make sure the user deleting is apart of restaurant of employee being deleted
+    if not hasattr(request.user, "restaurant") or request.user.restaurant != worker.restaurant:
+        return Response({"error": "Unauthorized"}, status=403)
+
+    # Prevent deleting the last manager
+    if worker.role == "manager":
+        num_managers = Worker.objects.filter(restaurant=worker.restaurant, role="manager").count()
+        if num_managers <= 1:
+            return Response({"error": "At least one manager is required"}, status=400)
+
+    worker.delete()
+    return Response({"message": "Worker deleted successfully"}, status=200)
