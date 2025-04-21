@@ -150,6 +150,7 @@ def login_user(request):
                 "tokens": tokens,
                 "bar_name": restaurant.name,
                 "restaurant_id": restaurant.id,
+                "worker_id": worker.id,
                 "role": worker.role,
             }, status=200)
         except Worker.DoesNotExist:

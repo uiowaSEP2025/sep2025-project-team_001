@@ -56,10 +56,6 @@ const Dashboard = () => {
 
       const data = await response.json();
       if (response.ok) {
-        sessionStorage.setItem('accessToken', data.tokens.access);
-        sessionStorage.setItem('refreshToken', data.tokens.refresh);
-        sessionStorage.setItem('barName', data.bar_name);
-        sessionStorage.setItem('restaurantId', data.restaurant_id);
         sessionStorage.setItem('workerId', data.worker_id);
 
         if (data.role === 'manager') {
