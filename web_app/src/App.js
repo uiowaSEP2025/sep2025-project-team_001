@@ -9,9 +9,7 @@ import Dashboard from './pages/Dashboard';
 import OrdersPage from './pages/OrdersPage';
 import MenuPage from './pages/MenuPage';
 import PrivateRoute from './PrivateRoute';
-import ManagerRegistrationPage from './pages/ManagerRegistrationPage';
 import ManagerDashboard from './pages/ManagerDashboard';
-import BartenderRegistrationPage from './pages/BartenderRegistrationPage';
 
 function AppRoutes() {
   return (
@@ -19,54 +17,10 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Registration />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/bartender_registration"
-        element={
-          <PrivateRoute>
-            <BartenderRegistrationPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/manager_registration"
-        element={
-          <PrivateRoute>
-            <ManagerRegistrationPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/manager_dashboard"
-        element={
-          <PrivateRoute>
-            <ManagerDashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/orders"
-        element={
-          <PrivateRoute>
-            <OrdersPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/menu"
-        element={
-          <PrivateRoute>
-            <MenuPage />
-          </PrivateRoute>
-        }
-      />
+      <Route path="/dashboard" element={<PrivateRoute> <Dashboard /> </PrivateRoute>}/>
+      <Route path="/manager_dashboard" element={<PrivateRoute> <ManagerDashboard /> </PrivateRoute>}/>
+      <Route path="/orders" element={<PrivateRoute> <OrdersPage /> </PrivateRoute>}/>
+      <Route path="/menu" element={<PrivateRoute> <MenuPage /> </PrivateRoute>}/>
     </Routes>
   );
 }
