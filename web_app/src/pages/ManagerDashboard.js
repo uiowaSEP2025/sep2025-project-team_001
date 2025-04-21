@@ -20,6 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import OwnerAuthModal from '../components/OwnerAuthModal';
+import './styles/ManagerDashboard.css';
 
 function ManagerDashboard() {
   const navigate = useNavigate();
@@ -290,78 +291,105 @@ function ManagerDashboard() {
 
   return (
     <Box sx={{ overflowY: 'auto', maxHeight: '100vh', pb: 10 }}>
-      <Container className="text-center mt-5">
-        <h1 className="mb-4">Manager Dashboard</h1>
-        {barName && <h2 className="mb-4">Restaurant: {barName}</h2>}
+      <Container className="manager-dashboard">
+        {barName && <h2>Restaurant: {barName}</h2>}
 
-        <Button variant="primary" size="lg" onClick={() => navigate('/menu')} className="mb-3">Menu</Button>
-        <Button variant="primary" size="lg" onClick={() => navigate('/orders')} className="mb-3">Orders</Button>
-        <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')}>Log Out</Button>
+        {/* Top Controls */}
+        <div className="top-controls">
+          <div className="left-buttons">
+            <Button variant="primary" size="lg" onClick={() => navigate('/menu')}>Menu</Button>
+            <Button variant="primary" size="lg" onClick={() => navigate('/orders')}>Orders</Button>
+          </div>
+          <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')} className="logout">Log Out</Button>
+        </div>
 
-        {/* Daily Stats */}
-        {dailyStats && (
-          <Box className="mt-4" sx={{ maxWidth: 500, mx: 'auto' }}>
-            <Typography variant="h5" gutterBottom>Today's Stats</Typography>
-            <Paper elevation={3} sx={{ p: 2, textAlign: 'left' }}>
+        <div className="panel-wrapper">
+          {/* Left Panel - Daily Stats */}
+          {dailyStats && (
+            <Paper className="panel" elevation={4}>
+              <Typography variant="h5" gutterBottom>📊 Today's Stats</Typography>
               <Typography><strong>Total Orders:</strong> {dailyStats.total_orders}</Typography>
               <Typography><strong>Total Sales:</strong> ${dailyStats.total_sales.toFixed(2)}</Typography>
               <Typography><strong>Average Order Value:</strong> ${dailyStats.avg_order_value.toFixed(2)}</Typography>
               <Typography><strong>Active Workers:</strong> {dailyStats.active_workers}</Typography>
             </Paper>
-          </Box>
-        )}
+          )}
 
-        {/* Employees Section */}
-        <Box className="mt-4 mb-5" sx={{ maxWidth: 600, mx: 'auto' }}>
-          <Typography variant="h5">Employees</Typography>
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <Stack spacing={1}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <TextField
-                  label="Search by name"
-                  size="small"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  sx={{ width: '60%' }}
-                />
-                <TextField
-                  select
-                  label="Filter by role"
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  size="small"
-                  sx={{ width: '35%' }}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  <MenuItem value="manager">Manager</MenuItem>
-                  <MenuItem value="bartender">Bartender</MenuItem>
-                </TextField>
-              </Box>
-              <Box sx={{ display: 'flex', fontWeight: 'bold' }}>
-                <Box sx={{ width: '40%' }}>Name</Box>
-                <Box sx={{ width: '30%' }}>Role</Box>
-                <Box sx={{ width: '30%' }}>PIN</Box>
-              </Box>
-              {[...workers.managers, ...workers.bartenders]
-                .sort((a, b) => a.id - b.id)
-                .filter(worker => {
-                  const nameMatch = worker.name.toLowerCase().includes(searchTerm.toLowerCase());
-                  const roleMatch = roleFilter === 'all' || worker.role === roleFilter;
-                  return nameMatch && roleMatch;
-                })
-                .map(renderWorkerRow)}
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <TextField label="Name" size="small" value={workerName} onChange={(e) => setWorkerName(e.target.value)} sx={{ width: '30%', mr: 1 }} />
-                <TextField label="4-digit PIN" size="small" type="password" value={workerPin} onChange={(e) => setWorkerPin(e.target.value)} sx={{ width: '30%', mr: 1 }} />
-                <TextField select label="Role" value={workerRole} onChange={(e) => setWorkerRole(e.target.value)} size="small" sx={{ width: '20%', mr: 1 }}>
-                  <MenuItem value="manager">manager</MenuItem>
-                  <MenuItem value="bartender">bartender</MenuItem>
-                </TextField>
-                <MuiButton variant="contained" onClick={handleCreateWorker}>+ Add</MuiButton>
-              </Box>
-            </Stack>
+          {/* Right Panel - Employees */}
+          <Paper className="panel" elevation={4}>
+            <Typography variant="h5" gutterBottom>👨‍🍳 Employees</Typography>
+            <Paper elevation={2} sx={{ p: 2 }}>
+              <Stack spacing={1}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <TextField
+                    label="Search by name"
+                    size="small"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ width: '60%' }}
+                  />
+                  <TextField
+                    select
+                    label="Filter by role"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    size="small"
+                    sx={{ width: '35%' }}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    <MenuItem value="manager">Manager</MenuItem>
+                    <MenuItem value="bartender">Bartender</MenuItem>
+                  </TextField>
+                </Box>
+
+                <Box sx={{ display: 'flex', fontWeight: 'bold', justifyContent: 'space-between' }}>
+                  <Box sx={{ width: '40%' }}>Name</Box>
+                  <Box sx={{ width: '30%' }}>Role</Box>
+                  <Box sx={{ width: '30%', textAlign: 'center' }}>PIN</Box>
+                </Box>
+
+                {[...workers.managers, ...workers.bartenders]
+                  .sort((a, b) => a.id - b.id)
+                  .filter(worker => {
+                    const nameMatch = worker.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const roleMatch = roleFilter === 'all' || worker.role === roleFilter;
+                    return nameMatch && roleMatch;
+                  })
+                  .map(renderWorkerRow)}
+
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                  <TextField
+                    label="Name"
+                    size="small"
+                    value={workerName}
+                    onChange={(e) => setWorkerName(e.target.value)}
+                    sx={{ width: '30%', mr: 1 }}
+                  />
+                  <TextField
+                    label="4-digit PIN"
+                    size="small"
+                    type="password"
+                    value={workerPin}
+                    onChange={(e) => setWorkerPin(e.target.value)}
+                    sx={{ width: '30%', mr: 1 }}
+                  />
+                  <TextField
+                    select
+                    label="Role"
+                    value={workerRole}
+                    onChange={(e) => setWorkerRole(e.target.value)}
+                    size="small"
+                    sx={{ width: '20%', mr: 1 }}
+                  >
+                    <MenuItem value="manager">manager</MenuItem>
+                    <MenuItem value="bartender">bartender</MenuItem>
+                  </TextField>
+                  <MuiButton variant="contained" onClick={handleCreateWorker}>+ Add</MuiButton>
+                </Box>
+              </Stack>
+            </Paper>
           </Paper>
-        </Box>
+        </div>
 
         <OwnerAuthModal
           show={showManagerAuthModal}
@@ -385,7 +413,7 @@ function ManagerDashboard() {
                     return;
                   }
                   const response = await axios.delete(`${process.env.REACT_APP_API_URL}/delete-worker/${deletingWorker.id}/`);
-                  console.log(response.data)
+                  console.log(response.data);
                   setConfirmOpen(false);
                   setDeletingWorker(null);
                   fetchWorkers();
