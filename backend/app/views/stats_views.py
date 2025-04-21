@@ -27,13 +27,14 @@ def daily_stats(request):
 
     orders = Order.objects.filter(
         restaurant=restaurant,
-        start_time__range=(start, end)
+        start_time__range=(start, end),
+        status__in=["completed", "picked_up"]
     )
 
     total_orders = orders.count()
     total_sales = sum(order.total_price for order in orders)
     avg_order_value = total_sales / total_orders if total_orders else 0
-    active_bartenders = (
+    active_workers = (
         orders.exclude(worker=None)
         .values_list("worker_id", flat=True)
         .distinct()
@@ -44,5 +45,5 @@ def daily_stats(request):
         "total_orders": total_orders,
         "total_sales": round(total_sales, 2),
         "avg_order_value": round(avg_order_value, 2),
-        "active_bartenders": active_bartenders,
+        "active_workers": active_workers,
     })

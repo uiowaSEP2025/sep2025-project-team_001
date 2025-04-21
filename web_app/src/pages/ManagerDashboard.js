@@ -38,8 +38,7 @@ function ManagerDashboard() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [deletingWorker, setDeletingWorker] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-
+  const [dailyStats, setDailyStats] = useState(null);
 
   const [flashMessage, setFlashMessage] = useState('');
   const [flashSeverity, setFlashSeverity] = useState('success');
@@ -53,6 +52,16 @@ function ManagerDashboard() {
       setFlashOpen(true);
     }, 50); // Small delay to ensure re-open works
   };  
+
+  const fetchDailyStats = async () => {
+    const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/daily_stats?date=${today}`);
+      setDailyStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch daily stats:', err);
+    }
+  };
 
   const fetchWorkers = async () => {
     try {
@@ -69,6 +78,7 @@ function ManagerDashboard() {
 
   useEffect(() => {
     fetchWorkers();
+    fetchDailyStats();
   }, []);
 
   const handleEditStart = (workerId, field, currentValue) => {
@@ -287,6 +297,19 @@ function ManagerDashboard() {
         <Button variant="primary" size="lg" onClick={() => navigate('/menu')} className="mb-3">Menu</Button>
         <Button variant="primary" size="lg" onClick={() => navigate('/orders')} className="mb-3">Orders</Button>
         <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')}>Log Out</Button>
+
+        {/* Daily Stats */}
+        {dailyStats && (
+          <Box className="mt-4" sx={{ maxWidth: 500, mx: 'auto' }}>
+            <Typography variant="h5" gutterBottom>Today's Stats</Typography>
+            <Paper elevation={3} sx={{ p: 2, textAlign: 'left' }}>
+              <Typography><strong>Total Orders:</strong> {dailyStats.total_orders}</Typography>
+              <Typography><strong>Total Sales:</strong> ${dailyStats.total_sales.toFixed(2)}</Typography>
+              <Typography><strong>Average Order Value:</strong> ${dailyStats.avg_order_value.toFixed(2)}</Typography>
+              <Typography><strong>Active Workers:</strong> {dailyStats.active_workers}</Typography>
+            </Paper>
+          </Box>
+        )}
 
         {/* Employees Section */}
         <Box className="mt-4 mb-5" sx={{ maxWidth: 600, mx: 'auto' }}>
