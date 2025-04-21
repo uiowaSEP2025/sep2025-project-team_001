@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import pytest
 
+
 # ------------------------------------------------------------------
 # GET /restaurants/list/ - Public endpoint to retrieve restaurants
 # ------------------------------------------------------------------

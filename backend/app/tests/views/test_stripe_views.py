@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+
 # ------------------------------------------------------------------
 # POST /order/payment/ - Create a Stripe PaymentIntent
 # ------------------------------------------------------------------

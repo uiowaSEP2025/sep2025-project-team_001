@@ -3,6 +3,7 @@ import json
 import pytest
 from app.models.worker_models import Worker
 
+
 # ------------------------------------------------------------------
 # POST /create-worker/ - Create a new worker for a restaurant
 # ------------------------------------------------------------------
