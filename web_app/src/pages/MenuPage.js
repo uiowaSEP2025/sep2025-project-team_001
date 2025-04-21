@@ -1,4 +1,3 @@
-// 🟢 HEAD IMPORTS
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -162,7 +161,8 @@ const MenuPage = () => {
       }),
     })
       .then((res) => res.json())
-      .then(() => {
+      .then((data) => {
+        console.log(data);
         setShowCreateModal(false);
         fetchItems();
       });

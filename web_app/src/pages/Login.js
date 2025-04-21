@@ -24,7 +24,7 @@ function Login() {
           password,
         },
       );
-
+      console.log(response.data)
       const { access, refresh } = response.data.tokens;
 
       sessionStorage.setItem(
