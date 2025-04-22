@@ -6,13 +6,15 @@ import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 void registerFcmToken(int customerId) async {
-    final accessToken = await TokenManager.getAccessToken();
+  final accessToken = await TokenManager.getAccessToken();
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  String? token = await messaging.getToken();
+  await messaging.requestPermission();
 
+  String? token = await messaging.getToken();
+  print("FCM token: $token");
   if (token != null) {
-    const String endpoint = "${ApiConfig.baseUrl}/save_fcm_token/";
+    const String endpoint = "${ApiConfig.baseUrl}/mobile/fcm_token/";
 
     final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
@@ -32,18 +34,10 @@ void registerFcmToken(int customerId) async {
           },
         ),
       );
-
-      if (response.statusCode == 201) {
-        print("Order placed! ID: ${response.data['order_id']}");
-        final orderId = response.data['order_id'];
-        return orderId;
-      } else {
-        print("Failed to place order: ${response.data}");
-        throw Exception("Failed to place order");
-      }
     } on DioException catch (e) {
-      print("Order error: ${e.response?.data}");
-      throw Exception("Error placing order: ${e.response?.statusCode}");
+      print("Error sending firebase token: ${e.response?.data}");
+      throw Exception(
+          "Error sending firebase token: ${e.response?.statusCode}");
     }
   }
 }

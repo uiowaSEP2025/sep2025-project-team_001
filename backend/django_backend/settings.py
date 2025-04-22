@@ -9,6 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-key")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "fallback-stripe-key")
 
+FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_CREDENTIALS_JSON", "fallback")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

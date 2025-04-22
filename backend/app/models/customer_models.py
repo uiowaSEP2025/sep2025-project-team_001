@@ -12,7 +12,7 @@ class CustomUser(AbstractUser):
 class Customer(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="customer"
-    )
+    )    
     stripe_customer_id = models.CharField(
         max_length=255, null=True, blank=True
     )

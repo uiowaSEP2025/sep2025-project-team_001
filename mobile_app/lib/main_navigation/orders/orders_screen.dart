@@ -35,6 +35,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.data['type'] == 'ORDER_UPDATE') {
+        print("automatically updating");
         _loadOrders();
       }
     });

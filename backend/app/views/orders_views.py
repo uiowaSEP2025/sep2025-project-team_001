@@ -1,3 +1,4 @@
+from app.mobileViews.utils import send_fcm_httpv1
 from app.models.restaurant_models import Restaurant
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -85,6 +86,15 @@ def update_order_status(request, order_id, new_status, restaurant_id):
 
     order.status = normalized_status
     order.save()
+    
+    if order.customer.fcm_token:
+        send_fcm_httpv1(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} is now {order.status}",
+            data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
+        )
+    
     return Response(
         {
             "message": f"Order status updated to '{normalized_status}'.",
@@ -114,3 +124,4 @@ def get_customer_orders(request):
 
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
