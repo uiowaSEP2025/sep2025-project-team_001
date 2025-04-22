@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "923440048779",
+    "project_id": "streamline-bar-app",
+    "storage_bucket": "streamline-bar-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923440048779:android:133b3d8bf38bb8e720c28e",
+        "android_client_info": {
+          "package_name": "com.example.mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-ZucxrBl8xH9eRtzn_g5kooGznr7g43Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

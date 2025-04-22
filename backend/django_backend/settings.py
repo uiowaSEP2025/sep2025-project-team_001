@@ -9,6 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-key")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "fallback-stripe-key")
+
+FIREBASE_CREDENTIALS_JSON = os.getenv("FIREBASE_CREDENTIALS_JSON", "fallback")
+
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

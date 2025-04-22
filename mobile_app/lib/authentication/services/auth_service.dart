@@ -14,7 +14,7 @@ class AuthService {
       data: {"username": email, "password": password},
       options: Options(headers: {"Content-Type": "application/json"}),
     );
-
+  
     return response.data;
   }
 }

@@ -1,5 +1,6 @@
 # urls.py
 from django.urls import path
+from app.mobileViews.notificationViews import save_fcm_token
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
@@ -35,6 +36,8 @@ urlpatterns = [
     path("order/customer/", get_customer_orders, name="get_customer_orders"),
     path("order/payment/", create_payment_intent, name="create_payment"),
     path("order/setup/", create_setup_intent, name="create_setup_intent"),
+    path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
+    
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),

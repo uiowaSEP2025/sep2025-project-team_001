@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -31,8 +32,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("getting something");
+      print(message.data);
+      if (message.data['type'] == 'ORDER_UPDATE') {
+        print("automatically updating");
+        _loadOrders();
+      }
+    });
+
     _loadOrders();
-    _startPolling();
+    // _startPolling();
   }
 
   @override
