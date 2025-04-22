@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
