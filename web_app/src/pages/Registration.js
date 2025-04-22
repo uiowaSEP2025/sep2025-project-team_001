@@ -72,8 +72,7 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address, restaurantImage } =
-      formData;
+    const { email, phone, business_name, business_address, restaurantImage } = formData;
 
     if (
       !email ||
@@ -98,6 +97,29 @@ function Registration() {
       toast.error('Phone number must be exactly 10 digits.');
       return;
     }
+
+    // validate restaurant
+    try {
+      const validateRes = await axios.post(
+        `${process.env.REACT_APP_API_URL}/validate_restaurant/`,
+        {
+          name: business_name,
+          address: business_address,
+        }
+      );
+
+      if (!validateRes.data.valid) {
+        toast.error('Invalid business address. Contact streamlinebars@gmail.com for manual verification');
+        console.log("Restaurant validation failed")
+        return;
+      }
+    } catch (err) {
+      toast.error('Invalid business address. Contact streamlinebars@gmail.com for manual verification');
+      console.log("Restaurant validation failed")
+      return;
+    }
+
+    console.log("Restaurant validation success")
 
     try {
       const response = await axios.post(
