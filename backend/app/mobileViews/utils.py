@@ -32,13 +32,19 @@ def send_fcm_httpv1(device_token, title, body, data=None):
     payload = {
         "message": {
             "token": device_token,
-            "notification": {
+            "data": {
+                "type": "ORDER_UPDATE",
+                "order_id": data.get("order_id", ""),
                 "title": title,
-                "body": body,
-            },
-            "data": data or {}
+                "body": body
+            }
         }
     }
+
+    print("---- FCM DEBUG ----")
+    print("Payload:", json.dumps(payload, indent=2))
+    print("Access Token:", access_token[:10] + "...")
+    print("Headers:", headers)
 
     response = requests.post(
         f'https://fcm.googleapis.com/v1/projects/{project_id}/messages:send',
@@ -46,4 +52,9 @@ def send_fcm_httpv1(device_token, title, body, data=None):
         json=payload
     )
 
+    print("Response Status:", response.status_code)
+    print("Response Body:", response.text)
+    print("---- END DEBUG ----")
+
     return response
+
