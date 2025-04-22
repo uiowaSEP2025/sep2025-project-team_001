@@ -1,4 +1,4 @@
-from app.mobileViews.utils import send_fcm_httpv1
+from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
 
 from datetime import timedelta
 
@@ -149,6 +149,13 @@ def update_order_status(request, restaurant_id, order_id, new_status):
     
     if order.customer.fcm_token:
         send_fcm_httpv1(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} is now {order.status}",
+            data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
+        )
+        
+        send_notification_to_device(
             device_token=order.customer.fcm_token,
             title="Order Update",
             body=f"Your order #{order.id} is now {order.status}",

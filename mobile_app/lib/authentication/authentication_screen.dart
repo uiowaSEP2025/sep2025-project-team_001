@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +39,16 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void initState() {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+
     super.initState();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   void signInWithApple() async {
@@ -102,7 +112,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       await TokenManager.saveTokens(accessToken, refreshToken);
       await UserManager.saveName(userName);
 
-registerFcmToken(userId);
+      registerFcmToken(userId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
