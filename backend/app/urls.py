@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
-from .views.auth_views import login_restaurant, login_user, register_user
+from .views.auth_views import login_restaurant, login_user, register_user, validate_business
 from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
     create_order,
@@ -24,6 +24,7 @@ urlpatterns = [
     path("login_user/", login_user, name="login_user"),
     path("register/", register_user, name="register"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("validate_restaurant/", validate_business, name="validate_restaurant"),
     # mobile
     path("mobile/register/", register_customer, name="customerRegister"),
     path("mobile/login/", login_customer, name="customerLogin"),
