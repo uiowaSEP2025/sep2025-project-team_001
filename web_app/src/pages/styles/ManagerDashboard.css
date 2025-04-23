@@ -53,7 +53,9 @@
   border-radius: 20px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   background-color: #ffffff;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .panel-wrapper > .panel:first-of-type {
@@ -94,7 +96,7 @@
   color: #343a40;
 }
 
-.panel .MuiBox-root[style*="align-items: center"] {
+.panel .MuiBox-root[style*='align-items: center'] {
   border-bottom: 1px solid #f1f3f5;
   padding: 0.6rem 0;
   display: flex;
@@ -104,7 +106,7 @@
   color: #212529;
 }
 
-.panel .MuiBox-root[style*="justify-content: center"] {
+.panel .MuiBox-root[style*='justify-content: center'] {
   justify-content: center !important;
   text-align: center;
 }
@@ -145,7 +147,7 @@
     font-size: 1.4rem;
   }
 
-  .panel .MuiBox-root[style*="align-items: center"] {
+  .panel .MuiBox-root[style*='align-items: center'] {
     font-size: 0.95rem;
   }
 }

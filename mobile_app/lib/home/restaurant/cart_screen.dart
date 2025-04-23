@@ -93,9 +93,6 @@ class _CartScreenState extends State<CartScreen> {
         );
         await Stripe.instance.presentPaymentSheet();
 
-
-
-
         final orderId = await placeOrder(
           customerId: customerId,
           restaurantId: restaurantId,

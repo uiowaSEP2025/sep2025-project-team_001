@@ -1,11 +1,16 @@
 # urls.py
-from django.urls import path
 from app.mobileViews.notificationViews import save_fcm_token
+from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
-from .views.auth_views import login_restaurant, login_user, register_user, validate_business
+from .views.auth_views import (
+    login_restaurant,
+    login_user,
+    register_user,
+    validate_business,
+)
 from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
     create_order,
@@ -37,7 +42,7 @@ urlpatterns = [
     path("order/payment/", create_payment_intent, name="create_payment"),
     path("order/setup/", create_setup_intent, name="create_setup_intent"),
     path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
-    
+
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),

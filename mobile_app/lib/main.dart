@@ -19,18 +19,19 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
     _handleMessageNavigation(initialMessage);
   }
 
-FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-  _handleMessageNavigation(message);
-});
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    _handleMessageNavigation(message);
+  });
 
   Stripe.publishableKey =
       'pk_test_51RAFr02cTgsJM4b11a6uRlyWLHp0qyDzpf7FnNvBdWC15nc7r0UGfmgDTUBgaK3thLKa6OXRGtufqo69pXRz6ikT00EWGzhEwv';
-  
+
   runApp(const MyApp());
 }
 
@@ -47,7 +48,7 @@ void _handleMessageNavigation(RemoteMessage message) {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       '/home',
       (route) => false,
-      arguments: {'initialIndex':1},
+      arguments: {'initialIndex': 1},
     );
   }
 }
