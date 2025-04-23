@@ -74,6 +74,9 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "backend_ec2" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
+  credit_specification {
+    cpu_credits = "unlimited"
+  }
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   key_name               = var.key_pair_name
@@ -105,6 +108,8 @@ resource "aws_instance" "backend_ec2" {
     echo "DB_PASS=${var.db_pass}" >> .env
     echo "DJANGO_SECRET_KEY=${var.dj_secret_key}" >> .env
     echo "STRIPE_SECRET_KEY=${var.stripe_secret_key}" >> .env
+    echo "FIREBASE_CREDENTIALS_JSON=${var.firebase_credentials_json}" >> .env
+    echo "GOOGLE_PLACES_API_KEY=${var.google_places_api_key}" >> .env
 
     # Build Docker image from Dockerfile in your backend folder
     docker build -t backend-image .

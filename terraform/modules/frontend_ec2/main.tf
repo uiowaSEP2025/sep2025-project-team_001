@@ -68,6 +68,9 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "frontend_ec2" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
+  credit_specification {
+    cpu_credits = "unlimited"
+  }
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [aws_security_group.frontend_sg.id]
   key_name                    = var.key_pair_name

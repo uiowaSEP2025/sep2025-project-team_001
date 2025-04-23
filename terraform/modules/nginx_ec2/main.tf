@@ -52,6 +52,9 @@ resource "aws_security_group" "nginx_sg" {
 resource "aws_instance" "nginx" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = var.instance_type
+  credit_specification {
+    cpu_credits = "unlimited"
+  }
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_pair_name
