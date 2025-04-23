@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:mobile_app/authentication/authentication_screen.dart';
@@ -10,12 +11,45 @@ import 'package:mobile_app/home/restaurant_addition_screen.dart';
 import 'package:mobile_app/main_navigation/main_navigation_screen.dart';
 import 'package:mobile_app/main_navigation/orders/order_history_screen.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    _handleMessageNavigation(initialMessage);
+  }
+
+FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  _handleMessageNavigation(message);
+});
+
   Stripe.publishableKey =
       'pk_test_51RAFr02cTgsJM4b11a6uRlyWLHp0qyDzpf7FnNvBdWC15nc7r0UGfmgDTUBgaK3thLKa6OXRGtufqo69pXRz6ikT00EWGzhEwv';
+  
   runApp(const MyApp());
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  print("Background Message: ${message.notification?.title}");
+}
+
+void _handleMessageNavigation(RemoteMessage message) {
+  final data = message.data;
+
+  if (data['type'] == 'ORDER_UPDATE' && data['order_id'] != null) {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/home',
+      (route) => false,
+      arguments: {'initialIndex':1},
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -24,6 +58,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Streamline',
       initialRoute: '/',

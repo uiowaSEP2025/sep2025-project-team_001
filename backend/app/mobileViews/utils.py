@@ -49,3 +49,31 @@ def send_fcm_httpv1(device_token, title, body, data=None):
 
     return response
 
+def send_notification_to_device(device_token, title, body, data=None):
+    credentials = get_fcm_credentials()
+    credentials.refresh(Request())
+    access_token = credentials.token
+    project_id = credentials.project_id
+
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json; UTF-8',
+    }
+
+    payload = {
+        "message": {
+            "token": device_token,
+            "notification": {
+                "title": title,
+                "body": body,
+            },
+            "data": data or {}
+        }
+    }
+
+    response = requests.post(
+        f'https://fcm.googleapis.com/v1/projects/{project_id}/messages:send',
+        headers=headers,
+        json=payload
+    )
+    return response
