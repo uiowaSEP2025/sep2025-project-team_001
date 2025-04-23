@@ -12,12 +12,15 @@ class CustomUser(AbstractUser):
 class Customer(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="customer"
-    )
+    )    
     stripe_customer_id = models.CharField(
         max_length=255, null=True, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    fcm_token = models.CharField(
+        max_length=255, null=True, blank=True
+    )
 
     def to_dict(self):
         return {
@@ -28,6 +31,7 @@ class Customer(models.Model):
             "stripe_customer_id": self.stripe_customer_id,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "fcm_token": self.fcm_token
         }
 
     def __str__(self):

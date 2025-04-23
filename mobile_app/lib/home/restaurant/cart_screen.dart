@@ -91,8 +91,10 @@ class _CartScreenState extends State<CartScreen> {
             merchantDisplayName: 'Streamline',
           ),
         );
-
         await Stripe.instance.presentPaymentSheet();
+
+
+
 
         final orderId = await placeOrder(
           customerId: customerId,
@@ -141,14 +143,17 @@ class _CartScreenState extends State<CartScreen> {
               title: Text(cartItem.item.name),
               subtitle: Column(
                 children: [
-                  SizedBox(height: verticalSpacing*0.5,),
+                  SizedBox(
+                    height: verticalSpacing * 0.5,
+                  ),
                   if (cartItem.unwantedIngredientNames.isNotEmpty)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
                           "Without: ${cartItem.unwantedIngredientNames.join(', ')}",
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ],
                     ),
@@ -161,8 +166,10 @@ class _CartScreenState extends State<CartScreen> {
                             setState(() {
                               _cart[key] = CartItem(
                                 item: cartItem.item,
-                                unwantedIngredientsIds: cartItem.unwantedIngredientsIds,
-                                unwantedIngredientNames: cartItem.unwantedIngredientNames,
+                                unwantedIngredientsIds:
+                                    cartItem.unwantedIngredientsIds,
+                                unwantedIngredientNames:
+                                    cartItem.unwantedIngredientNames,
                                 quantity: cartItem.quantity - 1,
                               );
                             });
@@ -176,9 +183,11 @@ class _CartScreenState extends State<CartScreen> {
                           setState(() {
                             _cart[key] = CartItem(
                               item: cartItem.item,
-                                unwantedIngredientsIds: cartItem.unwantedIngredientsIds,
-                                unwantedIngredientNames: cartItem.unwantedIngredientNames,
-                                quantity: cartItem.quantity + 1,
+                              unwantedIngredientsIds:
+                                  cartItem.unwantedIngredientsIds,
+                              unwantedIngredientNames:
+                                  cartItem.unwantedIngredientNames,
+                              quantity: cartItem.quantity + 1,
                             );
                           });
                         },

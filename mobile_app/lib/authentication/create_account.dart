@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_app/authentication/services/fcm_service.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -400,6 +401,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
       await TokenManager.saveTokens(accessToken, refreshToken);
 
+      registerFcmToken(userId);
       // final prefs = await SharedPreferences.getInstance();
       // await prefs.setString('access_token', access);
       // await prefs.setString('refresh_token', refresh);

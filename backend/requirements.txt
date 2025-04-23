@@ -9,3 +9,6 @@ setuptools
 django-cors-headers
 djangorestframework-simplejwt
 stripe
+google-auth
+requests
+python-decouple

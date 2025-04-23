@@ -1,0 +1,151 @@
+.manager-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+}
+
+.manager-dashboard h1,
+.manager-dashboard h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #343a40;
+}
+
+.manager-dashboard .top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 2rem;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+}
+
+.manager-dashboard .top-controls .left-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.manager-dashboard .top-controls .logout {
+  margin-left: auto;
+  background-color: #dc3545;
+  border-color: #dc3545;
+  font-weight: 600;
+}
+
+.panel-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 1rem;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+.panel {
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel-wrapper > .panel:first-of-type {
+  flex: 1;
+  max-width: 33%;
+  min-width: 300px;
+}
+
+.panel-wrapper > .panel:last-of-type {
+  flex: 2;
+  max-width: 67%;
+}
+
+.panel h5 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+.panel strong {
+  color: #495057;
+}
+
+.panel .MuiStack-root > .MuiBox-root:first-of-type {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel .MuiStack-root > .MuiBox-root:nth-of-type(2) {
+  font-weight: 600;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  color: #343a40;
+}
+
+.panel .MuiBox-root[style*="align-items: center"] {
+  border-bottom: 1px solid #f1f3f5;
+  padding: 0.6rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #212529;
+}
+
+.panel .MuiBox-root[style*="justify-content: center"] {
+  justify-content: center !important;
+  text-align: center;
+}
+
+.MuiAlert-root {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+@media (max-width: 992px) {
+  .panel-wrapper {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .panel-wrapper > .panel {
+    max-width: 100% !important;
+  }
+
+  .manager-dashboard .top-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .manager-dashboard .top-controls .logout {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .panel {
+    padding: 1rem;
+  }
+
+  .panel h5 {
+    font-size: 1.4rem;
+  }
+
+  .panel .MuiBox-root[style*="align-items: center"] {
+    font-size: 0.95rem;
+  }
+}

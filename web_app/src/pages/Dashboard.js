@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Alert,
-} from '@mui/material';
+import { Box, Typography, Button, Paper, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import NumberPad from '../components/NumberPad';
 
@@ -51,15 +45,12 @@ const Dashboard = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ pin, restaurant_id: restaurantId }),
-        }
+        },
       );
 
       const data = await response.json();
       if (response.ok) {
-        sessionStorage.setItem('accessToken', data.tokens.access);
-        sessionStorage.setItem('refreshToken', data.tokens.refresh);
-        sessionStorage.setItem('barName', data.bar_name);
-        sessionStorage.setItem('restaurantId', data.restaurant_id);
+        sessionStorage.setItem('workerId', data.worker_id);
 
         if (data.role === 'manager') {
           navigate('/manager_dashboard');
@@ -110,7 +101,10 @@ const Dashboard = () => {
         Logout
       </Button>
 
-      <Paper elevation={6} sx={{ p: 4, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+      <Paper
+        elevation={6}
+        sx={{ p: 4, maxWidth: 400, width: '100%', textAlign: 'center' }}
+      >
         <Typography variant="h5" gutterBottom>
           {barName || 'Welcome'}
         </Typography>

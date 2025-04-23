@@ -1,12 +1,12 @@
 /* Dashboard.css */
 .logout-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-  }
-  
-  .pin-display {
-    min-height: 2.5rem;
-    margin-bottom: 1rem;
-  }
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.pin-display {
+  min-height: 2.5rem;
+  margin-bottom: 1rem;
+}

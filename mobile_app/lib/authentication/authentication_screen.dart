@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_app/authentication/services/fcm_service.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
@@ -37,7 +39,16 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void initState() {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+
     super.initState();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   void signInWithApple() async {
@@ -100,6 +111,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
       await TokenManager.saveTokens(accessToken, refreshToken);
       await UserManager.saveName(userName);
+
+      registerFcmToken(userId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -425,7 +438,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               ),
             ),
           ]),
-
         ),
       ),
     );

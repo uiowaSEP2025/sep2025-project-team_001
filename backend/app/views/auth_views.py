@@ -12,6 +12,8 @@ from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
 
+import requests, unicodedata
+from django.conf import settings
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -103,6 +105,7 @@ def register_user(request):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+
 @csrf_exempt
 def login_restaurant(request):
     if request.method == "POST":
@@ -150,9 +153,55 @@ def login_user(request):
                 "tokens": tokens,
                 "bar_name": restaurant.name,
                 "restaurant_id": restaurant.id,
+                "worker_id": worker.id,
                 "role": worker.role,
             }, status=200)
         except Worker.DoesNotExist:
             return JsonResponse({"error": "Invalid PIN for this restaurant."}, status=401)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+# Helper Function
+def _norm(txt: str) -> str:
+    txt = unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode()
+    return re.sub(r"[^\w\s]", "", txt).lower().strip()
+
+@csrf_exempt
+def validate_business(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            name, address = data["name"], data["address"]
+        except (KeyError, TypeError, json.JSONDecodeError):
+            return JsonResponse({"error": "name and address required"}, status=400)
+
+        if not settings.GOOGLE_PLACES_API_KEY:
+            return JsonResponse({"error": "Server mis‑config: key missing"}, status=500)
+
+        params = {
+            "input": f"{name}, {address}",
+            "inputtype": "textquery",
+            "fields": "place_id,name,formatted_address,business_status,types",
+            "key": settings.GOOGLE_PLACES_API_KEY,
+        }
+        r = requests.get(
+            "https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
+            params=params,
+            timeout=6,
+        ).json()
+
+        if r.get("status") != "OK" or not r["candidates"]:
+            return JsonResponse({"valid": False, "reason": "Place not found"}, status=400)
+
+        cand = r["candidates"][0]
+        if cand.get("business_status") == "CLOSED_PERMANENTLY":
+            return JsonResponse({"valid": False, "reason": "Closed business"}, status=400)
+
+        if _norm(address) not in _norm(cand["formatted_address"]):
+            return JsonResponse({"valid": False, "reason": "Address mismatch"}, status=400)
+
+        if not any(t in cand["types"] for t in ("bar", "restaurant")):
+            return JsonResponse({"valid": False, "reason": "Not restaurant/bar"}, status=400)
+        
+        return JsonResponse({"valid": True, "place_id": cand["place_id"]}, status=200)
