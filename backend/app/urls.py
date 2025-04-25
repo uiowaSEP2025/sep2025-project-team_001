@@ -4,7 +4,7 @@ from app.mobileViews.notificationViews import save_fcm_token
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
-from .mobileViews.stripeViews import create_payment_intent, create_setup_intent, list_saved_payment_methods, pay_with_saved_card
+from .mobileViews.stripeViews import create_payment_intent, create_setup_intent, delete_payment_method, list_saved_payment_methods, pay_with_saved_card
 from .views.auth_views import login_restaurant, login_user, register_user, validate_business
 from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
 from .views.orders_views import (
@@ -39,6 +39,7 @@ urlpatterns = [
     path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
     path("order/payment/methods/", list_saved_payment_methods, name="list_saved_payment_methods"),
     path("order/payment/saved_card/", pay_with_saved_card, name="pay_with_saved_card"),
+    path("order/payment/saved_card/<str:payment_method_id>/", delete_payment_method, name="pay_with_saved_card"),
     
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
     # api

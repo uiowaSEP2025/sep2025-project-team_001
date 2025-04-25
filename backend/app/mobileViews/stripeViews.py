@@ -94,6 +94,16 @@ def pay_with_saved_card(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_payment_method(request, payment_method_id):
+    try:
+        stripe.PaymentMethod.detach(payment_method_id)
+
+        return JsonResponse({"message": "Payment method detached successfully"})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 
 def create_stripe_customer(email):
     customer = stripe.Customer.create(email=email)

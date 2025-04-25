@@ -85,7 +85,14 @@ class _CartScreenState extends State<CartScreen> {
   );
 
   try {
-    await handleCheckout(total);
+    final paymentSuccess = await handleCheckout(total);
+
+    if(!paymentSuccess){
+      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Payment failed or cancelled")),
+    );
+    return;
+    }
 
     final orderId = await placeOrder(
       customerId: customerId,
@@ -276,11 +283,40 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
               final last4 = method['last4'];
               final expMonth = method['exp_month'];
               final expYear = method['exp_year'];
+              final paymentMethodId = method['id'];
+
               return ListTile(
                 title: Text('$brand **** $last4'),
                 subtitle: Text('Expires $expMonth/$expYear'),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () async {
+                    final confirmDelete = await showDialog<bool>(
+                      context: navigatorKey.currentContext!,
+                      builder: (context) => AlertDialog(
+                        title: Text('Delete Card?'),
+                        content: Text('Are you sure you want to delete this saved card?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmDelete == true) {
+                      await deletePaymentMethod(paymentMethodId);
+                      Navigator.of(context).pop(); 
+                    }
+                  },
+                ),
                 onTap: () {
-                  Navigator.of(context).pop(method['id']);
+                  Navigator.of(context).pop(paymentMethodId);
                 },
               );
             }).toList(),
@@ -296,3 +332,4 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
     },
   );
 }
+

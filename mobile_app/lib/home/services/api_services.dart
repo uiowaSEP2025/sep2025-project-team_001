@@ -199,7 +199,7 @@ Future<Map<String, String>> createSetupIntent(double amountInDollars) async {
   }
 }
 
-Future<void> handleCheckout(double amount) async {
+Future<bool> handleCheckout(double amount) async { //todo currently this is wrong the setup intent is not charging them so need a way to save the card in the create payment intent 
   final accessToken = await TokenManager.getAccessToken();
 
   final methodsResponse = await Dio().get(
@@ -211,56 +211,66 @@ Future<void> handleCheckout(double amount) async {
 
   final savedMethods = methodsResponse.data['paymentMethods'];
 
-  if (savedMethods.isEmpty) {
-    final saveCard = await showDialog<bool>(
-      context: navigatorKey.currentContext!,
-      builder: (context) => AlertDialog(
-        title: Text("Save your card?"),
-        content: Text(
-            "Would you like to securely save your card for faster future checkouts?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text("No"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text("Yes"),
-          ),
-        ],
-      ),
-    );
-
-    if (saveCard == true) {
-      final stripeData = await createSetupIntent(amount);
-
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          setupIntentClientSecret: stripeData['clientSecret'],
-          customerId: stripeData['customerId'],
-          merchantDisplayName: 'Streamline',
+  try {
+    if (savedMethods.isEmpty) {
+      final saveCard = await showDialog<bool>(
+        context: navigatorKey.currentContext!,
+        builder: (context) => AlertDialog(
+          title: Text("Save your card?"),
+          content: Text(
+              "Would you like to securely save your card for faster future checkouts?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text("No"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text("Yes"),
+            ),
+          ],
         ),
       );
 
-      await Stripe.instance.presentPaymentSheet();
-    } else {
-      final stripeData = await createPaymentIntent(amount);
+      if (saveCard == true) {
+        final stripeData = await createSetupIntent(amount);
 
-      await Stripe.instance.initPaymentSheet(
+        await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-              paymentIntentClientSecret: stripeData['clientSecret'],
-              merchantDisplayName: 'Streamline'));
+            setupIntentClientSecret: stripeData['clientSecret'],
+            customerId: stripeData['customerId'],
+            merchantDisplayName: 'Streamline',
+          ),
+        );
 
-      await Stripe.instance.presentPaymentSheet();
-    }
-  } else {
-    final selectedCardId = await showCardPicker(savedMethods);
+        await Stripe.instance.presentPaymentSheet();
+      } else {
+        final stripeData = await createPaymentIntent(amount);
 
-    if (selectedCardId != null) {
-      await payWithSavedCard(selectedCardId, amount);
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: stripeData['clientSecret'],
+            merchantDisplayName: 'Streamline',
+          ),
+        );
+
+        await Stripe.instance.presentPaymentSheet();
+      }
     } else {
-      print("User canceled card selection.");
+      final selectedCardId = await showCardPicker(savedMethods);
+
+      if (selectedCardId != null) {
+        await payWithSavedCard(selectedCardId, amount);
+      } else {
+        print("User canceled card selection.");
+        return false; 
+      }
     }
+
+    return true;
+  } catch (e) {
+    print("Payment error inside handleCheckout: $e");
+    return false; 
   }
 }
 
@@ -285,3 +295,33 @@ Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
     print("Payment failed: ${response.data}");
   }
 }
+
+Future<void> deletePaymentMethod(String paymentMethodId) async {
+  final accessToken = await TokenManager.getAccessToken();
+
+  final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+
+  try {
+    final response = await dio.delete(
+      "${ApiConfig.baseUrl}/order/payment/saved_card/$paymentMethodId/",
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print('Payment method deleted successfully');
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Payment method deleted')),
+      );
+    } else {
+      print('Failed to delete payment method');
+    }
+  } on DioException catch (e) {
+    print("Delete error: ${e.response?.data}");
+  }
+}
+
