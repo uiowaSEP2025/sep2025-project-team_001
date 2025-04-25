@@ -299,6 +299,7 @@ function ManagerDashboard() {
           <div className="left-buttons">
             <Button variant="primary" size="lg" onClick={() => navigate('/menu')}>Menu</Button>
             <Button variant="primary" size="lg" onClick={() => navigate('/orders')}>Orders</Button>
+            <Button variant="primary" size="lg" onClick={() => navigate('/product_statistics')}>Product Statistics</Button>
           </div>
           <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')} className="logout">Log Out</Button>
         </div>
