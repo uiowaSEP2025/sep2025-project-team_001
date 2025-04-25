@@ -146,6 +146,10 @@ def update_order_status(request, restaurant_id, order_id, new_status):
 
     order.status = normalized_status
     order.save()
+    if normalized_status == "completed":
+        for order_item in order.order_items.all():
+            order_item.item.times_ordered += order_item.quantity
+            order_item.item.save()
     
     if order.customer.fcm_token:
         send_fcm_httpv1(
