@@ -1,10 +1,14 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:mobile_app/home/restaurant/cart_screen.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/constants.dart';
+import 'package:mobile_app/main.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 Future<List<Restaurant>> fetchCustomerRestaurants() async {
@@ -119,7 +123,7 @@ Future<List<Order>> fetchUserOrders(int customerId) async {
   return data.map((json) => Order.fromJson(json)).toList();
 }
 
-Future<String> createPaymentIntent(double amountInDollars) async {
+Future<Map<String, String>> createPaymentIntent(double amountInDollars) async {
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {
@@ -133,7 +137,7 @@ Future<String> createPaymentIntent(double amountInDollars) async {
     final response = await dio.post(
       endpoint,
       data: jsonEncode(
-          {'amount': (amountInDollars * 100).toInt()}), //cents for stripe
+          {'amount': (amountInDollars * 100).toInt()}),
       options: Options(
         headers: {
           "Authorization": "Bearer $accessToken",
@@ -144,7 +148,9 @@ Future<String> createPaymentIntent(double amountInDollars) async {
 
     if (response.statusCode == 200) {
       final clientSecret = response.data['clientSecret'];
-      return clientSecret;
+      return {
+        'clientSecret': clientSecret,
+      };
     } else {
       throw Exception("Failed to create PaymentIntent");
     }
@@ -168,7 +174,7 @@ Future<Map<String, String>> createSetupIntent(double amountInDollars) async {
     final response = await dio.post(
       endpoint,
       data: jsonEncode(
-          {'amount': (amountInDollars * 100).toInt()}), //cents for stripe
+          {'amount': (amountInDollars * 100).toInt()}),
       options: Options(
         headers: {
           "Authorization": "Bearer $accessToken",
@@ -190,5 +196,92 @@ Future<Map<String, String>> createSetupIntent(double amountInDollars) async {
   } on DioException catch (e) {
     print("PaymentIntent error: ${e.response?.data}");
     throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
+  }
+}
+
+Future<void> handleCheckout(double amount) async {
+  final accessToken = await TokenManager.getAccessToken();
+
+  final methodsResponse = await Dio().get(
+    "${ApiConfig.baseUrl}/order/payment/methods/",
+    options: Options(headers: {
+      "Authorization": "Bearer $accessToken",
+    }),
+  );
+
+  final savedMethods = methodsResponse.data['paymentMethods'];
+
+  if (savedMethods.isEmpty) {
+    final saveCard = await showDialog<bool>(
+      context: navigatorKey.currentContext!,
+      builder: (context) => AlertDialog(
+        title: Text("Save your card?"),
+        content: Text(
+            "Would you like to securely save your card for faster future checkouts?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text("No"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text("Yes"),
+          ),
+        ],
+      ),
+    );
+
+    if (saveCard == true) {
+      final stripeData = await createSetupIntent(amount);
+
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          setupIntentClientSecret: stripeData['clientSecret'],
+          customerId: stripeData['customerId'],
+          merchantDisplayName: 'Streamline',
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+    } else {
+      final stripeData = await createPaymentIntent(amount);
+
+      await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+              paymentIntentClientSecret: stripeData['clientSecret'],
+              merchantDisplayName: 'Streamline'));
+
+      await Stripe.instance.presentPaymentSheet();
+    }
+  } else {
+    final selectedCardId = await showCardPicker(savedMethods);
+
+    if (selectedCardId != null) {
+      await payWithSavedCard(selectedCardId, amount);
+    } else {
+      print("User canceled card selection.");
+    }
+  }
+}
+
+Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
+  final accessToken = await TokenManager.getAccessToken();
+
+  final response = await Dio().post(
+    "${ApiConfig.baseUrl}/order/payment/saved_card/",
+    data: {
+      "payment_method_id": paymentMethodId,
+      "amount": (amount * 100).toInt(), // cents
+    },
+    options: Options(headers: {
+      "Authorization": "Bearer $accessToken",
+      "Content-Type": "application/json",
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print("Payment successful!");
+  } else {
+    print("Payment failed: ${response.data}");
   }
 }

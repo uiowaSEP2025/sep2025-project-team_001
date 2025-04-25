@@ -4,6 +4,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/services/api_services.dart';
+import 'package:mobile_app/main.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 class CartScreen extends StatefulWidget {
@@ -67,58 +68,49 @@ class _CartScreenState extends State<CartScreen> {
     //   }
     // }
 
-    void submitOrder() async {
-      final customerId = await UserManager.getUser();
-      final restaurantId = widget.restaurant.id;
+   void submitOrder() async {
+  final customerId = await UserManager.getUser();
+  final restaurantId = widget.restaurant.id;
 
-      if (customerId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Customer ID not found")),
-        );
-        return;
-      }
+  if (customerId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Customer ID not found")),
+    );
+    return;
+  }
 
-      double total = _cart.values.fold<double>(
-          0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
+  double total = _cart.values.fold<double>(
+    0,
+    (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+  );
 
-      try {
-        // final clientSecret = await createPaymentIntent(
-        //     total); //todo now setup payment intent to save payment methods
+  try {
+    await handleCheckout(total);
 
-        final stripeData = await createSetupIntent(total);
+    final orderId = await placeOrder(
+      customerId: customerId,
+      restaurantId: restaurantId,
+      cart: _cart,
+    );
 
-        await Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-            setupIntentClientSecret: stripeData['clientSecret'],
-            customerId: stripeData['customerId'],
-            merchantDisplayName: 'Streamline',
-          ),
-        );
-        await Stripe.instance.presentPaymentSheet();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Order placed with ID $orderId")),
+    );
 
-        final orderId = await placeOrder(
-          customerId: customerId,
-          restaurantId: restaurantId,
-          cart: _cart,
-        );
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
+      arguments: {'initialIndex': 1},
+    );
+  } catch (e) {
+    print("Payment/order error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Payment failed or cancelled")),
+    );
+  }
+}
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Order placed with ID $orderId")),
-        );
-
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-          arguments: {'initialIndex': 1},
-        );
-      } catch (e) {
-        print("Payment/order error: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment failed or cancelled")),
-        );
-      }
-    }
 
     double total = _cart.values.fold<double>(
         0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
@@ -268,4 +260,39 @@ class CartNavigatorObserver extends NavigatorObserver {
     onPop();
     super.didPop(route, previousRoute);
   }
+}
+
+
+Future<String?> showCardPicker(List<dynamic> savedMethods) async {
+  return await showDialog<String>(
+    context: navigatorKey.currentContext!,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Select a Payment Method'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: savedMethods.map<Widget>((method) {
+              final brand = method['brand'];
+              final last4 = method['last4'];
+              final expMonth = method['exp_month'];
+              final expYear = method['exp_year'];
+              return ListTile(
+                title: Text('$brand **** $last4'),
+                subtitle: Text('Expires $expMonth/$expYear'),
+                onTap: () {
+                  Navigator.of(context).pop(method['id']);
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
 }
