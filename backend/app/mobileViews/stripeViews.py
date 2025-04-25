@@ -3,13 +3,14 @@ import json
 import stripe
 from django.conf import settings
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_payment_intent(request):
     try:
         data = json.loads(request.body)
@@ -25,19 +26,23 @@ def create_payment_intent(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_setup_intent(request):
     try:
-        data = json.loads(request.body)
-        customer_id = data.get("customer_id")
+        # data = json.loads(request.body)
+        # customer_id = data.get("customer_id")
+        customer = request.user.customer
 
         setup_intent = stripe.SetupIntent.create(
-            customer=customer_id,
+            customer=customer.stripe_customer_id,
             payment_method_types=["card"],
         )
 
-        return JsonResponse({'clientSecret': setup_intent.client_secret})
+        return JsonResponse({
+            'clientSecret': setup_intent.client_secret,
+            'clientId': setup_intent.customer,
+                             })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 

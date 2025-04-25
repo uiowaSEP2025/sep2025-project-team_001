@@ -82,19 +82,19 @@ class _CartScreenState extends State<CartScreen> {
           0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
 
       try {
-        final clientSecret = await createPaymentIntent(
-            total); //todo now setup payment intent to save payment methods
+        // final clientSecret = await createPaymentIntent(
+        //     total); //todo now setup payment intent to save payment methods
+
+        final stripeData = await createSetupIntent(total);
 
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: clientSecret,
+            setupIntentClientSecret: stripeData['clientSecret'],
+            customerId: stripeData['customerId'],
             merchantDisplayName: 'Streamline',
           ),
         );
         await Stripe.instance.presentPaymentSheet();
-
-
-
 
         final orderId = await placeOrder(
           customerId: customerId,
