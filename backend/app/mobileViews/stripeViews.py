@@ -8,41 +8,32 @@ from rest_framework.permissions import IsAuthenticated
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_payment_intent(request):
     try:
         data = json.loads(request.body)
         amount = data.get('amount')
+        save_card = data.get('save_card', False)
 
-        intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency='usd',
-            automatic_payment_methods={"enabled": True},
-        )
-
-        return JsonResponse({'clientSecret': intent.client_secret})
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_setup_intent(request):
-    try:
-        # data = json.loads(request.body)
-        # customer_id = data.get("customer_id")
         customer = request.user.customer
 
-        setup_intent = stripe.SetupIntent.create(
-            customer=customer.stripe_customer_id,
-            payment_method_types=["card"],
-        )
+        payment_intent_data = {
+            "amount": amount,
+            "currency": "usd",
+            "customer": customer.stripe_customer_id,
+            "automatic_payment_methods": {"enabled": True},
+        }
+
+        if save_card:
+            payment_intent_data["setup_future_usage"] = "off_session"
+
+        intent = stripe.PaymentIntent.create(**payment_intent_data)
 
         return JsonResponse({
-            'clientSecret': setup_intent.client_secret,
-            'clientId': setup_intent.customer,
-                             })
+            'client_secret': intent.client_secret,
+            'customer_id': customer.stripe_customer_id,
+        })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 

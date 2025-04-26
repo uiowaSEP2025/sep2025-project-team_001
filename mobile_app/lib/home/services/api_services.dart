@@ -123,7 +123,8 @@ Future<List<Order>> fetchUserOrders(int customerId) async {
   return data.map((json) => Order.fromJson(json)).toList();
 }
 
-Future<Map<String, String>> createPaymentIntent(double amountInDollars) async {
+Future<Map<String, String>> createPaymentIntent(double amountInDollars,
+    {bool saveCard = false}) async {
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {
@@ -136,8 +137,10 @@ Future<Map<String, String>> createPaymentIntent(double amountInDollars) async {
   try {
     final response = await dio.post(
       endpoint,
-      data: jsonEncode(
-          {'amount': (amountInDollars * 100).toInt()}),
+      data: jsonEncode({
+        'amount': (amountInDollars * 100).toInt(),
+        'save_card': saveCard,
+      }),
       options: Options(
         headers: {
           "Authorization": "Bearer $accessToken",
@@ -147,45 +150,8 @@ Future<Map<String, String>> createPaymentIntent(double amountInDollars) async {
     );
 
     if (response.statusCode == 200) {
-      final clientSecret = response.data['clientSecret'];
-      return {
-        'clientSecret': clientSecret,
-      };
-    } else {
-      throw Exception("Failed to create PaymentIntent");
-    }
-  } on DioException catch (e) {
-    print("PaymentIntent error: ${e.response?.data}");
-    throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
-  }
-}
-
-Future<Map<String, String>> createSetupIntent(double amountInDollars) async {
-  final accessToken = await TokenManager.getAccessToken();
-
-  if (accessToken == null) {
-    throw Exception('Access token not found');
-  }
-
-  const String endpoint = "${ApiConfig.baseUrl}/order/setup/";
-  final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
-
-  try {
-    final response = await dio.post(
-      endpoint,
-      data: jsonEncode(
-          {'amount': (amountInDollars * 100).toInt()}),
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $accessToken",
-          "Content-Type": "application/json",
-        },
-      ),
-    );
-
-    if (response.statusCode == 200) {
-      final clientSecret = response.data['clientSecret'];
-      final customerId = response.data['clientId'];
+      final clientSecret = response.data['client_secret'];
+      final customerId = response.data['customer_id'];
       return {
         'clientSecret': clientSecret,
         'customerId': customerId,
@@ -199,7 +165,7 @@ Future<Map<String, String>> createSetupIntent(double amountInDollars) async {
   }
 }
 
-Future<bool> handleCheckout(double amount) async { //todo currently this is wrong the setup intent is not charging them so need a way to save the card in the create payment intent 
+Future<bool> handleCheckout(double amount) async {
   final accessToken = await TokenManager.getAccessToken();
 
   final methodsResponse = await Dio().get(
@@ -233,11 +199,11 @@ Future<bool> handleCheckout(double amount) async { //todo currently this is wron
       );
 
       if (saveCard == true) {
-        final stripeData = await createSetupIntent(amount);
+        final stripeData = await createPaymentIntent(amount, saveCard: true);
 
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-            setupIntentClientSecret: stripeData['clientSecret'],
+            paymentIntentClientSecret: stripeData['clientSecret'],
             customerId: stripeData['customerId'],
             merchantDisplayName: 'Streamline',
           ),
@@ -245,7 +211,7 @@ Future<bool> handleCheckout(double amount) async { //todo currently this is wron
 
         await Stripe.instance.presentPaymentSheet();
       } else {
-        final stripeData = await createPaymentIntent(amount);
+        final stripeData = await createPaymentIntent(amount, saveCard: false);
 
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
@@ -263,14 +229,14 @@ Future<bool> handleCheckout(double amount) async { //todo currently this is wron
         await payWithSavedCard(selectedCardId, amount);
       } else {
         print("User canceled card selection.");
-        return false; 
+        return false;
       }
     }
 
     return true;
   } catch (e) {
     print("Payment error inside handleCheckout: $e");
-    return false; 
+    return false;
   }
 }
 
@@ -281,7 +247,7 @@ Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
     "${ApiConfig.baseUrl}/order/payment/saved_card/",
     data: {
       "payment_method_id": paymentMethodId,
-      "amount": (amount * 100).toInt(), // cents
+      "amount": (amount * 100).toInt(),
     },
     options: Options(headers: {
       "Authorization": "Bearer $accessToken",
@@ -324,4 +290,3 @@ Future<void> deletePaymentMethod(String paymentMethodId) async {
     print("Delete error: ${e.response?.data}");
   }
 }
-
