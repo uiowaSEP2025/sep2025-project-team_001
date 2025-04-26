@@ -339,20 +339,9 @@ function ManagerDashboard() {
         {/* Top Controls */}
         <div className="top-controls">
           <div className="left-buttons">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => navigate('/menu')}
-            >
-              Menu
-            </Button>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => navigate('/orders')}
-            >
-              Orders
-            </Button>
+            <Button variant="primary" size="lg" onClick={() => navigate('/menu')}>Menu</Button>
+            <Button variant="primary" size="lg" onClick={() => navigate('/orders')}>Orders</Button>
+            <Button variant="primary" size="lg" onClick={() => navigate('/product_statistics')}>Product Statistics</Button>
           </div>
           <Button
             variant="danger"

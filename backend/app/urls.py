@@ -5,20 +5,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, create_setup_intent
-from .views.auth_views import (
-    login_restaurant,
-    login_user,
-    register_user,
-    validate_business,
-)
-from .views.menu_views import manage_menu_item, menu_items_api
-from .views.orders_views import (
-    create_order,
-    estimate_order_eta,
-    get_customer_orders,
-    retrieve_active_orders,
-    update_order_status,
-)
+from .views.auth_views import login_restaurant, login_user, register_user, validate_business
+from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
+from .views.orders_views import create_order, estimate_order_eta, get_customer_orders, retrieve_active_orders, update_order_status
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.review_views import create_review, list_reviews
 from .views.stats_views import daily_stats
@@ -26,7 +15,7 @@ from .views.worker_views import create_worker, delete_worker, get_workers, updat
 
 
 urlpatterns = [
-    path("login_restaurant/", login_restaurant, name="login_restaurant"),
+   path("login_restaurant/", login_restaurant, name="login_restaurant"),
     path("login_user/", login_user, name="login_user"),
     path("register/", register_user, name="register"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -55,5 +44,6 @@ urlpatterns = [
     path("get-workers/", get_workers, name="get_workers"),
     path('update-worker/<int:worker_id>/', update_worker),
     path("delete-worker/<int:worker_id>/", delete_worker, name="delete_worker"),
-    path("daily_stats", daily_stats, name="daily_stats")
+    path("daily_stats", daily_stats, name="daily_stats"),
+    path('api/statistics/', get_item_statistics, name="get_item_statistics"),
 ]
