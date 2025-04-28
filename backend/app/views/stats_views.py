@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from ..models.order_models import Order
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
+from ..models.worker_models import Worker
+from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField
 
 
 @api_view(["GET"])
@@ -46,4 +48,57 @@ def daily_stats(request):
         "total_sales": round(total_sales, 2),
         "avg_order_value": round(avg_order_value, 2),
         "active_workers": active_workers,
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_bartender_statistics(request, worker_id):
+    try:
+        worker = Worker.objects.get(pk=worker_id)
+    except Worker.DoesNotExist:
+        return Response({"error": "Worker not found"}, status=404)
+
+    orders = Order.objects.filter(
+        worker=worker,
+        status='completed',
+        start_time__isnull=False,
+        completion_time__isnull=False
+    ).annotate(
+        elapsed_time=ExpressionWrapper(
+            F('completion_time') - F('start_time'),
+            output_field=DurationField()
+        )
+    )
+
+    total_orders = orders.count()
+
+    # If no orders then don't query database
+    if total_orders == 0:
+        return Response({
+            "total_orders": 0,
+            "average_time_seconds": None,
+            "fastest_time_seconds": None,
+            "slowest_time_seconds": None,
+            "total_sales": 0.0,
+        })
+
+    aggregates = orders.aggregate(
+        avg_time=Avg('elapsed_time'),
+        fastest=Min('elapsed_time'),
+        slowest=Max('elapsed_time'),
+        total_sales=Sum('total_price')
+    )
+
+    average_time = aggregates['avg_time']
+    fastest_time = aggregates['fastest']
+    slowest_time = aggregates['slowest']
+    total_sales = aggregates['total_sales']
+
+    return Response({
+        "total_orders": total_orders,
+        "average_time_seconds": average_time.total_seconds() if average_time else None,
+        "fastest_time_seconds": fastest_time.total_seconds() if fastest_time else None,
+        "slowest_time_seconds": slowest_time.total_seconds() if slowest_time else None,
+        "total_sales": float(total_sales) if total_sales else 0.0,
     })
