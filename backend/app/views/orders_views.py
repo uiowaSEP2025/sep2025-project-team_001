@@ -141,15 +141,17 @@ def update_order_status(request, restaurant_id, order_id, new_status):
         try:
             worker = Worker.objects.get(id=worker_id)
             order.worker = worker
+            order.start_time = timezone.now()
         except Worker.DoesNotExist:
             return Response({"error": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
 
     order.status = normalized_status
-    order.save()
     if normalized_status == "completed":
+        order.completion_time = timezone.now()
         for order_item in order.order_items.all():
             order_item.item.times_ordered += order_item.quantity
-            order_item.item.save()
+            order_item.item.save()         
+    order.save()
     
     if order.customer.fcm_token:
         send_fcm_httpv1(
