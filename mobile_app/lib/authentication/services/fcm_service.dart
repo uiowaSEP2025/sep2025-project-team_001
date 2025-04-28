@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:mobile_app/api_services.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
@@ -35,6 +36,13 @@ void registerFcmToken(int customerId) async {
         ),
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        registerFcmToken(customerId);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
       print("Error sending firebase token: ${e.response?.data}");
       throw Exception(
           "Error sending firebase token: ${e.response?.statusCode}");

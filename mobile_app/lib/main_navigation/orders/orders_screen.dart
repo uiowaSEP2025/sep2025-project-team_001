@@ -180,7 +180,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ...inProgressOrders
                               .map((order) => Padding(
                                 padding: EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildOrderTile(order,screenHeight, screenWidth),
+                                child: buildProgressOrderTile(order,screenHeight, screenWidth),
                               )),
                         ],
                         if (pendingOrders.isNotEmpty) ...[

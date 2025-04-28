@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:mobile_app/api_services.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
@@ -33,6 +34,13 @@ Future<int> cancelOrder(
       throw Exception("Failed to cancel order");
     }
   } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await cancelOrder(orderId: orderId,restaurantId: restaurantId);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
     print("Order error: ${e.response?.data}");
     throw Exception("Error cancelling order: ${e.response?.statusCode}");
   }
