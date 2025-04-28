@@ -43,19 +43,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
     });
 
     _loadOrders();
-    // _startPolling();
   }
 
   @override
   void dispose() {
     _pollingTimer?.cancel();
     super.dispose();
-  }
-
-  void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      _loadOrders();
-    });
   }
 
   Future<void> _loadOrders() async {
@@ -167,7 +160,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ...completedOrders
                               .map((order) => Padding(
                                 padding: EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildOrderTile(order, screenHeight, screenWidth),
+                                child: buildPickupOrderTile(context,order, screenHeight, screenWidth),
                               )),
                         ],
                         if (inProgressOrders.isNotEmpty) ...[
