@@ -22,7 +22,7 @@ class OrderHistoryScreen extends StatelessWidget {
           : ListView.builder(
               itemCount: pickedUpOrders.length,
               itemBuilder: (context, index) {
-                return buildOrderTile(pickedUpOrders[index]);
+                return buildOrderTile(pickedUpOrders[index],screenHeight, screenWidth);
               },
             ),
     );

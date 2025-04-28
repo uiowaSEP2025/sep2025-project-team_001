@@ -156,6 +156,33 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
                       children: [
+                        
+                        if (completedOrders.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("Ready for pickup",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          ...completedOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildOrderTile(order, screenHeight, screenWidth),
+                              )),
+                        ],
+                        if (inProgressOrders.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("In Progress",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          ...inProgressOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildOrderTile(order,screenHeight, screenWidth),
+                              )),
+                        ],
                         if (pendingOrders.isNotEmpty) ...[
                           Padding(
                             padding: EdgeInsets.only(
@@ -173,26 +200,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     order, screenHeight, screenWidth),
                               )),
                         ],
-                        if (completedOrders.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.all(verticalSpacing),
-                            child: Text("Completed",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                          ...completedOrders
-                              .map((order) => buildOrderTile(order)),
-                        ],
-                        if (inProgressOrders.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.all(verticalSpacing),
-                            child: Text("In Progress",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                          ...inProgressOrders
-                              .map((order) => buildOrderTile(order)),
-                        ],
+                        
+                        
                       ],
                     ),
     );

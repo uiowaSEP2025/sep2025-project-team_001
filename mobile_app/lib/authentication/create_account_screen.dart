@@ -376,7 +376,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     setState(() => isLoading = true);
 
     try {
-      final dio = Dio();
+      final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
       final response = await dio.post(
         endpoint,
         data: {
