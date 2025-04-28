@@ -398,6 +398,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       await UserManager.saveEmail(email);
       await UserManager.saveName(name);
 
+      await UserManager.savePassword(password);
+
       await TokenManager.saveTokens(accessToken, refreshToken);
 
       // final prefs = await SharedPreferences.getInstance();

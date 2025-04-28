@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_app/authentication/services/fcm_service.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
@@ -62,7 +63,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void authenticate() async {
     final String email = _emailController.text.trim();
     UserManager.saveEmail(email);
+    
     final String password = _passwordController.text.trim();
+    UserManager.savePassword(password);
+
     const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -83,7 +87,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     setState(() => isLoading = true);
 
     try {
-      final dio = widget.dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+      final dio = widget.dio ??
+          Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
       final response = await dio.post(
         endpoint,
@@ -298,7 +303,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                         )),
                             ),
                             SizedBox(
-                              height: verticalSpacing*5,
+                              height: verticalSpacing * 5,
                             ),
                             // Row(
                             //   mainAxisAlignment: MainAxisAlignment.center,
@@ -407,7 +412,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                             //               ),
                             //             ),
                             //     )),
-                            
+
                             // SizedBox(
                             //   height: verticalSpacing * 2,
                             // ),
