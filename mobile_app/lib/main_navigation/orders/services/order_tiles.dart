@@ -6,69 +6,73 @@ import 'package:mobile_app/main_navigation/orders/order_receipt_screen.dart';
 import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 
-Widget buildOrderTile(Order order, double screenHeight, double screenWidth) {
-  return CustomExpandableTile(
-    screenHeight: screenHeight,
-    collapsedChild: Container(
-      decoration: BoxDecoration(
-        color: AppColors.secondary,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(screenHeight * 0.01),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Text("Order #${order.id} for ${order.restaurantName}"),
-                SizedBox(height: screenHeight * 0.01),
-                Text("${order.items.length} items"),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text("\$${order.totalPrice}"),
-              ],
-            ),
-          ],
+Widget buildHistoryOrderTile(BuildContext context,Order order, double screenHeight, double screenWidth) {
+  return GestureDetector(
+    onTap: (){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => OrderReceiptScreen(order: order)),
+      );
+    },
+    child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.secondary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(screenHeight * 0.02),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Order #${order.id} for ${order.restaurantName}",
+                    style: AppTextStyles.buttonText(
+                        screenHeight * 0.9, Colors.black),
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  Text("${order.items.length} items"),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("\$${order.totalPrice}",
+                      style: AppTextStyles.buttonText(
+                          screenHeight * 0.8, Colors.black)),
+                  SizedBox(height: screenWidth * 0.03),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => OrderReceiptScreen(order: order)),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      textStyle: AppTextStyles.buttonText(
+                          screenHeight * 0.7, AppColors.whiteText),
+                    ),
+                    child: const Text("View Details"),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-    expandedChild: Column(
-      children: order.items.map((item) {
-        return ListTile(
-          title: Text(item['item_name'] ?? ''),
-          subtitle: Text("Qty: ${item['quantity']}"),
-        );
-      }).toList(),
-    ),
   );
 
-  // return ExpansionTile(
-  //   title: Text("Order #${order.id}"),
-  //   subtitle: Text("Placed on ${order.startTime}"),
-  //   trailing: Column(
-  //     crossAxisAlignment: CrossAxisAlignment.end,
-  //     children: [
-  //       Text("${getTotalItems(order.items)} items"),
-  //       const SizedBox(height: 4),
-  //       Text(
-  //         "\$${order.totalPrice.toStringAsFixed(2)}",
-  //         style: const TextStyle(fontWeight: FontWeight.bold),
-  //       ),
-  //     ],
-  //   ),
-  //   children: order.items.map((item) {
-  //     return ListTile(
-  //       title: Text(item['item_name'] ?? 'Unnamed item'),
-  //       subtitle: Text("Quantity: ${item['quantity']}"),
-  //       visualDensity: VisualDensity.compact,
-  //     );
-  //   }).toList(),
-  // );
 }
 
 int getTotalItems(List<dynamic> items) {
@@ -146,7 +150,9 @@ Widget buildPendingOrderTile(
 }
 
 Widget buildProgressOrderTile(
-    Order order, double screenHeight, double screenWidth) {
+    Order order,
+    double screenHeight,
+    double screenWidth) {
   return CustomExpandableTile(
     screenHeight: screenHeight,
     collapsedChild: Container(
@@ -155,28 +161,43 @@ Widget buildProgressOrderTile(
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: EdgeInsets.all(screenHeight * 0.01),
+        padding: EdgeInsets.all(screenHeight * 0.02),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Order #${order.id} for ${order.restaurantName}"),
+                Text(
+                  "Order #${order.id} for ${order.restaurantName}",
+                  style: AppTextStyles.buttonText(
+                      screenHeight * 0.9, Colors.black),
+                ),
                 SizedBox(height: screenHeight * 0.01),
-                Text("${order.items.length} items"),
+                if (order.drinksETAminutes != null)
+                  Text("Drinks ready in ${order.drinksETAminutes} minutes"),
+                SizedBox(height: screenHeight * 0.01),
+                if (order.foodETAminutes != null)
+                  Text(
+                      "Food will be ready in ${order.drinksETAminutes} minutes")
               ],
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text("\$${order.totalPrice}"),
+                Text("\$${order.totalPrice}",
+                    style: AppTextStyles.buttonText(
+                        screenHeight * 0.8, Colors.black)),
+                SizedBox(height: screenHeight * 0.01),
+                Text("${order.items.length} items"),
               ],
             ),
           ],
         ),
       ),
     ),
+    
     expandedChild: Padding(
       padding: EdgeInsets.only(
           left: screenWidth * 0.015, right: screenWidth * 0.015),
@@ -215,12 +236,13 @@ Widget buildPickupOrderTile(BuildContext context, Order order,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: EdgeInsets.all(screenHeight * 0.01),
+        padding: EdgeInsets.all(screenHeight * 0.02),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Order #${order.id} for ${order.restaurantName}",
@@ -267,43 +289,5 @@ Widget buildPickupOrderTile(BuildContext context, Order order,
     ),
   );
 
-  // return CustomExpandableTile(
-  //   screenHeight: screenHeight,
-  //   collapsedChild: Container(
-  //     decoration: BoxDecoration(
-  //       color: AppColors.secondary,
-  //       borderRadius: BorderRadius.circular(8),
-  //     ),
-  //     child: Padding(
-  //       padding: EdgeInsets.all(screenHeight * 0.01),
-  //       child: Row(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           Column(
-  //             children: [
-  //               Text("Order #${order.id} for ${order.restaurantName}"),
-  //               SizedBox(height: screenHeight * 0.01),
-  //               Text("${order.items.length} items"),
-  //             ],
-  //           ),
-  //           Column(
-  //             crossAxisAlignment: CrossAxisAlignment.end,
-  //             children: [
-  //               Text("\$${order.totalPrice}"),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   ),
-  //   expandedChild: Column(
-  //     children: order.items.map((item) {
-  //       return ListTile(
-  //         title: Text(item['item_name'] ?? ''),
-  //         subtitle: Text("Qty: ${item['quantity']}"),
-  //       );
-  //     }).toList(),
-  //   ),
-  // );
+  
 }

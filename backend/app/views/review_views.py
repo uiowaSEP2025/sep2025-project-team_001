@@ -1,3 +1,4 @@
+from app.models.order_models import Order
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +21,11 @@ def create_review(request):
     serializer = ReviewSerializer(data=request.data)
     if serializer.is_valid():
         review = serializer.save()
+        
+        order = Order.objects.get(id=order_id)
+        order.reviewed = True
+        order.save()
+        
         return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
