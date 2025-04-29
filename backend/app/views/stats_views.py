@@ -53,52 +53,57 @@ def daily_stats(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_bartender_statistics(request, worker_id):
-    try:
-        worker = Worker.objects.get(pk=worker_id)
-    except Worker.DoesNotExist:
-        return Response({"error": "Worker not found"}, status=404)
+def get_bartender_statistics(request):
+    if not hasattr(request.user, "restaurant"):
+        return Response({"error": "Only restaurant accounts can access bartender statistics."}, status=403)
 
-    orders = Order.objects.filter(
-        worker=worker,
-        status='completed',
-        start_time__isnull=False,
-        completion_time__isnull=False
-    ).annotate(
-        elapsed_time=ExpressionWrapper(
-            F('completion_time') - F('start_time'),
-            output_field=DurationField()
+    restaurant = request.user.restaurant
+
+    workers = Worker.objects.filter(restaurant=restaurant)  # 👈 SELECT ALL WORKERS, NOT JUST BARTENDERS
+    stats = []
+
+    for worker in workers:
+        orders = Order.objects.filter(
+            worker=worker,
+            status='completed',
+            start_time__isnull=False,
+            completion_time__isnull=False
+        ).annotate(
+            elapsed_time=ExpressionWrapper(
+                F('completion_time') - F('start_time'),
+                output_field=DurationField()
+            )
         )
-    )
 
-    total_orders = orders.count()
+        total_orders = orders.count()
 
-    # If no orders then don't query database
-    if total_orders == 0:
-        return Response({
-            "total_orders": 0,
-            "average_time_seconds": None,
-            "fastest_time_seconds": None,
-            "slowest_time_seconds": None,
-            "total_sales": 0.0,
+        if total_orders == 0:
+            stats.append({
+                "worker_name": worker.name,
+                "role": worker.role,   # 👈 include the role so frontend can show it
+                "total_orders": 0,
+                "average_time_seconds": None,
+                "fastest_time_seconds": None,
+                "slowest_time_seconds": None,
+                "total_sales": 0.0,
+            })
+            continue
+
+        aggregates = orders.aggregate(
+            avg_time=Avg('elapsed_time'),
+            fastest=Min('elapsed_time'),
+            slowest=Max('elapsed_time'),
+            total_sales=Sum('total_price')
+        )
+
+        stats.append({
+            "worker_name": worker.name,
+            "role": worker.role,  # 👈 include the role always
+            "total_orders": total_orders,
+            "average_time_seconds": aggregates['avg_time'].total_seconds() if aggregates['avg_time'] else None,
+            "fastest_time_seconds": aggregates['fastest'].total_seconds() if aggregates['fastest'] else None,
+            "slowest_time_seconds": aggregates['slowest'].total_seconds() if aggregates['slowest'] else None,
+            "total_sales": float(aggregates['total_sales']) if aggregates['total_sales'] else 0.0,
         })
 
-    aggregates = orders.aggregate(
-        avg_time=Avg('elapsed_time'),
-        fastest=Min('elapsed_time'),
-        slowest=Max('elapsed_time'),
-        total_sales=Sum('total_price')
-    )
-
-    average_time = aggregates['avg_time']
-    fastest_time = aggregates['fastest']
-    slowest_time = aggregates['slowest']
-    total_sales = aggregates['total_sales']
-
-    return Response({
-        "total_orders": total_orders,
-        "average_time_seconds": average_time.total_seconds() if average_time else None,
-        "fastest_time_seconds": fastest_time.total_seconds() if fastest_time else None,
-        "slowest_time_seconds": slowest_time.total_seconds() if slowest_time else None,
-        "total_sales": float(total_sales) if total_sales else 0.0,
-    })
+    return Response({"bartender_statistics": stats})

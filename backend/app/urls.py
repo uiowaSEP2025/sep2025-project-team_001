@@ -54,5 +54,5 @@ urlpatterns = [
     path("delete-worker/<int:worker_id>/", delete_worker, name="delete_worker"),
     path("daily_stats", daily_stats, name="daily_stats"),
     path('api/statistics/', get_item_statistics, name="get_item_statistics"),
-    path('bartender-statistics/<int:worker_id>/', get_bartender_statistics, name="get_bartender_statistics"),
+    path('bartender-statistics/', get_bartender_statistics, name="get_bartender_statistics"),
 ]
