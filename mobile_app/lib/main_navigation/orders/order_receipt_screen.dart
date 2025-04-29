@@ -55,7 +55,11 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
         ),
         body: Container(
           width: screenWidth,
-          child: RatingWidget(widget: widget, screenHeight: screenHeight, verticalSpacing: verticalSpacing, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, reviewController: _reviewController, ratingChanged: ratingChanged),
+          child: Column(
+            children: [
+              if(widget.order.status == "picked_up" && !widget.order.reviewed) RatingWidget(widget: widget, screenHeight: screenHeight, verticalSpacing: verticalSpacing, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, reviewController: _reviewController, ratingChanged: ratingChanged),
+            ],
+          ),
        
         ),
       ),
