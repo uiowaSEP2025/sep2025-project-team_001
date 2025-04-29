@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, delete_payment_method, list_saved_payment_methods, pay_with_saved_card
 from .views.auth_views import login_restaurant, login_user, register_user, validate_business
-from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
+from .views.menu_views import manage_menu_item, menu_items_api
 from .views.orders_views import (
     create_order,
     estimate_order_eta,
@@ -16,7 +16,7 @@ from .views.orders_views import (
 )
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.review_views import create_review, list_reviews
-from .views.stats_views import daily_stats, get_bartender_statistics
+from .views.stats_views import daily_stats, get_bartender_statistics, get_item_statistics
 from .views.worker_views import create_worker, delete_worker, get_workers, update_worker
 
 

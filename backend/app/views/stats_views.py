@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from ..models.worker_models import Worker
 from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField
+from ..models.restaurant_models import Item
 
 
 @api_view(["GET"])
@@ -59,7 +60,7 @@ def get_bartender_statistics(request):
 
     restaurant = request.user.restaurant
 
-    workers = Worker.objects.filter(restaurant=restaurant)  # 👈 SELECT ALL WORKERS, NOT JUST BARTENDERS
+    workers = Worker.objects.filter(restaurant=restaurant)
     stats = []
 
     for worker in workers:
@@ -80,7 +81,7 @@ def get_bartender_statistics(request):
         if total_orders == 0:
             stats.append({
                 "worker_name": worker.name,
-                "role": worker.role,   # 👈 include the role so frontend can show it
+                "role": worker.role,
                 "total_orders": 0,
                 "average_time_seconds": None,
                 "fastest_time_seconds": None,
@@ -98,7 +99,7 @@ def get_bartender_statistics(request):
 
         stats.append({
             "worker_name": worker.name,
-            "role": worker.role,  # 👈 include the role always
+            "role": worker.role,
             "total_orders": total_orders,
             "average_time_seconds": aggregates['avg_time'].total_seconds() if aggregates['avg_time'] else None,
             "fastest_time_seconds": aggregates['fastest'].total_seconds() if aggregates['fastest'] else None,
@@ -107,3 +108,18 @@ def get_bartender_statistics(request):
         })
 
     return Response({"bartender_statistics": stats})
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_item_statistics(request):
+    if not hasattr(request.user, "restaurant"):
+        return Response({"error": "Unauthorized"}, status=403)
+
+    restaurant = request.user.restaurant
+    items = (
+        Item.objects.filter(restaurant=restaurant)
+        .order_by("-times_ordered")
+        .values("name", "price", "times_ordered")
+    )
+
+    return Response({"items": list(items)}, status=200)
