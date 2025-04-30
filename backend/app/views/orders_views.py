@@ -217,14 +217,26 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
         order.beverage_status = normalized_status
 
 
-    # Determine the lowest status between the two
+    # Determine correct main order status based on available categories
     status_priority = {"pending": 0, "in_progress": 1, "completed": 2, "picked_up": 3}
-
-    min_status_value = min(
-        status_priority[order.food_status], status_priority[order.beverage_status]
-    )
     reverse_lookup = {v: k for k, v in status_priority.items()}
-    order.status = reverse_lookup[min_status_value]
+
+    has_food = order.order_items.filter(item__category__iexact="food").exists()
+    has_bev = order.order_items.filter(item__category__iexact="beverage").exists()
+
+    food_val = status_priority[order.food_status] if has_food else None
+    bev_val = status_priority[order.beverage_status] if has_bev else None
+
+    if food_val is not None and bev_val is not None:
+        min_val = min(food_val, bev_val)
+    elif food_val is not None:
+        min_val = food_val
+    elif bev_val is not None:
+        min_val = bev_val
+    else:
+        min_val = status_priority["pending"]
+
+    order.status = reverse_lookup[min_val]
     order.save()
 
     # if order.customer.fcm_token:

@@ -22,14 +22,13 @@ const OrdersPage = () => {
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
         isAssigningWorker ? { worker_id: workerID } : {},
       );
-      console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
-      console.log('Updated order status:', {
+
+      console.log(`Order ${response.data.order_id} updated to ${nextStatus}:`, {
         status: response.data.status,
         food_status: response.data.food_status,
         beverage_status: response.data.beverage_status,
       });
       
-
       const updatedOrders = orders.map((order) =>
         order.id === orderId
           ? {
@@ -101,12 +100,12 @@ const OrdersPage = () => {
         setTimeout(() => setSelectedOrder(null), 300);
       }
   
-      console.log(`Updated ${category} to ${newStatus} for order #${orderId}`);
-      console.log(`Updated ${category} status:`, {
+      console.log(`Updated ${category} to ${newStatus} for order #${orderId}:`, {
         status: updated.status,
         food_status: updated.food_status,
         beverage_status: updated.beverage_status,
-      });      
+      });
+          
     } catch (err) {
       console.error('Error updating category status:', err);
     }
@@ -232,91 +231,99 @@ const OrdersPage = () => {
           {selectedOrder && (
             <>
               {/* Beverage Items */}
-              <h5>Beverages (Status: {formatStatus(selectedOrder.beverage_status)})</h5>
-              <Table striped bordered hover size="sm" className="mb-3">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.order_items
-                    .filter((item) => item.category?.toLowerCase() === "beverage")
-                    .map((item, index) => (
-                      <tr key={`bev-${index}`}>
-                        <td>{item.item_name}</td>
-                        <td>{item.quantity}</td>
+              {selectedOrder.order_items.some(item => item.category?.toLowerCase() === "beverage") && (
+                <>
+                  <h5>Beverages (Status: {formatStatus(selectedOrder.beverage_status)})</h5>
+                  <Table striped bordered hover size="sm" className="mb-3">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
                       </tr>
-                    ))}
-                </tbody>
-              </Table>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.order_items
+                        .filter((item) => item.category?.toLowerCase() === "beverage")
+                        .map((item, index) => (
+                          <tr key={`bev-${index}`}>
+                            <td>{item.item_name}</td>
+                            <td>{item.quantity}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </Table>
   
-              {selectedOrder.beverage_status === 'in_progress' && (
-                <Button
-                  variant="warning"
-                  className="mb-3"
-                  onClick={() =>
-                    handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'completed')
-                  }
-                >
-                  Mark Beverage Completed
-                </Button>
-              )}
-              {selectedOrder.beverage_status === 'completed' && (
-                <Button
-                  variant="success"
-                  className="mb-3"
-                  onClick={() =>
-                    handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'picked_up')
-                  }
-                >
-                  Mark Beverage Picked Up
-                </Button>
+                  {selectedOrder.beverage_status === 'in_progress' && (
+                    <Button
+                      variant="warning"
+                      className="mb-3"
+                      onClick={() =>
+                        handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'completed')
+                      }
+                    >
+                      Mark Beverage Completed
+                    </Button>
+                  )}
+                  {selectedOrder.beverage_status === 'completed' && (
+                    <Button
+                      variant="success"
+                      className="mb-3"
+                      onClick={() =>
+                        handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'picked_up')
+                      }
+                    >
+                      Mark Beverage Picked Up
+                    </Button>
+                  )}
+                </>
               )}
   
               {/* Food Items */}
-              <h5>Food (Status: {formatStatus(selectedOrder.food_status)})</h5>
-              <Table striped bordered hover size="sm" className="mb-3">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.order_items
-                    .filter((item) => item.category?.toLowerCase() !== "beverage")
-                    .map((item, index) => (
-                      <tr key={`food-${index}`}>
-                        <td>{item.item_name}</td>
-                        <td>{item.quantity}</td>
+              {selectedOrder.order_items.some(item => item.category?.toLowerCase() !== "beverage") && (
+                <>
+                  <h5>Food (Status: {formatStatus(selectedOrder.food_status)})</h5>
+                  <Table striped bordered hover size="sm" className="mb-3">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
                       </tr>
-                    ))}
-                </tbody>
-              </Table>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.order_items
+                        .filter((item) => item.category?.toLowerCase() !== "beverage")
+                        .map((item, index) => (
+                          <tr key={`food-${index}`}>
+                            <td>{item.item_name}</td>
+                            <td>{item.quantity}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </Table>
   
-              {selectedOrder.food_status === 'in_progress' && (
-                <Button
-                  variant="warning"
-                  className="mb-3"
-                  onClick={() =>
-                    handleUpdateCategoryStatus(selectedOrder.id, 'food', 'completed')
-                  }
-                >
-                  Mark Food Completed
-                </Button>
-              )}
-              {selectedOrder.food_status === 'completed' && (
-                <Button
-                  variant="success"
-                  className="mb-3"
-                  onClick={() =>
-                    handleUpdateCategoryStatus(selectedOrder.id, 'food', 'picked_up')
-                  }
-                >
-                  Mark Food Picked Up
-                </Button>
+                  {selectedOrder.food_status === 'in_progress' && (
+                    <Button
+                      variant="warning"
+                      className="mb-3"
+                      onClick={() =>
+                        handleUpdateCategoryStatus(selectedOrder.id, 'food', 'completed')
+                      }
+                    >
+                      Mark Food Completed
+                    </Button>
+                  )}
+                  {selectedOrder.food_status === 'completed' && (
+                    <Button
+                      variant="success"
+                      className="mb-3"
+                      onClick={() =>
+                        handleUpdateCategoryStatus(selectedOrder.id, 'food', 'picked_up')
+                      }
+                    >
+                      Mark Food Picked Up
+                    </Button>
+                  )}
+                </>
               )}
             </>
           )}
