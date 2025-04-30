@@ -132,6 +132,7 @@ const OrdersPage = () => {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
+            <th>Order #</th>
             <th>Customer</th>
             <th>Ordered Time</th>
             <th>Total Price</th>
@@ -145,6 +146,7 @@ const OrdersPage = () => {
               onClick={() => setSelectedOrder(order)}
               style={{ cursor: 'pointer' }}
             >
+              <td>{order.id}</td>
               <td>{order.customer_name}</td>
               <td>{new Date(order.start_time).toLocaleString()}</td>
               <td>${Number(order.total_price).toFixed(2)}</td>
