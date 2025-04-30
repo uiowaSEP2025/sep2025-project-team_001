@@ -23,10 +23,23 @@ const OrdersPage = () => {
         isAssigningWorker ? { worker_id: workerID } : {},
       );
       console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
+      console.log('Updated order status:', {
+        status: response.data.status,
+        food_status: response.data.food_status,
+        beverage_status: response.data.beverage_status,
+      });
+      
 
       const updatedOrders = orders.map((order) =>
-        order.id === orderId ? { ...order, status: nextStatus } : order,
-      );
+        order.id === orderId
+          ? {
+              ...order,
+              status: response.data.status,
+              food_status: response.data.food_status,
+              beverage_status: response.data.beverage_status,
+            }
+          : order
+      );      
       setOrders(updatedOrders);
 
       // Automatically close modal if final status
@@ -34,13 +47,70 @@ const OrdersPage = () => {
         setSelectedOrder(null);
       } else {
         setSelectedOrder((prev) =>
-          prev ? { ...prev, status: nextStatus } : null,
-        );
+          prev
+            ? {
+                ...prev,
+                status: response.data.status,
+                food_status: response.data.food_status,
+                beverage_status: response.data.beverage_status,
+              }
+            : null
+        );        
       }
     } catch (error) {
       console.error('Error updating order status: ', error);
     }
   };
+
+  const handleUpdateCategoryStatus = async (orderId, category, newStatus) => {
+    try {
+      const restaurantId = sessionStorage.getItem('restaurantId');
+      const url = `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`;
+      const response = await axios.patch(url);
+  
+      const updated = response.data;
+  
+      setSelectedOrder((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          status: updated.status,
+          food_status:
+            category === 'food' ? updated.food_status : prev.food_status,
+          beverage_status:
+            category === 'beverage' ? updated.beverage_status : prev.beverage_status,
+        };
+      });
+  
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === updated.order_id
+            ? {
+                ...o,
+                status: updated.status,
+                food_status:
+                  category === 'food' ? updated.food_status : o.food_status,
+                beverage_status:
+                  category === 'beverage' ? updated.beverage_status : o.beverage_status,
+              }
+            : o
+        )
+      );
+  
+      if (updated.status === 'picked_up') {
+        setTimeout(() => setSelectedOrder(null), 300);
+      }
+  
+      console.log(`Updated ${category} to ${newStatus} for order #${orderId}`);
+      console.log(`Updated ${category} status:`, {
+        status: updated.status,
+        food_status: updated.food_status,
+        beverage_status: updated.beverage_status,
+      });      
+    } catch (err) {
+      console.error('Error updating category status:', err);
+    }
+  };    
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -127,7 +197,6 @@ const OrdersPage = () => {
       >
         Log Out
       </Button>
-
       <h1>Active Orders</h1>
       <Table striped bordered hover responsive>
         <thead>
@@ -155,13 +224,7 @@ const OrdersPage = () => {
           ))}
         </tbody>
       </Table>
-
-      {/* Modal for Order Details */}
-      <Modal
-        show={!!selectedOrder}
-        onHide={() => setSelectedOrder(null)}
-        centered
-      >
+      <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Order Details</Modal.Title>
         </Modal.Header>
@@ -169,8 +232,8 @@ const OrdersPage = () => {
           {selectedOrder && (
             <>
               {/* Beverage Items */}
-              <h5>Beverages</h5>
-              <Table striped bordered hover size="sm" className="mb-4">
+              <h5>Beverages (Status: {formatStatus(selectedOrder.beverage_status)})</h5>
+              <Table striped bordered hover size="sm" className="mb-3">
                 <thead>
                   <tr>
                     <th>Item</th>
@@ -188,9 +251,33 @@ const OrdersPage = () => {
                     ))}
                 </tbody>
               </Table>
+  
+              {selectedOrder.beverage_status === 'in_progress' && (
+                <Button
+                  variant="warning"
+                  className="mb-3"
+                  onClick={() =>
+                    handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'completed')
+                  }
+                >
+                  Mark Beverage Completed
+                </Button>
+              )}
+              {selectedOrder.beverage_status === 'completed' && (
+                <Button
+                  variant="success"
+                  className="mb-3"
+                  onClick={() =>
+                    handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'picked_up')
+                  }
+                >
+                  Mark Beverage Picked Up
+                </Button>
+              )}
+  
               {/* Food Items */}
-              <h5>Food</h5>
-              <Table striped bordered hover size="sm">
+              <h5>Food (Status: {formatStatus(selectedOrder.food_status)})</h5>
+              <Table striped bordered hover size="sm" className="mb-3">
                 <thead>
                   <tr>
                     <th>Item</th>
@@ -208,25 +295,41 @@ const OrdersPage = () => {
                     ))}
                 </tbody>
               </Table>
+  
+              {selectedOrder.food_status === 'in_progress' && (
+                <Button
+                  variant="warning"
+                  className="mb-3"
+                  onClick={() =>
+                    handleUpdateCategoryStatus(selectedOrder.id, 'food', 'completed')
+                  }
+                >
+                  Mark Food Completed
+                </Button>
+              )}
+              {selectedOrder.food_status === 'completed' && (
+                <Button
+                  variant="success"
+                  className="mb-3"
+                  onClick={() =>
+                    handleUpdateCategoryStatus(selectedOrder.id, 'food', 'picked_up')
+                  }
+                >
+                  Mark Food Picked Up
+                </Button>
+              )}
             </>
           )}
         </Modal.Body>
         <Modal.Footer>
-          {selectedOrder && selectedOrder.status !== 'picked_up' && (
+          {selectedOrder && selectedOrder.status === 'pending' && (
             <Button
               variant="success"
-              onClick={() => {
-                const nextStatus = getNextStatus(selectedOrder.status);
-                if (nextStatus) {
-                  handleUpdateOrderStatus(selectedOrder.id, nextStatus);
-                }
-              }}
+              onClick={() =>
+                handleUpdateOrderStatus(selectedOrder.id, 'in_progress')
+              }
             >
-              {selectedOrder.status === 'pending'
-                ? 'Mark In Progress'
-                : selectedOrder.status === 'in_progress'
-                  ? 'Mark Completed'
-                  : 'Mark Picked Up'}
+              Mark In Progress
             </Button>
           )}
           <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
@@ -235,7 +338,7 @@ const OrdersPage = () => {
         </Modal.Footer>
       </Modal>
     </Container>
-  );
+  );  
 };
 
 export default OrdersPage;

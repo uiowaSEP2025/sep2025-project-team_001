@@ -143,6 +143,8 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             order.worker = worker
         except Worker.DoesNotExist:
             return Response({"error": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
+        order.food_status = "in_progress"
+        order.beverage_status = "in_progress"
 
     order.status = normalized_status
     order.save()
@@ -172,9 +174,12 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             "message": f"Order status updated to '{normalized_status}'.",
             "order_id": order.id,
             "status": normalized_status,
+            "food_status": order.food_status,
+            "beverage_status": order.beverage_status,
         },
         status=status.HTTP_200_OK,
     )
+
 
 
 @api_view(["PATCH"])
@@ -205,30 +210,41 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    # Update food or beverage status
     if normalized_category == "food":
         order.food_status = normalized_status
     else:
         order.beverage_status = normalized_status
 
+
+    # Determine the lowest status between the two
+    status_priority = {"pending": 0, "in_progress": 1, "completed": 2, "picked_up": 3}
+
+    min_status_value = min(
+        status_priority[order.food_status], status_priority[order.beverage_status]
+    )
+    reverse_lookup = {v: k for k, v in status_priority.items()}
+    order.status = reverse_lookup[min_status_value]
     order.save()
 
-    if order.customer.fcm_token:
-        send_fcm_httpv1(
-            device_token=order.customer.fcm_token,
-            title="Order Update",
-            body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
-            data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
-        )
-        send_notification_to_device(
-            device_token=order.customer.fcm_token,
-            title="Order Update",
-            body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
-            data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
-        )
+    # if order.customer.fcm_token:
+    #     send_fcm_httpv1(
+    #         device_token=order.customer.fcm_token,
+    #         title="Order Update",
+    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+    #     )
+    #     send_notification_to_device(
+    #         device_token=order.customer.fcm_token,
+    #         title="Order Update",
+    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+    #     )
 
     return Response({
         "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
         "order_id": order.id,
+        "status": order.status,
         "food_status": order.food_status,
         "beverage_status": order.beverage_status,
     }, status=status.HTTP_200_OK)
