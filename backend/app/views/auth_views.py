@@ -11,6 +11,7 @@ from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
+from app.utils.image_upload import save_image_from_base64
 
 import requests, unicodedata
 from django.conf import settings
@@ -76,8 +77,16 @@ def register_user(request):
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
-            restaurant_image=data.get("restaurantImage")
         )
+
+        restaurant_image_b64 = data.get("restaurantImage")
+        if restaurant_image_b64:
+            restaurant.restaurant_image_url = save_image_from_base64(
+                restaurant_image_b64,
+                folder="restaurant-logos",
+                ref_id=restaurant.id
+            )
+            restaurant.save()
 
         # Create Worker (Manager role)
         worker = Worker.objects.create(
@@ -87,7 +96,8 @@ def register_user(request):
             role="manager"
         )
 
-        restaurant_data = RestaurantSerializer(restaurant).data
+        restaurant_data = RestaurantSerializer(restaurant, context={"request": request}).data
+
         worker_data = WorkerSerializer(worker).data
 
         tokens = get_tokens_for_user(custom_user)  # Generate JWT tokens
@@ -167,6 +177,7 @@ def _norm(txt: str) -> str:
     txt = unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode()
     return re.sub(r"[^\w\s]", "", txt).lower().strip()
 
+
 @csrf_exempt
 def validate_business(request):
     if request.method == "POST":
@@ -205,3 +216,4 @@ def validate_business(request):
             return JsonResponse({"valid": False, "reason": "Not restaurant/bar"}, status=400)
         
         return JsonResponse({"valid": True, "place_id": cand["place_id"]}, status=200)
+    return JsonResponse({"error": "Invalid request"}, status=400)

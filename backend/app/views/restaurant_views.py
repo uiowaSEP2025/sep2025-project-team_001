@@ -12,7 +12,7 @@ from ..serializers.restaurant_serializer import RestaurantSerializer
 @permission_classes([IsAuthenticated])
 def get_restaurants(request):
     restaurants = Restaurant.objects.all()
-    serializer = RestaurantSerializer(restaurants, many=True)
+    serializer = RestaurantSerializer(restaurants, many=True, context={"request": request})
     return Response(serializer.data)
 
 
@@ -20,5 +20,5 @@ def get_restaurants(request):
 @permission_classes([IsAuthenticated])
 def get_menu_items(request, restaurant_id):
     items = Item.objects.filter(restaurant__id=restaurant_id, available=True)
-    serializer = ItemSerializer(items, many=True)
+    serializer = ItemSerializer(items, many=True, context={"request": request})
     return Response(serializer.data)

@@ -111,3 +111,9 @@ variable "admin_ip" {
   description = "Allowed IP address for SSH access"
   default     = "0.0.0.0/0"
 }
+
+variable "s3_bucket_name" {
+    type        = string
+    description = "S3 bucket name for images"
+    default     = "streamlinebars-images"
+}
