@@ -64,8 +64,9 @@ const OrdersPage = () => {
   const handleUpdateCategoryStatus = async (orderId, category, newStatus) => {
     try {
       const restaurantId = sessionStorage.getItem('restaurantId');
-      const url = `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`;
-      const response = await axios.patch(url);
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`
+      );      
   
       const updated = response.data;
   
