@@ -22,3 +22,10 @@ def get_menu_items(request, restaurant_id):
     items = Item.objects.filter(restaurant__id=restaurant_id, available=True)
     serializer = ItemSerializer(items, many=True)
     return Response(serializer.data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_restaurant(request, restaurant_id):
+    restaurant = Restaurant.objects.get(id=restaurant_id)
+    serializer = RestaurantSerializer(restaurant)
+    return Response(serializer.data)

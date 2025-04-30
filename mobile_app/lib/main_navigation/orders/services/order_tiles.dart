@@ -3,6 +3,7 @@ import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/main_navigation/orders/order_receipt_screen.dart';
+import 'package:mobile_app/main_navigation/orders/order_review_screen.dart';
 import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 
@@ -11,7 +12,7 @@ Widget buildHistoryOrderTile(BuildContext context,Order order, double screenHeig
     onTap: (){
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => OrderReceiptScreen(order: order)),
+        MaterialPageRoute(builder: (_) => OrderReviewScreen(order: order)),
       );
     },
     child: Container(
@@ -49,7 +50,7 @@ Widget buildHistoryOrderTile(BuildContext context,Order order, double screenHeig
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => OrderReceiptScreen(order: order)),
+                            builder: (_) => OrderReviewScreen(order: order)),
                       );
                     },
                     style: ElevatedButton.styleFrom(
