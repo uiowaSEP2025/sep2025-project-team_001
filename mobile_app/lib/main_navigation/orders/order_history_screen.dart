@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
-import 'package:mobile_app/main_navigation/orders/services/methods.dart';
+import 'package:mobile_app/main_navigation/orders/services/order_tiles.dart';
 
 class OrderHistoryScreen extends StatelessWidget {
   final List<Order> pickedUpOrders;
@@ -22,7 +22,10 @@ class OrderHistoryScreen extends StatelessWidget {
           : ListView.builder(
               itemCount: pickedUpOrders.length,
               itemBuilder: (context, index) {
-                return buildOrderTile(pickedUpOrders[index]);
+                return Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.025),
+                  child: buildHistoryOrderTile(context,pickedUpOrders[index],screenHeight, screenWidth),
+                );
               },
             ),
     );

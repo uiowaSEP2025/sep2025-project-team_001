@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_app/authentication/services/fcm_service.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
@@ -62,7 +63,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void authenticate() async {
     final String email = _emailController.text.trim();
     UserManager.saveEmail(email);
+    
     final String password = _passwordController.text.trim();
+    UserManager.savePassword(password);
+
     const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -83,7 +87,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     setState(() => isLoading = true);
 
     try {
-      final dio = widget.dio ?? Dio();
+      final dio = widget.dio ??
+          Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
       final response = await dio.post(
         endpoint,
@@ -179,7 +184,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                 child: Container(
-                  height: screenHeight * 0.25,
+                  height: screenHeight * 0.35,
                   clipBehavior: Clip.hardEdge,
                   decoration: const BoxDecoration(
                     borderRadius:
@@ -199,7 +204,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: screenHeight * 0.25,
+                      height: screenHeight * 0.35,
                     ),
                     Container(
                       color: Colors.white,
@@ -207,7 +212,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
-                              height: verticalSpacing / 2,
+                              height: verticalSpacing,
                             ),
                             SizedBox(
                               width: screenWidth * 0.75,
@@ -298,118 +303,119 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                         )),
                             ),
                             SizedBox(
-                              height: verticalSpacing,
+                              height: verticalSpacing * 5,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 1,
-                                  width: screenWidth * 0.4,
-                                  color: AppColors.paragraphText,
-                                ),
-                                SizedBox(
-                                  width: horizontalSpacing / 2,
-                                ),
-                                Text(
-                                  "Or",
-                                  style: AppTextStyles.subtitleParagraph(
-                                      screenHeight, AppColors.paragraphText),
-                                ),
-                                SizedBox(
-                                  width: horizontalSpacing / 2,
-                                ),
-                                Container(
-                                  height: 1,
-                                  width: screenWidth * 0.4,
-                                  color: AppColors.paragraphText,
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: verticalSpacing,
-                            ),
-                            // Platform.isIOS
-                            defaultTargetPlatform == TargetPlatform.iOS
-                                ? SizedBox(
-                                    height: screenWidth * 0.12,
-                                    width: screenWidth - horizontalSpacing * 2,
-                                    child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.black),
-                                        onPressed:
-                                            isLoading ? null : signInWithApple,
-                                        child: isLoading
-                                            ? const CircularProgressIndicator(
-                                                color: Colors.white)
-                                            : Center(
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.apple,
-                                                      size: screenWidth * 0.08,
-                                                      color:
-                                                          AppColors.whiteText,
-                                                    ),
-                                                    SizedBox(
-                                                      width:
-                                                          horizontalSpacing / 2,
-                                                    ),
-                                                    Text(
-                                                      "Sign In with Apple",
-                                                      style: AppTextStyles
-                                                          .buttonText(
-                                                              screenHeight,
-                                                              AppColors
-                                                                  .whiteText),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )),
-                                  )
-                                : Container(),
-                            defaultTargetPlatform == TargetPlatform.iOS
-                                ? SizedBox(
-                                    height: verticalSpacing,
-                                  )
-                                : Container(),
-                            SizedBox(
-                                height: screenWidth * 0.12,
-                                width: screenWidth - horizontalSpacing * 2,
-                                child: OutlinedButton(
-                                  onPressed:
-                                      isLoading ? null : signInWithGoogle,
-                                  child: isLoading
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.white)
-                                      : Center(
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                  height: screenWidth * 0.1,
-                                                  width: screenWidth * 0.1,
-                                                  child: Image.asset(
-                                                      "assets/logos/GoogleLogo.png")),
-                                              SizedBox(
-                                                width: horizontalSpacing / 2,
-                                              ),
-                                              Text(
-                                                "Sign In with Google",
-                                                style: AppTextStyles.buttonText(
-                                                    screenHeight, Colors.black),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                )),
-                            SizedBox(
-                              height: verticalSpacing * 2,
-                            ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   crossAxisAlignment: CrossAxisAlignment.center,
+                            //   children: [
+                            //     Container(
+                            //       height: 1,
+                            //       width: screenWidth * 0.4,
+                            //       color: AppColors.paragraphText,
+                            //     ),
+                            //     SizedBox(
+                            //       width: horizontalSpacing / 2,
+                            //     ),
+                            //     Text(
+                            //       "Or",
+                            //       style: AppTextStyles.subtitleParagraph(
+                            //           screenHeight, AppColors.paragraphText),
+                            //     ),
+                            //     SizedBox(
+                            //       width: horizontalSpacing / 2,
+                            //     ),
+                            //     Container(
+                            //       height: 1,
+                            //       width: screenWidth * 0.4,
+                            //       color: AppColors.paragraphText,
+                            //     )
+                            //   ],
+                            // ),
+                            // SizedBox(
+                            //   height: verticalSpacing,
+                            // ),
+                            // // Platform.isIOS
+                            // defaultTargetPlatform == TargetPlatform.iOS
+                            //     ? SizedBox(
+                            //         height: screenWidth * 0.12,
+                            //         width: screenWidth - horizontalSpacing * 2,
+                            //         child: ElevatedButton(
+                            //             style: ElevatedButton.styleFrom(
+                            //                 backgroundColor: Colors.black),
+                            //             onPressed:
+                            //                 isLoading ? null : signInWithApple,
+                            //             child: isLoading
+                            //                 ? const CircularProgressIndicator(
+                            //                     color: Colors.white)
+                            //                 : Center(
+                            //                     child: Row(
+                            //                       mainAxisAlignment:
+                            //                           MainAxisAlignment.center,
+                            //                       children: [
+                            //                         Icon(
+                            //                           Icons.apple,
+                            //                           size: screenWidth * 0.08,
+                            //                           color:
+                            //                               AppColors.whiteText,
+                            //                         ),
+                            //                         SizedBox(
+                            //                           width:
+                            //                               horizontalSpacing / 2,
+                            //                         ),
+                            //                         Text(
+                            //                           "Sign In with Apple",
+                            //                           style: AppTextStyles
+                            //                               .buttonText(
+                            //                                   screenHeight,
+                            //                                   AppColors
+                            //                                       .whiteText),
+                            //                         ),
+                            //                       ],
+                            //                     ),
+                            //                   )),
+                            //       )
+                            //     : Container(),
+                            // defaultTargetPlatform == TargetPlatform.iOS
+                            //     ? SizedBox(
+                            //         height: verticalSpacing,
+                            //       )
+                            //     : Container(),
+                            // SizedBox(
+                            //     height: screenWidth * 0.12,
+                            //     width: screenWidth - horizontalSpacing * 2,
+                            //     child: OutlinedButton(
+                            //       onPressed:
+                            //           isLoading ? null : signInWithGoogle,
+                            //       child: isLoading
+                            //           ? const CircularProgressIndicator(
+                            //               color: Colors.white)
+                            //           : Center(
+                            //               child: Row(
+                            //                 mainAxisAlignment:
+                            //                     MainAxisAlignment.center,
+                            //                 children: [
+                            //                   SizedBox(
+                            //                       height: screenWidth * 0.1,
+                            //                       width: screenWidth * 0.1,
+                            //                       child: Image.asset(
+                            //                           "assets/logos/GoogleLogo.png")),
+                            //                   SizedBox(
+                            //                     width: horizontalSpacing / 2,
+                            //                   ),
+                            //                   Text(
+                            //                     "Sign In with Google",
+                            //                     style: AppTextStyles.buttonText(
+                            //                         screenHeight, Colors.black),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             ),
+                            //     )),
+
+                            // SizedBox(
+                            //   height: verticalSpacing * 2,
+                            // ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
