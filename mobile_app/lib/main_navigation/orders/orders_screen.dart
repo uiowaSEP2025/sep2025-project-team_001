@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/services/api_services.dart';
-import 'package:mobile_app/main_navigation/orders/services/methods.dart';
+import 'package:mobile_app/main_navigation/orders/services/order_tiles.dart';
 import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
@@ -43,19 +42,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
     });
 
     _loadOrders();
-    // _startPolling();
   }
 
   @override
   void dispose() {
     _pollingTimer?.cancel();
     super.dispose();
-  }
-
-  void _startPolling() {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      _loadOrders();
-    });
   }
 
   Future<void> _loadOrders() async {
@@ -156,6 +148,33 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
                       children: [
+                        
+                        if (completedOrders.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("Ready for pickup",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          ...completedOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildPickupOrderTile(context,order, screenHeight, screenWidth),
+                              )),
+                        ],
+                        if (inProgressOrders.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.all(verticalSpacing),
+                            child: Text("In Progress",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          ...inProgressOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildProgressOrderTile(order,screenHeight, screenWidth),
+                              )),
+                        ],
                         if (pendingOrders.isNotEmpty) ...[
                           Padding(
                             padding: EdgeInsets.only(
@@ -173,26 +192,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     order, screenHeight, screenWidth),
                               )),
                         ],
-                        if (completedOrders.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.all(verticalSpacing),
-                            child: Text("Completed",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                          ...completedOrders
-                              .map((order) => buildOrderTile(order)),
-                        ],
-                        if (inProgressOrders.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.all(verticalSpacing),
-                            child: Text("In Progress",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                          ...inProgressOrders
-                              .map((order) => buildOrderTile(order)),
-                        ],
+                        
+                        
                       ],
                     ),
     );
