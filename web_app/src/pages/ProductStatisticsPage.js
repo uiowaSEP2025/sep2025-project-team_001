@@ -28,7 +28,6 @@ const StatisticsPage = () => {
           axios.get(`${process.env.REACT_APP_API_URL}/bartender-statistics/`),
         ]);
 
-        console.log(workerRes.data)
         setProductStats(productRes.data.items || []);
         setWorkerStats(workerRes.data.bartender_statistics || []);
       } catch (error) {
@@ -39,23 +38,40 @@ const StatisticsPage = () => {
     fetchStats();
   }, []);
 
+  const uniformRowSx = {
+    height: 56,
+    '& td, & th': {
+      paddingTop: 1,
+      paddingBottom: 1,
+      height: 56,
+      verticalAlign: 'middle',
+      textAlign: 'center',
+    },
+  };
+
   return (
-    <Box sx={{ mt: 4, px: 6 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Button onClick={() => navigate('/manager_dashboard')}>Back to Dashboard</Button>
-        <Typography variant="h4">Statistics</Typography>
-        <Box width={100} />
+    <Box sx={{ mt: 4, px: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+        <Typography variant="h4" align="center">Statistics</Typography>
       </Box>
 
-      <Grid container spacing={4}>
-        {/* Left Side - Worker Statistics */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>Worker Statistics</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        <Button variant="outlined" onClick={() => navigate('/manager_dashboard')}>
+          Back to Dashboard
+        </Button>
+      </Box>
+
+      <Grid container spacing={4} justifyContent="center">
+        {/* Worker Statistics */}
+        <Grid item xs={12} md={5}>
+          <Paper elevation={4} sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+              Worker Statistics
+            </Typography>
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow>
+                  <TableRow sx={uniformRowSx}>
                     <TableCell><strong>Name</strong></TableCell>
                     <TableCell><strong>Role</strong></TableCell>
                     <TableCell><strong>Orders</strong></TableCell>
@@ -65,7 +81,7 @@ const StatisticsPage = () => {
                 </TableHead>
                 <TableBody>
                   {workerStats.map((worker, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{worker.worker_name}</TableCell>
                       <TableCell>
                         {worker.role ? worker.role.charAt(0).toUpperCase() + worker.role.slice(1) : ''}
@@ -85,13 +101,16 @@ const StatisticsPage = () => {
           </Paper>
         </Grid>
 
-        {/* Right Side - Product Statistics */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3}>
+        {/* Product Statistics */}
+        <Grid item xs={12} md={7}>
+          <Paper elevation={4} sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+              Product Statistics
+            </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow>
+                  <TableRow sx={uniformRowSx}>
                     <TableCell><strong>Item Name</strong></TableCell>
                     <TableCell><strong>Price</strong></TableCell>
                     <TableCell><strong># Ordered</strong></TableCell>
@@ -99,7 +118,7 @@ const StatisticsPage = () => {
                 </TableHead>
                 <TableBody>
                   {productStats.map((item, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{item.name}</TableCell>
                       <TableCell>${parseFloat(item.price).toFixed(2)}</TableCell>
                       <TableCell>{item.times_ordered}</TableCell>
