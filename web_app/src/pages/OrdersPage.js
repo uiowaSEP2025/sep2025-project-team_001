@@ -168,6 +168,28 @@ const OrdersPage = () => {
         <Modal.Body>
           {selectedOrder && (
             <>
+              {/* Beverage Items */}
+              <h5>Beverages</h5>
+              <Table striped bordered hover size="sm" className="mb-4">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedOrder.order_items
+                    .filter((item) => item.category?.toLowerCase() === "beverage")
+                    .map((item, index) => (
+                      <tr key={`bev-${index}`}>
+                        <td>{item.item_name}</td>
+                        <td>{item.quantity}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </Table>
+              {/* Food Items */}
+              <h5>Food</h5>
               <Table striped bordered hover size="sm">
                 <thead>
                   <tr>
@@ -176,12 +198,14 @@ const OrdersPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedOrder.order_items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.item_name}</td>
-                      <td>{item.quantity}</td>
-                    </tr>
-                  ))}
+                  {selectedOrder.order_items
+                    .filter((item) => item.category?.toLowerCase() !== "beverage")
+                    .map((item, index) => (
+                      <tr key={`food-${index}`}>
+                        <td>{item.item_name}</td>
+                        <td>{item.quantity}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </Table>
             </>
