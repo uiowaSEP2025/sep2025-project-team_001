@@ -86,6 +86,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           pickedUpOrders = newPickedUp;
         });
       }
+
     } catch (e) {
       print("Error loading orders: $e");
       if (!_initialLoadDone) {
