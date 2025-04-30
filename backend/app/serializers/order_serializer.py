@@ -13,10 +13,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
     unwanted_ingredients = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), many=True, required=False
     )
+    category = serializers.CharField(source="item.category", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ["item_id", "item_name", "quantity", "unwanted_ingredients"]
+        fields = ["item_id", "item_name", "quantity", "unwanted_ingredients","category"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -55,6 +56,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "restaurant_name",
             "start_time",
             "status",
+            "food_status",
+            "beverage_status",
             "total_price",
             "order_items",
             "estimated_food_ready_time",

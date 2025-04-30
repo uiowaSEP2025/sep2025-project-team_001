@@ -177,6 +177,63 @@ def update_order_status(request, restaurant_id, order_id, new_status):
     )
 
 
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_order_category_status(request, restaurant_id, order_id, category, new_status):
+    if not hasattr(request.user, "restaurant"):
+        return Response(
+            {"error": "Only restaurant accounts can update orders."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    normalized_category = category.lower()
+    normalized_status = new_status.lower().replace(" ", "_")
+
+    if normalized_category not in ["food", "beverage"]:
+        return Response({"error": "Invalid category"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if normalized_status not in ["completed", "picked_up"]:
+        return Response({"error": f"Invalid status '{new_status}'"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        restaurant = Restaurant.objects.get(pk=restaurant_id)
+    except Restaurant.DoesNotExist:
+        return Response({"error": "Restaurant not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        order = Order.objects.get(pk=order_id, restaurant=restaurant)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if normalized_category == "food":
+        order.food_status = normalized_status
+    else:
+        order.beverage_status = normalized_status
+
+    order.save()
+
+    if order.customer.fcm_token:
+        send_fcm_httpv1(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+            data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+        )
+        send_notification_to_device(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+            data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+        )
+
+    return Response({
+        "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
+        "order_id": order.id,
+        "food_status": order.food_status,
+        "beverage_status": order.beverage_status,
+    }, status=status.HTTP_200_OK)
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_customer_orders(request):
