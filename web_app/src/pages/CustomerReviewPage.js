@@ -25,8 +25,20 @@ const CustomerReviewPage = () => {
               <Paper key={review.id} sx={{ p: 2 }}>
                 <Typography variant="subtitle1"><strong>Customer:</strong> {review.order.customer.user.username}</Typography>
                 <Typography variant="subtitle2"><strong>Worker:</strong> {review.order.worker?.name || 'N/A'}</Typography>
-                <Typography><strong>Rating:</strong> {review.rating} / 5</Typography>
-                <Typography><strong>Comment:</strong> {review.comment || 'No comment provided.'}</Typography>
+    
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography><strong>Rating:</strong></Typography>
+                  <Rating
+                    name="read-only-rating"
+                    value={review.rating}
+                    readOnly
+                    precision={1}
+                    icon={<StarIcon fontSize="inherit" />}
+                    emptyIcon={<StarIcon fontSize="inherit" style={{ opacity: 0.3 }} />}
+                  />
+                </Box>
+    
+                <Typography sx={{ mt: 1 }}><strong>Comment:</strong> {review.comment || 'No comment provided.'}</Typography>
                 <Typography variant="caption" color="text.secondary">
                   Submitted on: {new Date(review.created_at).toLocaleString()}
                 </Typography>
@@ -38,4 +50,4 @@ const CustomerReviewPage = () => {
       );
     };
     
-    export default ReviewPage;
+    export default CustomerReviewPage;
