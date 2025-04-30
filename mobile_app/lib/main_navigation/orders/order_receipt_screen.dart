@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
+import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 
 class OrderReceiptScreen extends StatefulWidget {
   Order order;
@@ -14,9 +15,11 @@ class OrderReceiptScreen extends StatefulWidget {
 }
 
 class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
-  double rating = 0;
-
   late TextEditingController _reviewController;
+  late bool needsReview;
+  bool isLoading = true;
+  bool errorFetching = false;
+  late Order order;
 
   @override
   void dispose() {
@@ -27,14 +30,41 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
   @override
   void initState() {
     _reviewController = TextEditingController();
+    needsReview = !widget.order.reviewed;
+    loadOrder(widget.order.id);
     super.initState();
   }
 
-  void ratingChanged(double rating){
+  void submitReview(int orderId, double rating, String comment){
+    setState(() async {
+                  await reviewOrder(
+                      orderId: orderId,
+                      rating: rating,
+                      review: comment);
+                });
+  }
+
+  void loadOrder(int orderId) async {
     setState(() {
-      this.rating = rating;
+      isLoading = true;
+      errorFetching = false;
     });
-    
+
+    try {
+      final fetchedOrder = await getOrder(orderId: orderId);
+
+      setState(() {
+        order = fetchedOrder;
+      });
+    } catch (e) {
+      setState(() {
+        errorFetching = true;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -47,44 +77,84 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
 
     return GestureDetector(
       onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Order: #${widget.order.id}"),
+          title: Text(
+              "Order: #${widget.order.id} has been reviewed: ${widget.order.reviewed}"),
         ),
-        body: Container(
-          width: screenWidth,
-          child: Column(
-            children: [
-              if(widget.order.status == "picked_up" && !widget.order.reviewed) RatingWidget(widget: widget, screenHeight: screenHeight, verticalSpacing: verticalSpacing, screenWidth: screenWidth, horizontalSpacing: horizontalSpacing, reviewController: _reviewController, ratingChanged: ratingChanged),
-            ],
-          ),
-       
-        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : errorFetching
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Failed to load order."),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            loadOrder(widget.order.id);
+                          },
+                          child: const Text("Try Again"),
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(
+                    width: screenWidth,
+                    child: Column(
+                      children: [
+                        if (order.status == "picked_up" && !order.reviewed)
+                          RatingWidget(
+                              order: order,
+                              screenHeight: screenHeight,
+                              verticalSpacing: verticalSpacing,
+                              screenWidth: screenWidth,
+                              horizontalSpacing: horizontalSpacing,
+                              reviewController: _reviewController,
+                              onSubmit: submitReview),
+                      ],
+                    ),
+                  ),
       ),
     );
   }
 }
 
-class RatingWidget extends StatelessWidget {
-  const RatingWidget({
-    super.key,
-    required this.widget,
-    required this.screenHeight,
-    required this.verticalSpacing,
-    required this.screenWidth,
-    required this.horizontalSpacing,
-    required TextEditingController reviewController, required this.ratingChanged,
-  }) : _reviewController = reviewController;
+class RatingWidget extends StatefulWidget {
+  const RatingWidget(
+      {super.key,
+      required this.order,
+      required this.screenHeight,
+      required this.verticalSpacing,
+      required this.screenWidth,
+      required this.horizontalSpacing,
+      required TextEditingController reviewController, required this.onSubmit})
+      : _reviewController = reviewController;
 
-  final OrderReceiptScreen widget;
+  final Order order;
   final double screenHeight;
   final double verticalSpacing;
   final double screenWidth;
   final double horizontalSpacing;
   final TextEditingController _reviewController;
-  final void Function(double rating) ratingChanged;
+  final void Function(int,double,String) onSubmit;
+  
+
+  @override
+  State<RatingWidget> createState() => _RatingWidgetState();
+}
+
+class _RatingWidgetState extends State<RatingWidget> {
+  double rating = 0;
+
+  void ratingChanged(double rating) {
+    setState(() {
+      this.rating = rating;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +164,13 @@ class RatingWidget extends StatelessWidget {
         Text(
           "How was ${widget.order.restaurantName}?",
           style: AppTextStyles.subtitleParagraph(
-              screenHeight * 1.5, AppColors.paragraphText),
+              widget.screenHeight * 1.5, AppColors.paragraphText),
         ),
         SizedBox(
-          height: verticalSpacing,
+          height: widget.verticalSpacing,
         ),
         RatingBar.builder(
-          itemSize: screenWidth * 0.15,
+          itemSize: widget.screenWidth * 0.12,
           initialRating: 0,
           minRating: 1,
           direction: Axis.horizontal,
@@ -116,20 +186,24 @@ class RatingWidget extends StatelessWidget {
           },
         ),
         Padding(
-          padding: EdgeInsets.all(horizontalSpacing),
+          padding: EdgeInsets.only(
+              top: widget.horizontalSpacing,
+              bottom: widget.horizontalSpacing,
+              left: widget.horizontalSpacing * 2,
+              right: widget.horizontalSpacing * 2),
           child: Container(
             padding: EdgeInsets.only(
-                top: horizontalSpacing / 4,
-                left: horizontalSpacing / 2,
-                right: horizontalSpacing / 2,
-                bottom: horizontalSpacing / 4),
+                top: widget.horizontalSpacing / 4,
+                left: widget.horizontalSpacing / 2,
+                right: widget.horizontalSpacing / 2,
+                bottom: widget.horizontalSpacing / 4),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: Colors.grey.shade400),
               borderRadius: BorderRadius.circular(8),
             ),
             child: TextField(
-              controller: _reviewController,
+              controller: widget._reviewController,
               minLines: 4,
               maxLines: 6,
               decoration: InputDecoration(
@@ -140,18 +214,22 @@ class RatingWidget extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(left:horizontalSpacing, right: horizontalSpacing),
+          padding: EdgeInsets.only(
+              left: widget.horizontalSpacing * 2,
+              right: widget.horizontalSpacing * 2),
           child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor),
-              onPressed: (){},
+              onPressed: () {
+                widget.onSubmit(widget.order.id, rating, widget._reviewController.text);
+              },
               child: Center(
-                      child: Text(
-                        "Post Review",
-                        style: AppTextStyles.buttonText(
-                            screenHeight, AppColors.whiteText),
-                      ),
-                    )),
+                child: Text(
+                  "Post Review",
+                  style: AppTextStyles.buttonText(
+                      widget.screenHeight, AppColors.whiteText),
+                ),
+              )),
         ),
       ],
     );

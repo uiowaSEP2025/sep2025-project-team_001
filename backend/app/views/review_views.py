@@ -1,3 +1,4 @@
+from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
 from app.models.order_models import Order
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -22,7 +23,7 @@ def create_review(request):
     if serializer.is_valid():
         review = serializer.save()
         
-        order = Order.objects.get(id=order_id)
+        order = review.order
         order.reviewed = True
         order.save()
         
