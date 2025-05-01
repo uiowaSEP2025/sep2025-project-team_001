@@ -224,7 +224,7 @@ const OrdersPage = () => {
           ))}
         </tbody>
       </Table>
-      <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered>
+      <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Order Details</Modal.Title>
         </Modal.Header>
@@ -238,22 +238,27 @@ const OrdersPage = () => {
                   <Table striped bordered hover size="sm" className="mb-3">
                     <thead>
                       <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
+                        <th style={{ width: '15ch' }}>Item</th>
+                        <th style={{ width: '10ch' }}>Quantity</th>
+                        <th>Unwanted Ingredients</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedOrder.order_items
-                        .filter((item) => item.category?.toLowerCase() === "beverage")
+                        .filter((item) => item.category?.toLowerCase() === 'beverage')
                         .map((item, index) => (
                           <tr key={`bev-${index}`}>
                             <td>{item.item_name}</td>
                             <td>{item.quantity}</td>
+                            <td>
+                              {item.unwanted_ingredient_names?.length > 0
+                                ? `UNWANTED INGREDIENTS: ${item.unwanted_ingredient_names.join(', ')}`
+                                : 'N/A'}
+                            </td>
                           </tr>
                         ))}
                     </tbody>
                   </Table>
-  
                   {selectedOrder.beverage_status === 'in_progress' && (
                     <Button
                       variant="warning"
@@ -286,22 +291,27 @@ const OrdersPage = () => {
                   <Table striped bordered hover size="sm" className="mb-3">
                     <thead>
                       <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
+                        <th style={{ width: '15ch' }}>Item</th>
+                        <th style={{ width: '10ch' }}>Quantity</th>
+                        <th>Unwanted Ingredients</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedOrder.order_items
-                        .filter((item) => item.category?.toLowerCase() !== "beverage")
+                        .filter((item) => item.category?.toLowerCase() !== 'beverage')
                         .map((item, index) => (
                           <tr key={`food-${index}`}>
                             <td>{item.item_name}</td>
                             <td>{item.quantity}</td>
+                            <td>
+                              {item.unwanted_ingredient_names?.length > 0
+                                ? item.unwanted_ingredient_names.join(', ')
+                                : 'N/A'}
+                            </td>
                           </tr>
                         ))}
                     </tbody>
                   </Table>
-  
                   {selectedOrder.food_status === 'in_progress' && (
                     <Button
                       variant="warning"

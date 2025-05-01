@@ -13,11 +13,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
     unwanted_ingredients = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), many=True, required=False
     )
+
+    unwanted_ingredient_names = serializers.SerializerMethodField()
     category = serializers.CharField(source="item.category", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ["item_id", "item_name", "quantity", "unwanted_ingredients","category"]
+        fields = ["item_id", "item_name", "quantity", "unwanted_ingredients", "unwanted_ingredient_names", "category"]
+
+    def get_unwanted_ingredient_names(self, obj):
+        return [ingredient.name for ingredient in obj.unwanted_ingredients.all()]
 
 
 class OrderSerializer(serializers.ModelSerializer):
