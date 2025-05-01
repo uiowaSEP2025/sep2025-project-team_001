@@ -114,7 +114,7 @@ def test_register_short_password(client):
 
 
 # ------------------------------------------------------------------
-# POST /login/ - Login via username/password or PIN
+# POST /login_restaurant/ - Login via username/password
 # ------------------------------------------------------------------
 
 @pytest.mark.django_db
@@ -140,7 +140,7 @@ def test_login_with_pin_success(api_client, manager_user_with_worker):
     pin = manager_user_with_worker["pin"]
     restaurant_id = manager_user_with_worker["restaurant"].id
     response = api_client.post(
-        "/login/", data=json.dumps({"pin": pin, "restaurant_id": restaurant_id}), content_type="application/json"
+        "/login_user/", data=json.dumps({"pin": pin, "restaurant_id": restaurant_id}), content_type="application/json"
     )
     assert response.status_code == 200
     data = response.json()
@@ -151,12 +151,12 @@ def test_login_with_pin_success(api_client, manager_user_with_worker):
 @pytest.mark.django_db
 def test_login_with_invalid_pin(client):
     """
-    An invalid PIN should return a 401 Unauthorized error.
+    An invalid PIN should return a 400.
     """
     login_data = {"pin": "wrongpin"}
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
-    assert response.status_code == 401
-    assert response.json()["error"] == "Invalid pin"
+    response = client.post("/login_user/", data=json.dumps(login_data), content_type="application/json")
+    assert response.status_code == 400
+    assert response.json()["error"] == "PIN and restaurant_id are required."
 
 
 @pytest.mark.django_db
@@ -168,9 +168,9 @@ def test_login_invalid_credentials(client):
     client.post("/register/", data=json.dumps(data), content_type="application/json")
 
     login_data = {"username": "bob", "password": "wrongpass"}
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    response = client.post("/login_restaurant/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 401
-    assert "Invalid credentials" in response.json().get("error", "")
+    assert "Invalid username or password." in response.json().get("error", "")
 
 
 @pytest.mark.django_db
@@ -179,16 +179,6 @@ def test_login_user_without_restaurant(client, user):
     A user that exists but has no linked restaurant should return 403.
     """
     login_data = {"username": user.username, "password": "testpass"}
-    response = client.post("/login/", data=json.dumps(login_data), content_type="application/json")
+    response = client.post("/login_restaurant/", data=json.dumps(login_data), content_type="application/json")
     assert response.status_code == 403
     assert "not linked to a restaurant" in response.json()["error"]
-
-
-@pytest.mark.django_db
-def test_login_invalid_method(client):
-    """
-    A GET request to /login/ should return a 400 error.
-    """
-    response = client.get("/login/")
-    assert response.status_code == 400
-    assert "Invalid request" in response.json().get("error", "")

@@ -1,9 +1,11 @@
+from datetime import datetime
+
 from django.utils.timezone import make_aware
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from ..models.order_models import Order
 from rest_framework.permissions import IsAuthenticated
-from datetime import datetime
+from rest_framework.response import Response
+
+from ..models.order_models import Order
 
 
 @api_view(["GET"])

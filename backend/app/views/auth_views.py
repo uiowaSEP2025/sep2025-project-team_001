@@ -1,6 +1,9 @@
 import json
 import re
+import unicodedata
 
+import requests
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -12,8 +15,6 @@ from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
 
-import requests, unicodedata
-from django.conf import settings
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -167,6 +168,7 @@ def _norm(txt: str) -> str:
     txt = unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode()
     return re.sub(r"[^\w\s]", "", txt).lower().strip()
 
+
 @csrf_exempt
 def validate_business(request):
     if request.method == "POST":
@@ -203,5 +205,6 @@ def validate_business(request):
 
         if not any(t in cand["types"] for t in ("bar", "restaurant")):
             return JsonResponse({"valid": False, "reason": "Not restaurant/bar"}, status=400)
-        
+
         return JsonResponse({"valid": True, "place_id": cand["place_id"]}, status=200)
+    return JsonResponse({"error": "Invalid request"}, status=400)

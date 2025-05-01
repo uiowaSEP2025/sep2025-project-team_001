@@ -1,6 +1,6 @@
 # urls.py
-from django.urls import path
 from app.mobileViews.notificationViews import save_fcm_token
+from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer

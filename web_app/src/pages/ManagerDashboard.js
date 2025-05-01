@@ -52,12 +52,14 @@ function ManagerDashboard() {
       setFlashSeverity(severity);
       setFlashOpen(true);
     }, 50); // Small delay to ensure re-open works
-  };  
+  };
 
   const fetchDailyStats = async () => {
     const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/daily_stats?date=${today}`);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/daily_stats?date=${today}`,
+      );
       setDailyStats(response.data);
     } catch (err) {
       console.error('Failed to fetch daily stats:', err);
@@ -66,11 +68,13 @@ function ManagerDashboard() {
 
   const fetchWorkers = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/get-workers/`);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/get-workers/`,
+      );
       const allWorkers = response.data.sort((a, b) => a.id - b.id);
       setWorkers({
-        managers: allWorkers.filter(w => w.role === 'manager'),
-        bartenders: allWorkers.filter(w => w.role === 'bartender'),
+        managers: allWorkers.filter((w) => w.role === 'manager'),
+        bartenders: allWorkers.filter((w) => w.role === 'bartender'),
       });
     } catch (error) {
       console.error('Error fetching workers:', error);
@@ -88,7 +92,9 @@ function ManagerDashboard() {
   };
 
   const handleEditSave = async () => {
-    const worker = [...workers.managers, ...workers.bartenders].find(w => w.id === editing.id);
+    const worker = [...workers.managers, ...workers.bartenders].find(
+      (w) => w.id === editing.id,
+    );
     if (!worker) return;
 
     // Prevent saving if no changes were made
@@ -105,7 +111,9 @@ function ManagerDashboard() {
       }
 
       const allWorkers = [...workers.managers, ...workers.bartenders];
-      const duplicate = allWorkers.find(w => w.pin === editValue && w.id !== worker.id);
+      const duplicate = allWorkers.find(
+        (w) => w.pin === editValue && w.id !== worker.id,
+      );
       if (duplicate) {
         showFlash('PIN already in use for this restaurant', 'error');
         return;
@@ -115,7 +123,10 @@ function ManagerDashboard() {
     const updatedWorker = { ...worker, [editing.field]: editValue };
 
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`, updatedWorker);
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`,
+        updatedWorker,
+      );
       console.log(response.data);
       setEditing({ id: null, field: null });
       setEditValue('');
@@ -123,7 +134,10 @@ function ManagerDashboard() {
       showFlash('Worker updated successfully!');
     } catch (err) {
       console.error('Update failed:', err);
-      showFlash(err.response?.data?.error || 'Failed to update worker', 'error');
+      showFlash(
+        err.response?.data?.error || 'Failed to update worker',
+        'error',
+      );
     }
   };
 
@@ -132,12 +146,15 @@ function ManagerDashboard() {
       setCreatingManager(false);
       try {
         const restaurantId = sessionStorage.getItem('restaurantId');
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
-          name: workerName,
-          pin: workerPin,
-          role: 'manager',
-          restaurant_id: restaurantId
-        });
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL}/create-worker/`,
+          {
+            name: workerName,
+            pin: workerPin,
+            role: 'manager',
+            restaurant_id: restaurantId,
+          },
+        );
         console.log(response.data);
         setWorkerName('');
         setWorkerPin('');
@@ -146,19 +163,25 @@ function ManagerDashboard() {
         fetchWorkers();
         showFlash('Manager created!');
       } catch (err) {
-        showFlash(err.response?.data?.error || 'Failed to create manager', 'error');
+        showFlash(
+          err.response?.data?.error || 'Failed to create manager',
+          'error',
+        );
       }
       return;
-    }    
+    }
 
     if (pendingRoleChange) {
       try {
         const updatedWorker = {
           ...pendingRoleChange,
-          role: 'manager'
+          role: 'manager',
         };
 
-        const response = await axios.put(`${process.env.REACT_APP_API_URL}/update-worker/${pendingRoleChange.id}/`, updatedWorker);
+        const response = await axios.put(
+          `${process.env.REACT_APP_API_URL}/update-worker/${pendingRoleChange.id}/`,
+          updatedWorker,
+        );
         console.log(response.data);
         setPendingRoleChange(null);
         setShowManagerAuthModal(false);
@@ -199,7 +222,10 @@ function ManagerDashboard() {
 
             try {
               const updatedWorker = { ...worker, role: newRole };
-              const response = await axios.put(`${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`, updatedWorker);
+              const response = await axios.put(
+                `${process.env.REACT_APP_API_URL}/update-worker/${worker.id}/`,
+                updatedWorker,
+              );
               console.log(response.data);
               setEditing({ id: null, field: null });
               setEditValue('');
@@ -230,7 +256,9 @@ function ManagerDashboard() {
         autoFocus
       />
     ) : (
-      <span onClick={() => handleEditStart(worker.id, field, value)}>{value}</span>
+      <span onClick={() => handleEditStart(worker.id, field, value)}>
+        {value}
+      </span>
     );
   };
 
@@ -238,7 +266,14 @@ function ManagerDashboard() {
     <Box key={worker.id} sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '40%' }}>{renderWorkerField(worker, 'name')}</Box>
       <Box sx={{ width: '30%' }}>{renderWorkerField(worker, 'role')}</Box>
-      <Box sx={{ width: '30%', position: 'relative', display: 'flex', justifyContent: 'center' }}>
+      <Box
+        sx={{
+          width: '30%',
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
         <Box>{renderWorkerField(worker, 'pin')}</Box>
         <IconButton
           color="error"
@@ -258,26 +293,30 @@ function ManagerDashboard() {
         </IconButton>
       </Box>
     </Box>
-  );  
+  );
 
   const handleCreateWorker = async () => {
     const restaurantId = sessionStorage.getItem('restaurantId');
     if (!restaurantId) return showFlash('Restaurant ID not found.', 'error');
-    if (workerPin.length !== 4 || !/^[0-9]{4}$/.test(workerPin)) return showFlash('PIN must be 4 digits', 'error');
-  
+    if (workerPin.length !== 4 || !/^[0-9]{4}$/.test(workerPin))
+      return showFlash('PIN must be 4 digits', 'error');
+
     if (workerRole === 'manager') {
       setCreatingManager(true);
       setShowManagerAuthModal(true);
       return;
     }
-  
+
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/create-worker/`, {
-        name: workerName,
-        pin: workerPin,
-        role: workerRole,
-        restaurant_id: restaurantId
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/create-worker/`,
+        {
+          name: workerName,
+          pin: workerPin,
+          role: workerRole,
+          restaurant_id: restaurantId,
+        },
+      );
       console.log(response.data);
       setWorkerName('');
       setWorkerPin('');
@@ -285,9 +324,12 @@ function ManagerDashboard() {
       fetchWorkers();
       showFlash('Employee created!');
     } catch (err) {
-      showFlash(err.response?.data?.error || 'Failed to create employee', 'error');
+      showFlash(
+        err.response?.data?.error || 'Failed to create employee',
+        'error',
+      );
     }
-  };  
+  };
 
   return (
     <Box sx={{ overflowY: 'auto', maxHeight: '100vh', pb: 10 }}>
@@ -301,27 +343,54 @@ function ManagerDashboard() {
             <Button variant="primary" size="lg" onClick={() => navigate('/orders')}>Orders</Button>
             <Button variant="primary" size="lg" onClick={() => navigate('/product_statistics')}>Product Statistics</Button>
           </div>
-          <Button variant="danger" size="lg" onClick={() => navigate('/dashboard')} className="logout">Log Out</Button>
+          <Button
+            variant="danger"
+            size="lg"
+            onClick={() => navigate('/dashboard')}
+            className="logout"
+          >
+            Log Out
+          </Button>
         </div>
 
         <div className="panel-wrapper">
           {/* Left Panel - Daily Stats */}
           {dailyStats && (
             <Paper className="panel" elevation={4}>
-              <Typography variant="h5" gutterBottom>📊 Today's Stats</Typography>
-              <Typography><strong>Total Orders:</strong> {dailyStats.total_orders}</Typography>
-              <Typography><strong>Total Sales:</strong> ${dailyStats.total_sales.toFixed(2)}</Typography>
-              <Typography><strong>Average Order Value:</strong> ${dailyStats.avg_order_value.toFixed(2)}</Typography>
-              <Typography><strong>Active Workers:</strong> {dailyStats.active_workers}</Typography>
+              <Typography variant="h5" gutterBottom>
+                📊 Today's Stats
+              </Typography>
+              <Typography>
+                <strong>Total Orders:</strong> {dailyStats.total_orders}
+              </Typography>
+              <Typography>
+                <strong>Total Sales:</strong> $
+                {dailyStats.total_sales.toFixed(2)}
+              </Typography>
+              <Typography>
+                <strong>Average Order Value:</strong> $
+                {dailyStats.avg_order_value.toFixed(2)}
+              </Typography>
+              <Typography>
+                <strong>Active Workers:</strong> {dailyStats.active_workers}
+              </Typography>
             </Paper>
           )}
 
           {/* Right Panel - Employees */}
           <Paper className="panel" elevation={4}>
-            <Typography variant="h5" gutterBottom>👨‍🍳 Employees</Typography>
+            <Typography variant="h5" gutterBottom>
+              👨‍🍳 Employees
+            </Typography>
             <Paper elevation={2} sx={{ p: 2 }}>
               <Stack spacing={1}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                  }}
+                >
                   <TextField
                     label="Search by name"
                     size="small"
@@ -343,7 +412,13 @@ function ManagerDashboard() {
                   </TextField>
                 </Box>
 
-                <Box sx={{ display: 'flex', fontWeight: 'bold', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    fontWeight: 'bold',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <Box sx={{ width: '40%' }}>Name</Box>
                   <Box sx={{ width: '30%' }}>Role</Box>
                   <Box sx={{ width: '30%', textAlign: 'center' }}>PIN</Box>
@@ -351,9 +426,12 @@ function ManagerDashboard() {
 
                 {[...workers.managers, ...workers.bartenders]
                   .sort((a, b) => a.id - b.id)
-                  .filter(worker => {
-                    const nameMatch = worker.name.toLowerCase().includes(searchTerm.toLowerCase());
-                    const roleMatch = roleFilter === 'all' || worker.role === roleFilter;
+                  .filter((worker) => {
+                    const nameMatch = worker.name
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase());
+                    const roleMatch =
+                      roleFilter === 'all' || worker.role === roleFilter;
                     return nameMatch && roleMatch;
                   })
                   .map(renderWorkerRow)}
@@ -385,7 +463,9 @@ function ManagerDashboard() {
                     <MenuItem value="manager">manager</MenuItem>
                     <MenuItem value="bartender">bartender</MenuItem>
                   </TextField>
-                  <MuiButton variant="contained" onClick={handleCreateWorker}>+ Add</MuiButton>
+                  <MuiButton variant="contained" onClick={handleCreateWorker}>
+                    + Add
+                  </MuiButton>
                 </Box>
               </Stack>
             </Paper>
@@ -401,7 +481,10 @@ function ManagerDashboard() {
         {/* Delete Confirmation Dialog */}
         <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
           <Box sx={{ p: 2 }}>
-            <Typography>Are you sure you want to remove <strong>{deletingWorker?.name}</strong>?</Typography>
+            <Typography>
+              Are you sure you want to remove{' '}
+              <strong>{deletingWorker?.name}</strong>?
+            </Typography>
           </Box>
           <DialogActions>
             <MuiButton onClick={() => setConfirmOpen(false)}>Cancel</MuiButton>
@@ -409,11 +492,16 @@ function ManagerDashboard() {
               color="error"
               onClick={async () => {
                 try {
-                  if (deletingWorker.role === 'manager' && workers.managers.length <= 1) {
+                  if (
+                    deletingWorker.role === 'manager' &&
+                    workers.managers.length <= 1
+                  ) {
                     showFlash('At least one manager is required.', 'error');
                     return;
                   }
-                  const response = await axios.delete(`${process.env.REACT_APP_API_URL}/delete-worker/${deletingWorker.id}/`);
+                  const response = await axios.delete(
+                    `${process.env.REACT_APP_API_URL}/delete-worker/${deletingWorker.id}/`,
+                  );
                   console.log(response.data);
                   setConfirmOpen(false);
                   setDeletingWorker(null);
@@ -437,7 +525,11 @@ function ManagerDashboard() {
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           TransitionComponent={(props) => <Slide {...props} direction="down" />}
         >
-          <Alert onClose={() => setFlashOpen(false)} severity={flashSeverity} sx={{ width: '100%', fontWeight: 'bold', fontSize: '1rem' }}>
+          <Alert
+            onClose={() => setFlashOpen(false)}
+            severity={flashSeverity}
+            sx={{ width: '100%', fontWeight: 'bold', fontSize: '1rem' }}
+          >
             {flashMessage}
           </Alert>
         </Snackbar>
