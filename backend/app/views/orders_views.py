@@ -1,7 +1,6 @@
-from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
-
 from datetime import timedelta
 
+from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
 from app.scheduler_instance import get_restaurant_scheduler
 from app.utils.eta_calculator import (
     calculate_beverage_eta_multibartender,
@@ -10,7 +9,6 @@ from app.utils.eta_calculator import (
 )
 from app.utils.order_eta_utils import recalculate_pending_etas
 from django.utils import timezone
-
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -146,11 +144,12 @@ def update_order_status(request, restaurant_id, order_id, new_status):
 
     order.status = normalized_status
     order.save()
+
     if normalized_status == "completed":
         for order_item in order.order_items.all():
             order_item.item.times_ordered += order_item.quantity
             order_item.item.save()
-    
+
     if order.customer.fcm_token:
         send_fcm_httpv1(
             device_token=order.customer.fcm_token,
@@ -158,14 +157,14 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             body=f"Your order #{order.id} is now {order.status}",
             data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
         )
-        
+
         send_notification_to_device(
             device_token=order.customer.fcm_token,
             title="Order Update",
             body=f"Your order #{order.id} is now {order.status}",
             data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
         )
-    
+
     recalculate_pending_etas(order.restaurant.id)
     return Response(
         {
@@ -197,6 +196,18 @@ def get_customer_orders(request):
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_order(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+    except:
+        return Response(
+            {"error": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    serializer = OrderSerializer(order)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

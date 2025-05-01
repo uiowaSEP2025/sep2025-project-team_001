@@ -72,7 +72,8 @@ function Registration() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { email, phone, business_name, business_address, restaurantImage } = formData;
+    const { email, phone, business_name, business_address, restaurantImage } =
+      formData;
 
     if (
       !email ||
@@ -105,21 +106,25 @@ function Registration() {
         {
           name: business_name,
           address: business_address,
-        }
+        },
       );
 
       if (!validateRes.data.valid) {
-        toast.error('Invalid business address. Contact streamlinebars@gmail.com for manual verification');
-        console.log("Restaurant validation failed")
+        toast.error(
+          'Invalid business address. Contact streamlinebars@gmail.com for manual verification',
+        );
+        console.log('Restaurant validation failed');
         return;
       }
     } catch (err) {
-      toast.error('Invalid business address. Contact streamlinebars@gmail.com for manual verification');
-      console.log("Restaurant validation failed")
+      toast.error(
+        'Invalid business address. Contact streamlinebars@gmail.com for manual verification',
+      );
+      console.log('Restaurant validation failed');
       return;
     }
 
-    console.log("Restaurant validation success")
+    console.log('Restaurant validation success');
 
     try {
       const response = await axios.post(

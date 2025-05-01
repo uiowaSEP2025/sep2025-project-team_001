@@ -1,6 +1,9 @@
 import json
 import re
+import unicodedata
 
+import requests
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -13,8 +16,6 @@ from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
 from app.utils.image_upload import save_image_from_base64
 
-import requests, unicodedata
-from django.conf import settings
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
