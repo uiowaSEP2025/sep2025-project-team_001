@@ -204,7 +204,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
     );
   }
 
-  Future<void> _openItemModalWithUrl(
+  Future<void> _openItemModal(
     BuildContext context,
     MenuItem item,
     double screenHeight,
@@ -253,8 +253,136 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     ),
                   ),
                 ),
-                // keep the rest of the UI the same
-                // ...
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: screenHeight * 0.4,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(
+                              top: verticalSpacing * .5,
+                              left: horizontalSpacing,
+                              right: horizontalSpacing),
+                          color: Colors.white,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  textAlign: TextAlign.left,
+                                  style: AppTextStyles.bigBoldLetters(
+                                      screenHeight * 0.7, Colors.black),
+                                ),
+                                SizedBox(
+                                  height: verticalSpacing * 0.5,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      expandDescription = !expandDescription;
+                                    });
+                                  },
+                                  child: Text(
+                                    item.description,
+                                    textAlign: TextAlign.left,
+                                    maxLines: expandDescription ? null : 4,
+                                    overflow: expandDescription
+                                        ? TextOverflow.visible
+                                        : TextOverflow.ellipsis,
+                                    style: AppTextStyles.subtitleParagraph(
+                                        screenHeight, AppColors.paragraphText),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: verticalSpacing * 0.5,
+                                ),
+                                Text("Ingredients:",
+                                    style: AppTextStyles.buttonText(
+                                        screenHeight, AppColors.paragraphText)),
+                                ...List.generate(item.ingredients.length,
+                                    (index) {
+                                  final ingredient = item.ingredients[index];
+                                  return CheckboxListTile(
+                                    title: Text(ingredient.name),
+                                    value: ingredientSelections[index],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        ingredientSelections[index] = value!;
+                                      });
+                                    },
+                                  );
+                                }),
+                                SizedBox(
+                                  height: verticalSpacing,
+                                )
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: SizedBox(
+                    height: screenWidth * 0.12,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+
+                        final unwantedIngredientsIds = <int>[];
+                        final unwantedIngredientsNames = <String>[];
+
+                        for (int i = 0; i < ingredientSelections.length; i++) {
+                          if (!ingredientSelections[i]) {
+                            unwantedIngredientsIds.add(item.ingredients[i].id);
+                            unwantedIngredientsNames
+                                .add(item.ingredients[i].name);
+                          } //todo asegurarme de que todos los cart items tengan el unwanted ingredient ids para que si se suman o restan items estos sean especificos de un ingrediente entonces cada item en la cart screen va a ser un cart item
+                        }
+                        _addToCart(item, unwantedIngredientsIds,
+                            unwantedIngredientsNames);
+                      },
+                      icon: const Icon(Icons.add_shopping_cart,
+                          color: Colors.white),
+                      label: Text(
+                        "Add to Cart",
+                        style: AppTextStyles.buttonText(
+                            screenHeight, Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 60,
+                  right: 16,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: screenWidth * 0.1,
+                      height: screenWidth * 0.1,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.close, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ),
+                ),
               ]),
             ),
           );
