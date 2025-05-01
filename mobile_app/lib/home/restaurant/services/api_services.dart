@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:mobile_app/api_services.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
 import 'package:mobile_app/utils/token_manager.dart';
@@ -30,6 +31,10 @@ Future<List<MenuItem>> fetchMenuItems(int restaurantId) async {
     return data.map((json) => MenuItem.fromJson(json)).toList();
   } on DioException catch (e) {
     if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if(refreshed){
+        return await fetchMenuItems(restaurantId);
+      }
       throw Exception("Access token expired or unauthorized");
     }
 

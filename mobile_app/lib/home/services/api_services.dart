@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:mobile_app/api_services.dart';
 import 'package:mobile_app/home/restaurant/cart_screen.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
@@ -40,6 +41,10 @@ Future<List<Restaurant>> fetchRestaurants() async {
     return data.map((json) => Restaurant.fromJson(json)).toList();
   } on DioException catch (e) {
     if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await fetchRestaurants();
+      }
       throw Exception("Access token expired or unauthorized");
     }
 
@@ -97,6 +102,14 @@ Future<int> placeOrder({
       throw Exception("Failed to place order");
     }
   } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await placeOrder(
+            customerId: customerId, restaurantId: restaurantId, cart: cart);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
     print("Order error: ${e.response?.data}");
     throw Exception("Error placing order: ${e.response?.statusCode}");
   }
@@ -107,20 +120,35 @@ Future<List<Order>> fetchUserOrders(int customerId) async {
   final dio = Dio();
 
   const String endpoint = "${ApiConfig.baseUrl}/order/customer/";
+  try {
+    final response = await dio.get(
+      endpoint,
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+      ),
+    );
 
-  final response = await dio.get(
-    endpoint,
-    options: Options(
-      headers: {
-        "Authorization": "Bearer $accessToken",
-        "Content-Type": "application/json",
-      },
-    ),
-  );
-
-  final data = response.data as List;
-  print(data);
-  return data.map((json) => Order.fromJson(json)).toList();
+    if (response.statusCode == 200) {
+      final data = response.data as List;
+      print(data);
+      return data.map((json) => Order.fromJson(json)).toList();
+    } else {
+      throw Exception("Failed to fetch user orders");
+    }
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await fetchUserOrders(customerId);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
+    print("PaymentIntent error: ${e.response?.data}");
+    throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
+  }
 }
 
 Future<Map<String, String>> createPaymentIntent(double amountInDollars,
@@ -160,6 +188,13 @@ Future<Map<String, String>> createPaymentIntent(double amountInDollars,
       throw Exception("Failed to create PaymentIntent");
     }
   } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await createPaymentIntent(amountInDollars);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
     print("PaymentIntent error: ${e.response?.data}");
     throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
   }
@@ -243,6 +278,7 @@ Future<bool> handleCheckout(double amount) async {
 Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
   final accessToken = await TokenManager.getAccessToken();
 
+try{
   final response = await Dio().post(
     "${ApiConfig.baseUrl}/order/payment/saved_card/",
     data: {
@@ -259,6 +295,17 @@ Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
     print("Payment successful!");
   } else {
     print("Payment failed: ${response.data}");
+  }}
+  on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await payWithSavedCard(paymentMethodId,amount);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
+    print("PaymentIntent error: ${e.response?.data}");
+    throw Exception("Error creating PaymentIntent: ${e.response?.statusCode}");
   }
 }
 
@@ -287,6 +334,13 @@ Future<void> deletePaymentMethod(String paymentMethodId) async {
       print('Failed to delete payment method');
     }
   } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return await deletePaymentMethod(paymentMethodId);
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
     print("Delete error: ${e.response?.data}");
   }
 }

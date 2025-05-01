@@ -7,7 +7,14 @@ from .mobileViews.mobileViews import login_customer, register_customer
 from .mobileViews.stripeViews import create_payment_intent, delete_payment_method, list_saved_payment_methods, pay_with_saved_card
 from .views.auth_views import login_restaurant, login_user, register_user, validate_business
 from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
-from .views.orders_views import create_order, estimate_order_eta, get_customer_orders, retrieve_active_orders, update_order_status
+from .views.orders_views import (
+    create_order,
+    estimate_order_eta,
+    get_customer_orders,
+    get_order,
+    retrieve_active_orders,
+    update_order_status,
+)
 from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.review_views import create_review, list_reviews
 from .views.stats_views import daily_stats
@@ -33,6 +40,7 @@ urlpatterns = [
     path("order/payment/methods/", list_saved_payment_methods, name="list_saved_payment_methods"),
     path("order/payment/saved_card/", pay_with_saved_card, name="pay_with_saved_card"),
     path("order/payment/saved_card/<str:payment_method_id>/", delete_payment_method, name="pay_with_saved_card"),
+    path("order/<int:order_id>/", get_order, name="get_order"),
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),

@@ -10,6 +10,7 @@ import 'package:mobile_app/home/restaurant/restaurant_menu_screen.dart';
 import 'package:mobile_app/home/restaurant_addition_screen.dart';
 import 'package:mobile_app/main_navigation/main_navigation_screen.dart';
 import 'package:mobile_app/main_navigation/orders/order_history_screen.dart';
+import 'package:mobile_app/splash_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -67,10 +68,13 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(
-                builder: (_) => const AuthenticationPage());
+                builder: (_) => const SplashScreen());
           // case '/home':
           //   return MaterialPageRoute(
           //       builder: (_) => const RestaurantSelectionScreen());
+          case '/authentication':
+            return MaterialPageRoute(
+                builder: (_) => const AuthenticationPage());
           case '/home':
             final args = settings.arguments as Map<String, dynamic>?;
             final initialIndex = args?['initialIndex'] ?? 0;
