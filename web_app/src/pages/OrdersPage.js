@@ -52,25 +52,31 @@ const OrdersPage = () => {
     try {
       const restaurantId = sessionStorage.getItem('restaurantId');
       const workerID = sessionStorage.getItem('workerId');
-
+      const workerName = sessionStorage.getItem('workerName');
+  
       const currentOrder = orders.find((o) => o.id === orderId);
       const isAssigningWorker = currentOrder.status === 'pending' && nextStatus === 'in_progress';
-
+  
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
         isAssigningWorker ? { worker_id: workerID } : {},
       );
-
+  
+      const updatedData = {
+        ...response.data,
+        ...(isAssigningWorker ? { worker_name: workerName } : {})
+      };
+  
       const updatedOrders = orders.map((order) =>
-        order.id === orderId ? { ...order, ...response.data } : order
+        order.id === orderId ? { ...order, ...updatedData } : order
       );
       setOrders(updatedOrders);
-
-      setSelectedOrder((prev) => (prev ? { ...prev, ...response.data } : null));
+  
+      setSelectedOrder((prev) => (prev ? { ...prev, ...updatedData } : null));
     } catch (error) {
       console.error('Error updating order status: ', error);
     }
-  };
+  };  
 
   const handleUpdateCategoryStatus = async (orderId, category, newStatus) => {
     try {
