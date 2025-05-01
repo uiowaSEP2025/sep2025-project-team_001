@@ -11,6 +11,7 @@ import MenuPage from './pages/MenuPage';
 import PrivateRoute from './PrivateRoute';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ProductStatisticsPage from './pages/ProductStatisticsPage';
+import CustomerReviewPage from './pages/CustomerReviewPage';
 
 function AppRoutes() {
   return (
@@ -22,8 +23,10 @@ function AppRoutes() {
       <Route path="/manager_dashboard" element={<PrivateRoute> <ManagerDashboard /> </PrivateRoute>}/>
       <Route path="/orders" element={<PrivateRoute> <OrdersPage /> </PrivateRoute>}/>
       <Route path="/menu" element={<PrivateRoute> <MenuPage /> </PrivateRoute>}/>
-      <Route path="/product_statistics" element={<PrivateRoute> <ProductStatisticsPage /> </PrivateRoute>} />
+      <Route path="/reviews" element={<PrivateRoute> <CustomerReviewPage /> </PrivateRoute>}/>
+      <Route path="/product_statistics" element={<PrivateRoute> <ProductStatisticsPage /> </PrivateRoute>}/>
     </Routes>
+
   );
 }
 
