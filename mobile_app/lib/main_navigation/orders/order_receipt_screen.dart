@@ -211,7 +211,7 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                           width: screenWidth - horizontalSpacing * 2,
                           child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondary),
+                                  backgroundColor: AppColors.primaryColor),
                               onPressed: () {
                                 generateAndPrintReceipt(
                                     widget.order, customerName, restaurant);
