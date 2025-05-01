@@ -152,7 +152,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     horizontalSpacing: horizontalSpacing,
                     verticalSpacing: verticalSpacing,
                     onAddToCart: (menuItem) {
-                      _openItemModal(context, menuItem, screenHeight,
+                      _openItemModal(context, item, screenHeight,
                           screenWidth, verticalSpacing, horizontalSpacing);
                     },
                   ),
