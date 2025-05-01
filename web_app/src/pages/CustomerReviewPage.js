@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Typography, Paper, Stack, Divider } from '@mui/material';
+import Rating from '@mui/material/Rating';
+import StarIcon from '@mui/icons-material/Star';
 
 const CustomerReviewPage = () => {
     const [reviews, setReviews] = useState([]);
@@ -23,8 +25,8 @@ const CustomerReviewPage = () => {
           <Stack spacing={2}>
             {reviews.map((review) => (
               <Paper key={review.id} sx={{ p: 2 }}>
-                <Typography variant="subtitle1"><strong>Customer:</strong> {review.order.customer.user.username}</Typography>
-                <Typography variant="subtitle2"><strong>Worker:</strong> {review.order.worker?.name || 'N/A'}</Typography>
+                <Typography variant="subtitle1"><strong>Customer:</strong> {review.customer_name}</Typography>
+                <Typography variant="subtitle2"><strong>Worker:</strong> {review.worker_name || 'N/A'}</Typography>
     
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography><strong>Rating:</strong></Typography>
