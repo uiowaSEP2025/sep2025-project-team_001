@@ -1,5 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Spinner, Modal, Button } from 'react-bootstrap';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  CircularProgress
+} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,53 +40,33 @@ const OrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [workerSearchTerm, setWorkerSearchTerm] = useState('');
 
+  const statusColorMap = {
+    pending: 'secondary',
+    in_progress: 'warning',
+    completed: 'info',
+    picked_up: 'success',
+    cancelled: 'error'
+  };;
+
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
       const restaurantId = sessionStorage.getItem('restaurantId');
       const workerID = sessionStorage.getItem('workerId');
 
       const currentOrder = orders.find((o) => o.id === orderId);
-      const isAssigningWorker =
-        currentOrder.status === 'pending' && nextStatus === 'in_progress';
+      const isAssigningWorker = currentOrder.status === 'pending' && nextStatus === 'in_progress';
 
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
         isAssigningWorker ? { worker_id: workerID } : {},
       );
 
-      console.log(`Order ${response.data.order_id} updated to ${nextStatus}:`, {
-        status: response.data.status,
-        food_status: response.data.food_status,
-        beverage_status: response.data.beverage_status,
-      });
-      
       const updatedOrders = orders.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: response.data.status,
-              food_status: response.data.food_status,
-              beverage_status: response.data.beverage_status,
-            }
-          : order
-      );      
+        order.id === orderId ? { ...order, ...response.data } : order
+      );
       setOrders(updatedOrders);
 
-      // Automatically close modal if final status
-      if (nextStatus === 'picked_up') {
-        setSelectedOrder(null);
-      } else {
-        setSelectedOrder((prev) =>
-          prev
-            ? {
-                ...prev,
-                status: response.data.status,
-                food_status: response.data.food_status,
-                beverage_status: response.data.beverage_status,
-              }
-            : null
-        );        
-      }
+      setSelectedOrder((prev) => (prev ? { ...prev, ...response.data } : null));
     } catch (error) {
       console.error('Error updating order status: ', error);
     }
@@ -75,369 +77,227 @@ const OrdersPage = () => {
       const restaurantId = sessionStorage.getItem('restaurantId');
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`
-      );      
-  
-      const updated = response.data;
-  
-      setSelectedOrder((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          status: updated.status,
-          food_status:
-            category === 'food' ? updated.food_status : prev.food_status,
-          beverage_status:
-            category === 'beverage' ? updated.beverage_status : prev.beverage_status,
-        };
-      });
-  
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === updated.order_id
-            ? {
-                ...o,
-                status: updated.status,
-                food_status:
-                  category === 'food' ? updated.food_status : o.food_status,
-                beverage_status:
-                  category === 'beverage' ? updated.beverage_status : o.beverage_status,
-              }
-            : o
-        )
       );
-  
-      if (updated.status === 'picked_up') {
-        setTimeout(() => setSelectedOrder(null), 300);
-      }
-  
-      console.log(`Updated ${category} to ${newStatus} for order #${orderId}:`, {
-        status: updated.status,
-        food_status: updated.food_status,
-        beverage_status: updated.beverage_status,
-      });
-          
+
+      const updated = response.data;
+      setSelectedOrder((prev) => prev ? { ...prev, ...updated } : null);
+      setOrders((prev) =>
+        prev.map((o) => o.id === updated.order_id ? { ...o, ...updated } : o)
+      );
     } catch (err) {
       console.error('Error updating category status:', err);
     }
-  };    
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/retrieve/orders/`,
-        );
-        const newOrders = response.data;
-
-        if (JSON.stringify(newOrders) !== JSON.stringify(orders)) {
-          //checks if orders have changed, if same do nothing
-          setOrders(newOrders);
-        }
-
-        if (loading) {
-          setLoading(false); // Only clear loading on first fetch
-        }
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/retrieve/orders/`);
+        setOrders((prev) => JSON.stringify(prev) !== JSON.stringify(response.data) ? response.data : prev);
+        if (loading) setLoading(false);
       } catch (error) {
         console.error('Error fetching orders:', error);
-        if (loading) {
-          setLoading(false);
-        }
+        if (loading) setLoading(false);
       }
     };
 
-    fetchOrders(); // On Page entry
-
-    const intervalId = setInterval(fetchOrders, 3000); // Poll every 3s
+    fetchOrders();
+    const intervalId = setInterval(fetchOrders, 3000);
     return () => clearInterval(intervalId);
   }, []);
 
-  const getNextStatus = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'in_progress';
-      case 'in_progress':
-        return 'completed';
-      case 'completed':
-        return 'picked_up';
-      default:
-        return null;
-    }
-  };
-
-  const formatStatus = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'picked_up':
-        return 'Picked Up';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  };
-
-  if (loading && orders.length === 0) {
-    return (
-      <Container className="mt-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </Container>
-    );
-  }
+  const formatStatus = (status) => status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <Container className="mt-5">
+    <Box p={3}>
       <Button
-        variant="outline-primary"
-        className="mb-3"
+        variant="contained"
+        color="error"
         onClick={() => navigate('/dashboard')}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          zIndex: 1051,
-        }}
+        sx={{ mb: 2 }}
       >
         Log Out
       </Button>
-      <h1>Active Orders</h1>
-  
-      {/* Status Filter */}
-      <div className="mb-3">
-        <label className="form-label fw-bold">Filter by Status</label>
-        <div className="d-flex flex-wrap gap-3">
-          {['pending', 'in_progress', 'completed', 'picked_up', 'cancelled'].map((status) => (
-            <div key={status} className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id={`status-${status}`}
+
+      <Typography variant="h4" align="center" gutterBottom>Active Orders</Typography>
+
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" mb={2}>
+        {['pending', 'in_progress', 'completed', 'picked_up', 'cancelled'].map((status) => (
+          <FormControlLabel
+            key={status}
+            control={
+              <Checkbox
                 checked={statusFilter.includes(status)}
-                onChange={() => {
+                onChange={() =>
                   setStatusFilter((prev) =>
-                    prev.includes(status)
-                      ? prev.filter((s) => s !== status)
-                      : [...prev, status]
-                  );
-                }}
+                    prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+                  )
+                }
               />
-              <label className="form-check-label" htmlFor={`status-${status}`}>
-                {status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-  
-      {/* Search Inputs */}
-      <div className="d-flex flex-column flex-md-row gap-3 mb-3">
-        <div style={{ maxWidth: '300px' }}>
-          <label htmlFor="customerSearch" className="form-label fw-bold">Search by Customer Name</label>
-          <input
-            type="text"
-            id="customerSearch"
-            className="form-control"
-            placeholder="Enter customer name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            }
+            label={formatStatus(status)}
           />
-        </div>
-        <div style={{ maxWidth: '300px' }}>
-          <label htmlFor="workerSearch" className="form-label fw-bold">Search by Worker Name</label>
-          <input
-            type="text"
-            id="workerSearch"
-            className="form-control"
-            placeholder="Enter worker name"
-            value={workerSearchTerm}
-            onChange={(e) => setWorkerSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-  
-      {/* Order Table */}
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Order #</th>
-            <th>Customer</th>
-            <th>ETA</th>
-            <th>Total Price</th>
-            <th>Worker</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders
-            .filter((order) =>
-              statusFilter.includes(order.status) &&
-              order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-              (order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()) || !order.worker_name)
-            )
-            .map((order) => (
-              <tr
-                key={order.id}
-                onClick={() => setSelectedOrder(order)}
-                style={{ cursor: 'pointer' }}
-              >
-                <td>{order.id}</td>
-                <td>{order.customer_name}</td>
-                <td>
-                  {order.food_eta_minutes !== null && (
-                    <div><strong>Food:</strong> {order.food_eta_minutes} min</div>
-                  )}
-                  {order.beverage_eta_minutes !== null && (
-                    <div><strong>Bev:</strong> {order.beverage_eta_minutes} min</div>
-                  )}
-                </td>
-                <td>${Number(order.total_price).toFixed(2)}</td>
-                <td>{order.worker_name || ''}</td>
-                <td>{formatStatus(order.status)}</td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
-  
-      {/* Modal */}
-      <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Order Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+        ))}
+      </Stack>
+
+      <Stack direction="row" spacing={2} mb={3}>
+        <TextField
+          label="Search Customer"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <TextField
+          label="Search Worker"
+          variant="outlined"
+          value={workerSearchTerm}
+          onChange={(e) => setWorkerSearchTerm(e.target.value)}
+        />
+      </Stack>
+
+      {loading ? (
+        <Box textAlign="center"><CircularProgress /></Box>
+      ) : (
+        <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order #</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell>ETA</TableCell>
+                <TableCell>Total Price</TableCell>
+                <TableCell>Worker</TableCell>
+                <TableCell>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders
+                .filter((order) =>
+                  statusFilter.includes(order.status) &&
+                  order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                  (!order.worker_name || order.worker_name.toLowerCase().includes(workerSearchTerm.toLowerCase()))
+                )
+                .map((order) => (
+                  <TableRow
+                    key={order.id}
+                    hover
+                    onClick={() => setSelectedOrder(order)}
+                    sx={{
+                      cursor: 'pointer',
+                      backgroundColor: '#fafafa',
+                      '&:hover': { backgroundColor: '#f0f0f0' },
+                      ...(order.status === 'cancelled' && {
+                        outline: '2px solid #f44336',
+                        backgroundColor: '#ffebee'
+                      })
+                    }}
+                  >
+                    <TableCell>{order.id}</TableCell>
+                    <TableCell>{order.customer_name}</TableCell>
+                    <TableCell>
+                      {order.food_eta_minutes && <div><strong>Food:</strong> {order.food_eta_minutes} min</div>}
+                      {order.beverage_eta_minutes && <div><strong>Bev:</strong> {order.beverage_eta_minutes} min</div>}
+                    </TableCell>
+                    <TableCell>${Number(order.total_price).toFixed(2)}</TableCell>
+                    <TableCell>{order.worker_name || '-'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={formatStatus(order.status)}
+                        color={statusColorMap[order.status] || 'default'}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                  </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      <Dialog open={!!selectedOrder} onClose={() => setSelectedOrder(null)} maxWidth="md" fullWidth>
+        <DialogTitle>Order Details</DialogTitle>
+        <DialogContent>
           {selectedOrder && (
-            <>
-              {/* Beverage Items */}
-              {selectedOrder.order_items.some(item => item.category?.toLowerCase() === "beverage") && (
-                <>
-                  <h5>Beverages (Status: {formatStatus(selectedOrder.beverage_status)})</h5>
-                  <Table striped bordered hover size="sm" className="mb-3">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '15ch' }}>Item</th>
-                        <th style={{ width: '10ch' }}>Quantity</th>
-                        <th>Unwanted Ingredients</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.order_items
-                        .filter((item) => item.category?.toLowerCase() === 'beverage')
-                        .map((item, index) => (
-                          <tr key={`bev-${index}`}>
-                            <td>{item.item_name}</td>
-                            <td>{item.quantity}</td>
-                            <td>
+            <Stack spacing={3}>
+              {['beverage', 'food'].map((category, idx) => {
+                const items = selectedOrder.order_items.filter((item) =>
+                  (category === 'beverage'
+                    ? item.category?.toLowerCase() === 'beverage'
+                    : item.category?.toLowerCase() !== 'beverage')
+                );
+                if (!items.length) return null;
+                const status = category === 'beverage' ? selectedOrder.beverage_status : selectedOrder.food_status;
+
+                return (
+                  <Box key={category}>
+                    {idx === 1 && <Divider sx={{ my: 2 }} />}
+                    <Typography variant="h6" gutterBottom>
+                      {category === 'beverage' ? 'Beverages' : 'Food'} (Status: {formatStatus(status)})
+                    </Typography>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Item</TableCell>
+                          <TableCell>Quantity</TableCell>
+                          <TableCell>Unwanted Ingredients</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {items.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{item.item_name}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>
                               {item.unwanted_ingredient_names?.length > 0
-                                ? `UNWANTED INGREDIENTS: ${item.unwanted_ingredient_names.join(', ')}`
+                                ? `${item.unwanted_ingredient_names.length} Ingredient(s): ${item.unwanted_ingredient_names.join(', ')}`
                                 : 'N/A'}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                    </tbody>
-                  </Table>
-                  {selectedOrder.beverage_status === 'in_progress' && (
-                    <Button
-                      variant="warning"
-                      className="mb-3"
-                      onClick={() =>
-                        handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'completed')
-                      }
-                    >
-                      Mark Beverage Completed
-                    </Button>
-                  )}
-                  {selectedOrder.beverage_status === 'completed' && (
-                    <Button
-                      variant="success"
-                      className="mb-3"
-                      onClick={() =>
-                        handleUpdateCategoryStatus(selectedOrder.id, 'beverage', 'picked_up')
-                      }
-                    >
-                      Mark Beverage Picked Up
-                    </Button>
-                  )}
-                </>
-              )}
-  
-              {/* Food Items */}
-              {selectedOrder.order_items.some(item => item.category?.toLowerCase() !== "beverage") && (
-                <>
-                  <h5>Food (Status: {formatStatus(selectedOrder.food_status)})</h5>
-                  <Table striped bordered hover size="sm" className="mb-3">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '15ch' }}>Item</th>
-                        <th style={{ width: '10ch' }}>Quantity</th>
-                        <th>Unwanted Ingredients</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.order_items
-                        .filter((item) => item.category?.toLowerCase() !== 'beverage')
-                        .map((item, index) => (
-                          <tr key={`food-${index}`}>
-                            <td>{item.item_name}</td>
-                            <td>{item.quantity}</td>
-                            <td>
-                              {item.unwanted_ingredient_names?.length > 0
-                                ? item.unwanted_ingredient_names.join(', ')
-                                : 'N/A'}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </Table>
-                  {selectedOrder.food_status === 'in_progress' && (
-                    <Button
-                      variant="warning"
-                      className="mb-3"
-                      onClick={() =>
-                        handleUpdateCategoryStatus(selectedOrder.id, 'food', 'completed')
-                      }
-                    >
-                      Mark Food Completed
-                    </Button>
-                  )}
-                  {selectedOrder.food_status === 'completed' && (
-                    <Button
-                      variant="success"
-                      className="mb-3"
-                      onClick={() =>
-                        handleUpdateCategoryStatus(selectedOrder.id, 'food', 'picked_up')
-                      }
-                    >
-                      Mark Food Picked Up
-                    </Button>
-                  )}
-                </>
-              )}
-            </>
+                      </TableBody>
+                    </Table>
+
+                    {status === 'in_progress' && (
+                      <Button
+                        variant="contained"
+                        color="info"
+                        sx={{ mt: 1 }}
+                        onClick={() => handleUpdateCategoryStatus(selectedOrder.id, category, 'completed')}
+                      >
+                        Mark {category} Completed
+                      </Button>
+                    )}
+                    {status === 'completed' && (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        sx={{ mt: 1 }}
+                        onClick={() => handleUpdateCategoryStatus(selectedOrder.id, category, 'picked_up')}
+                      >
+                        Mark {category} Picked Up
+                      </Button>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
           )}
-        </Modal.Body>
-        <Modal.Footer>
-          {selectedOrder && selectedOrder.status === 'pending' && (
+        </DialogContent>
+        <DialogActions>
+          {selectedOrder?.status === 'pending' && (
             <Button
-              variant="success"
-              onClick={() =>
-                handleUpdateOrderStatus(selectedOrder.id, 'in_progress')
-              }
+              variant="contained"
+              color="warning"
+              onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'in_progress')}
             >
               Mark In Progress
             </Button>
           )}
-          <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
-  );  
+          <Button onClick={() => setSelectedOrder(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
 };
 
 export default OrdersPage;
