@@ -8,6 +8,13 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState([
+    'pending',
+    'in_progress',
+    'completed',
+    'picked_up',
+  ]);
+  const [searchTerm, setSearchTerm] = useState(''); 
 
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
@@ -198,6 +205,43 @@ const OrdersPage = () => {
         Log Out
       </Button>
       <h1>Active Orders</h1>
+      <div className="mb-3">
+        <label className="form-label fw-bold">Filter by Status</label>
+        <div className="d-flex flex-wrap gap-3">
+          {['pending', 'in_progress', 'completed', 'picked_up', 'cancelled'].map((status) => (
+            <div key={status} className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={`status-${status}`}
+                checked={statusFilter.includes(status)}
+                onChange={() => {
+                  setStatusFilter((prev) =>
+                    prev.includes(status)
+                      ? prev.filter((s) => s !== status)
+                      : [...prev, status]
+                  );
+                }}
+              />
+              <label className="form-check-label" htmlFor={`status-${status}`}>
+                {status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mb-3">
+        <label htmlFor="customerSearch" className="form-label fw-bold">Search by Customer Name</label>
+        <input
+          type="text"
+          id="customerSearch"
+          className="form-control"
+          placeholder="Enter customer name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ maxWidth: '300px' }}
+        />
+      </div>
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -209,19 +253,24 @@ const OrdersPage = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
-            <tr
-              key={order.id}
-              onClick={() => setSelectedOrder(order)}
-              style={{ cursor: 'pointer' }}
-            >
-              <td>{order.id}</td>
-              <td>{order.customer_name}</td>
-              <td>{new Date(order.start_time).toLocaleString()}</td>
-              <td>${Number(order.total_price).toFixed(2)}</td>
-              <td>{formatStatus(order.status)}</td>
-            </tr>
-          ))}
+          {orders
+            .filter((order) =>
+              statusFilter.includes(order.status) &&
+              order.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((order) => (
+              <tr
+                key={order.id}
+                onClick={() => setSelectedOrder(order)}
+                style={{ cursor: 'pointer' }}
+              >
+                <td>{order.id}</td>
+                <td>{order.customer_name}</td>
+                <td>{new Date(order.start_time).toLocaleString()}</td>
+                <td>${Number(order.total_price).toFixed(2)}</td>
+                <td>{formatStatus(order.status)}</td>
+              </tr>
+            ))}
         </tbody>
       </Table>
       <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered size="lg">
