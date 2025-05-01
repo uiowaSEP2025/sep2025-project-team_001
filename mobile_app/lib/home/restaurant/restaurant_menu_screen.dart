@@ -142,7 +142,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 final item = filteredItems[index];
                 return GestureDetector(
                   onTap: () {
-                    _openItemModalWithUrl(context, item, screenHeight,
+                    _openItemModal(context, item, screenHeight,
                         screenWidth, verticalSpacing, horizontalSpacing);
                   },
                   child: MenuItemCard(
@@ -152,7 +152,7 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     horizontalSpacing: horizontalSpacing,
                     verticalSpacing: verticalSpacing,
                     onAddToCart: (menuItem) {
-                      _openItemModalWithUrl(context, menuItem, screenHeight,
+                      _openItemModal(context, menuItem, screenHeight,
                           screenWidth, verticalSpacing, horizontalSpacing);
                     },
                   ),
