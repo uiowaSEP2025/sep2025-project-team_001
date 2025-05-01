@@ -50,6 +50,8 @@ class OrderSerializer(serializers.ModelSerializer):
     estimated_food_ready_time = serializers.DateTimeField(read_only=True)
     estimated_beverage_ready_time = serializers.DateTimeField(read_only=True)
 
+    worker_name = serializers.CharField(source="worker.name", read_only=True)
+
     class Meta:
         model = Order
         fields = [
@@ -69,7 +71,11 @@ class OrderSerializer(serializers.ModelSerializer):
             "estimated_beverage_ready_time",
             "food_eta_minutes",
             "beverage_eta_minutes",
+            "worker_name",
         ]
+
+    def get_worker_name(self, obj):
+        return obj.worker.name if obj.worker else None
 
     def create(self, validated_data):
         order_items_data = validated_data.pop("order_items")

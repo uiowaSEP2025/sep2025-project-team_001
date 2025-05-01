@@ -13,8 +13,10 @@ const OrdersPage = () => {
     'in_progress',
     'completed',
     'picked_up',
+    'cancelled',
   ]);
-  const [searchTerm, setSearchTerm] = useState(''); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [workerSearchTerm, setWorkerSearchTerm] = useState('');
 
   const handleUpdateOrderStatus = async (orderId, nextStatus) => {
     try {
@@ -205,6 +207,8 @@ const OrdersPage = () => {
         Log Out
       </Button>
       <h1>Active Orders</h1>
+  
+      {/* Status Filter */}
       <div className="mb-3">
         <label className="form-label fw-bold">Filter by Status</label>
         <div className="d-flex flex-wrap gap-3">
@@ -230,25 +234,42 @@ const OrdersPage = () => {
           ))}
         </div>
       </div>
-      <div className="mb-3">
-        <label htmlFor="customerSearch" className="form-label fw-bold">Search by Customer Name</label>
-        <input
-          type="text"
-          id="customerSearch"
-          className="form-control"
-          placeholder="Enter customer name"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ maxWidth: '300px' }}
-        />
+  
+      {/* Search Inputs */}
+      <div className="d-flex flex-column flex-md-row gap-3 mb-3">
+        <div style={{ maxWidth: '300px' }}>
+          <label htmlFor="customerSearch" className="form-label fw-bold">Search by Customer Name</label>
+          <input
+            type="text"
+            id="customerSearch"
+            className="form-control"
+            placeholder="Enter customer name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div style={{ maxWidth: '300px' }}>
+          <label htmlFor="workerSearch" className="form-label fw-bold">Search by Worker Name</label>
+          <input
+            type="text"
+            id="workerSearch"
+            className="form-control"
+            placeholder="Enter worker name"
+            value={workerSearchTerm}
+            onChange={(e) => setWorkerSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
+  
+      {/* Order Table */}
       <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>Order #</th>
             <th>Customer</th>
-            <th>Ordered Time</th>
+            <th>ETA</th>
             <th>Total Price</th>
+            <th>Worker</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -256,7 +277,8 @@ const OrdersPage = () => {
           {orders
             .filter((order) =>
               statusFilter.includes(order.status) &&
-              order.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
+              order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+              (order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()) || !order.worker_name)
             )
             .map((order) => (
               <tr
@@ -266,13 +288,23 @@ const OrdersPage = () => {
               >
                 <td>{order.id}</td>
                 <td>{order.customer_name}</td>
-                <td>{new Date(order.start_time).toLocaleString()}</td>
+                <td>
+                  {order.food_eta_minutes !== null && (
+                    <div><strong>Food:</strong> {order.food_eta_minutes} min</div>
+                  )}
+                  {order.beverage_eta_minutes !== null && (
+                    <div><strong>Bev:</strong> {order.beverage_eta_minutes} min</div>
+                  )}
+                </td>
                 <td>${Number(order.total_price).toFixed(2)}</td>
+                <td>{order.worker_name || ''}</td>
                 <td>{formatStatus(order.status)}</td>
               </tr>
             ))}
         </tbody>
       </Table>
+  
+      {/* Modal */}
       <Modal show={!!selectedOrder} onHide={() => setSelectedOrder(null)} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Order Details</Modal.Title>
