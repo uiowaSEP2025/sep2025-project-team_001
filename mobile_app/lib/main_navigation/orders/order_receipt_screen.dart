@@ -6,6 +6,7 @@ import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
+import 'package:mobile_app/main_navigation/orders/services/methods.dart';
 import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
@@ -159,38 +160,70 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                 padding: EdgeInsets.only(
                     left: horizontalSpacing, right: horizontalSpacing),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: verticalSpacing * 0.5,
-                    ),
-                    Text(
-                      "Items: ",
-                      style: AppTextStyles.appBarText(screenHeight, Colors.black),
-                    ),
-                    SizedBox(
-                      height: verticalSpacing * 0.5,
-                    ),
-                    Column(
-                      children: widget.order.items.map((item) {
-                        return Container(
-                          child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: verticalSpacing * 0.5,
+                      ),
+                      Text(
+                        "Items: ",
+                        style: AppTextStyles.appBarText(
+                            screenHeight, Colors.black),
+                      ),
+                      SizedBox(
+                        height: verticalSpacing * 0.5,
+                      ),
+                      Column(
+                        children: widget.order.items.map((item) {
+                          return Row(
                             children: [
                               Container(
                                 color: AppColors.secondary,
                                 height: 20,
                                 width: 20,
-                                child: Center(child: Text("${item['quantity']}")),
+                                child:
+                                    Center(child: Text("${item['quantity']}")),
                               ),
                               SizedBox(width: horizontalSpacing),
                               Text(item['item_name'] ?? '')
                             ],
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(
+                        height: verticalSpacing * 2,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Total: ${widget.order.totalPrice}",
+                            style: AppTextStyles.appBarText(
+                                screenHeight, Colors.black),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: verticalSpacing,
+                      ),
+                      SizedBox(
+                          height: screenWidth * 0.12,
+                          width: screenWidth - horizontalSpacing * 2,
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.secondary),
+                              onPressed: () {
+                                generateAndPrintReceipt(
+                                    widget.order, customerName, restaurant);
+                              },
+                              child: Center(
+                                child: Text(
+                                  "Get Receipt",
+                                  style: AppTextStyles.buttonText(
+                                      screenHeight, AppColors.whiteText),
+                                ),
+                              ))),
+                    ]),
               )
             ],
           ),
