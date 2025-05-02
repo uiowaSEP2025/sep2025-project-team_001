@@ -9,7 +9,7 @@ from ..models.order_models import Order
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from ..models.worker_models import Worker
-from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField
+from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField, FloatField
 from ..models.restaurant_models import Item
 
 
@@ -103,6 +103,7 @@ def get_bartender_statistics(request):
 
     return Response({"bartender_statistics": stats})
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_item_statistics(request):
@@ -110,10 +111,17 @@ def get_item_statistics(request):
         return Response({"error": "Unauthorized"}, status=403)
 
     restaurant = request.user.restaurant
+
     items = (
         Item.objects.filter(restaurant=restaurant)
+        .annotate(
+            sales=ExpressionWrapper(
+                F("price") * F("times_ordered"),
+                output_field=FloatField()
+            )
+        )
         .order_by("-times_ordered")
-        .values("name", "price", "times_ordered")
+        .values("name", "price", "times_ordered", "sales")
     )
 
     return Response({"items": list(items)}, status=200)

@@ -28,7 +28,7 @@ const StatisticsPage = () => {
           axios.get(`${process.env.REACT_APP_API_URL}/bartender-statistics/`),
         ]);
 
-        console.log(workerRes.data);
+        console.log(workerRes)
 
         setProductStats(productRes.data.items || []);
         setWorkerStats(workerRes.data.bartender_statistics || []);
@@ -114,7 +114,7 @@ const StatisticsPage = () => {
                 <TableHead>
                   <TableRow sx={uniformRowSx}>
                     <TableCell><strong>Item Name</strong></TableCell>
-                    <TableCell><strong>Price</strong></TableCell>
+                    <TableCell><strong>Sales</strong></TableCell>
                     <TableCell><strong># Ordered</strong></TableCell>
                   </TableRow>
                 </TableHead>
@@ -122,7 +122,7 @@ const StatisticsPage = () => {
                   {productStats.map((item, index) => (
                     <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{item.name}</TableCell>
-                      <TableCell>${parseFloat(item.price).toFixed(2)}</TableCell>
+                      <TableCell>${(parseFloat(item.price) * item.times_ordered).toFixed(2)}</TableCell>
                       <TableCell>{item.times_ordered}</TableCell>
                     </TableRow>
                   ))}
