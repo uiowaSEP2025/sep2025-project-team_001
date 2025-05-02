@@ -84,14 +84,35 @@ def retrieve_active_orders(request):
         )
 
     restaurant = request.user.restaurant
-    orders = (
-        Order.objects.filter(restaurant=restaurant)
-        .prefetch_related("order_items__item", "customer__user")
-        .order_by("-start_time")
-    )
+    statuses = request.GET.get("statuses")
+    limit = int(request.GET.get("limit", 20))
+    offset_raw = request.GET.get("offset")
+    offset = int(offset_raw) if offset_raw is not None else None
 
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    orders = Order.objects.filter(restaurant=restaurant)
+
+    if statuses:
+        status_list = [s.strip() for s in statuses.split(",") if s.strip()]
+        if status_list:
+            orders = orders.filter(status__in=status_list)
+
+    orders = orders.order_by("-start_time")
+    total = orders.count()
+
+    if offset is not None:
+        paginated_orders = orders[offset:offset + limit]
+        next_offset = offset + limit if offset + limit < total else None
+    else:
+        paginated_orders = orders[:limit]
+        next_offset = limit if limit < total else None
+
+    serializer = OrderSerializer(paginated_orders, many=True)
+    return Response({
+        "results": serializer.data,
+        "total": total,
+        "next_offset": next_offset,
+    }, status=status.HTTP_200_OK)
+
 
 
 @api_view(["PATCH"])
