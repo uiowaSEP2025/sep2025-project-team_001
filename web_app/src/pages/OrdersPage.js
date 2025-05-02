@@ -214,7 +214,7 @@ const OrdersPage = () => {
                   .filter(order =>
                     statusFilter.includes(order.status) &&
                     order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                    (!order.worker_name || order.worker_name.toLowerCase().includes(workerSearchTerm.toLowerCase()))
+                    (workerSearchTerm === '' || order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()))
                   )
                   .map(order => (
                     <TableRow
