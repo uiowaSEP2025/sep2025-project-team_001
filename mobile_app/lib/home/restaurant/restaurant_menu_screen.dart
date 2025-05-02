@@ -1,21 +1,16 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/cart_screen.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/home/restaurant/services/api_services.dart';
 import 'package:mobile_app/home/restaurant/widgets/menu_item_card.dart';
-import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
 class RestaurantMenuScreen extends StatefulWidget {
   final Restaurant restaurant;
+
   const RestaurantMenuScreen({super.key, required this.restaurant});
 
   @override
@@ -147,10 +142,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                 final item = filteredItems[index];
                 return GestureDetector(
                   onTap: () {
-                    final base64String = item.base64image!.split(',').last;
-                    Uint8List imageBytes = base64Decode(base64String);
-                    _openItemModal(context, item, screenHeight, screenWidth,
-                        imageBytes, verticalSpacing, horizontalSpacing);
+                    _openItemModal(context, item, screenHeight,
+                        screenWidth, verticalSpacing, horizontalSpacing);
                   },
                   child: MenuItemCard(
                     item: item,
@@ -159,11 +152,8 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
                     horizontalSpacing: horizontalSpacing,
                     verticalSpacing: verticalSpacing,
                     onAddToCart: (menuItem) {
-                      final base64String =
-                          menuItem.base64image!.split(',').last;
-                      Uint8List imageBytes = base64Decode(base64String);
-                      _openItemModal(context, item, screenHeight, screenWidth,
-                          imageBytes, verticalSpacing, horizontalSpacing);
+                      _openItemModal(context, item, screenHeight,
+                          screenWidth, verticalSpacing, horizontalSpacing);
                     },
                   ),
                 );
@@ -215,193 +205,189 @@ class _RestaurantMenuScreenState extends State<RestaurantMenuScreen> {
   }
 
   Future<void> _openItemModal(
-      BuildContext context,
-      MenuItem item,
-      double screenHeight,
-      double screenWidth,
-      Uint8List imageBytes,
-      double verticalSpacing,
-      double horizontalSpacing) {
+    BuildContext context,
+    MenuItem item,
+    double screenHeight,
+    double screenWidth,
+    double verticalSpacing,
+    double horizontalSpacing,
+  ) {
     return showModalBottomSheet<void>(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
-        ),
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext context) {
-          List<bool> ingredientSelections =
-              List.generate(item.ingredients.length, (_) => true);
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+      ),
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        List<bool> ingredientSelections =
+            List.generate(item.ingredients.length, (_) => true);
+        bool expandDescription = false;
 
-          bool expandDescription = false;
-          return StatefulBuilder(builder: (context, setState) {
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(40)),
-              child: Container(
-                color: Colors.white,
-                height: screenHeight,
-                width: screenWidth,
-                child: Stack(children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: ClipRRect(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(30)),
-                      child: SizedBox(
-                        height: screenHeight * 0.4,
-                        child: Image.memory(
-                          imageBytes,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(Icons.broken_image,
-                                size: 40, color: Colors.grey);
-                          },
-                        ),
-                      ),
+        return StatefulBuilder(builder: (context, setState) {
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+            child: Container(
+              color: Colors.white,
+              height: screenHeight,
+              width: screenWidth,
+              child: Stack(children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(30)),
+                    child: SizedBox(
+                      height: screenHeight * 0.4,
+                      child: item.itemImageUrl != null
+                          ? Image.network(
+                              item.itemImageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image,
+                                      size: 40, color: Colors.grey),
+                            )
+                          : const Icon(Icons.image_not_supported,
+                              size: 40, color: Colors.grey),
                     ),
                   ),
-                  Positioned.fill(
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: screenHeight * 0.4,
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(
-                                top: verticalSpacing * .5,
-                                left: horizontalSpacing,
-                                right: horizontalSpacing),
-                            color: Colors.white,
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.name,
+                ),
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: screenHeight * 0.4,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(
+                              top: verticalSpacing * .5,
+                              left: horizontalSpacing,
+                              right: horizontalSpacing),
+                          color: Colors.white,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  textAlign: TextAlign.left,
+                                  style: AppTextStyles.bigBoldLetters(
+                                      screenHeight * 0.7, Colors.black),
+                                ),
+                                SizedBox(
+                                  height: verticalSpacing * 0.5,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      expandDescription = !expandDescription;
+                                    });
+                                  },
+                                  child: Text(
+                                    item.description,
                                     textAlign: TextAlign.left,
-                                    style: AppTextStyles.bigBoldLetters(
-                                        screenHeight * 0.7, Colors.black),
+                                    maxLines: expandDescription ? null : 4,
+                                    overflow: expandDescription
+                                        ? TextOverflow.visible
+                                        : TextOverflow.ellipsis,
+                                    style: AppTextStyles.subtitleParagraph(
+                                        screenHeight, AppColors.paragraphText),
                                   ),
-                                  SizedBox(
-                                    height: verticalSpacing * 0.5,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
+                                ),
+                                SizedBox(
+                                  height: verticalSpacing * 0.5,
+                                ),
+                                Text("Ingredients:",
+                                    style: AppTextStyles.buttonText(
+                                        screenHeight, AppColors.paragraphText)),
+                                ...List.generate(item.ingredients.length,
+                                    (index) {
+                                  final ingredient = item.ingredients[index];
+                                  return CheckboxListTile(
+                                    title: Text(ingredient.name),
+                                    value: ingredientSelections[index],
+                                    onChanged: (value) {
                                       setState(() {
-                                        expandDescription = !expandDescription;
+                                        ingredientSelections[index] = value!;
                                       });
                                     },
-                                    child: Text(
-                                      item.description,
-                                      textAlign: TextAlign.left,
-                                      maxLines: expandDescription ? null : 4,
-                                      overflow: expandDescription
-                                          ? TextOverflow.visible
-                                          : TextOverflow.ellipsis,
-                                      style: AppTextStyles.subtitleParagraph(
-                                          screenHeight,
-                                          AppColors.paragraphText),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: verticalSpacing * 0.5,
-                                  ),
-                                  Text("Ingredients:",
-                                      style: AppTextStyles.buttonText(
-                                          screenHeight,
-                                          AppColors.paragraphText)),
-                                  ...List.generate(item.ingredients.length,
-                                      (index) {
-                                    final ingredient = item.ingredients[index];
-                                    return CheckboxListTile(
-                                      title: Text(ingredient.name),
-                                      value: ingredientSelections[index],
-                                      onChanged: (value) {
-                                        setState(() {
-                                          ingredientSelections[index] = value!;
-                                        });
-                                      },
-                                    );
-                                  }),
-                                  SizedBox(
-                                    height: verticalSpacing,
-                                  )
-                                ]),
-                          ),
-                        ],
-                      ),
+                                  );
+                                }),
+                                SizedBox(
+                                  height: verticalSpacing,
+                                )
+                              ]),
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    bottom: 24,
-                    left: 24,
-                    right: 24,
-                    child: SizedBox(
-                      height: screenWidth * 0.12,
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                ),
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: SizedBox(
+                    height: screenWidth * 0.12,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
 
-                          final unwantedIngredientsIds = <int>[];
-                          final unwantedIngredientsNames = <String>[];
+                        final unwantedIngredientsIds = <int>[];
+                        final unwantedIngredientsNames = <String>[];
 
-                          for (int i = 0;
-                              i < ingredientSelections.length;
-                              i++) {
-                            if (!ingredientSelections[i]) {
-                              unwantedIngredientsIds
-                                  .add(item.ingredients[i].id);
-                              unwantedIngredientsNames
-                                  .add(item.ingredients[i].name);
-                            } //todo asegurarme de que todos los cart items tengan el unwanted ingredient ids para que si se suman o restan items estos sean especificos de un ingrediente entonces cada item en la cart screen va a ser un cart item
-                          }
-                          _addToCart(item, unwantedIngredientsIds,
-                              unwantedIngredientsNames);
-                        },
-                        icon: const Icon(Icons.add_shopping_cart,
-                            color: Colors.white),
-                        label: Text(
-                          "Add to Cart",
-                          style: AppTextStyles.buttonText(
-                              screenHeight, Colors.white),
-                        ),
+                        for (int i = 0; i < ingredientSelections.length; i++) {
+                          if (!ingredientSelections[i]) {
+                            unwantedIngredientsIds.add(item.ingredients[i].id);
+                            unwantedIngredientsNames
+                                .add(item.ingredients[i].name);
+                          } //todo asegurarme de que todos los cart items tengan el unwanted ingredient ids para que si se suman o restan items estos sean especificos de un ingrediente entonces cada item en la cart screen va a ser un cart item
+                        }
+                        _addToCart(item, unwantedIngredientsIds,
+                            unwantedIngredientsNames);
+                      },
+                      icon: const Icon(Icons.add_shopping_cart,
+                          color: Colors.white),
+                      label: Text(
+                        "Add to Cart",
+                        style: AppTextStyles.buttonText(
+                            screenHeight, Colors.white),
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 60,
-                    right: 16,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: screenWidth * 0.1,
-                        height: screenWidth * 0.1,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child:
-                              Icon(Icons.close, color: Colors.white, size: 20),
-                        ),
+                ),
+                Positioned(
+                  top: 60,
+                  right: 16,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: screenWidth * 0.1,
+                      height: screenWidth * 0.1,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.close, color: Colors.white, size: 20),
                       ),
                     ),
                   ),
-                ]),
-              ),
-            );
-          });
+                ),
+              ]),
+            ),
+          );
         });
+      },
+    );
   }
 }

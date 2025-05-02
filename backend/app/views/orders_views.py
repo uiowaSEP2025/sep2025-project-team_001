@@ -1,7 +1,6 @@
-from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
-
 from datetime import timedelta
 
+from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
 from app.scheduler_instance import get_restaurant_scheduler
 from app.utils.eta_calculator import (
     calculate_beverage_eta_multibartender,
@@ -10,7 +9,6 @@ from app.utils.eta_calculator import (
 )
 from app.utils.order_eta_utils import recalculate_pending_etas
 from django.utils import timezone
-
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -84,14 +82,35 @@ def retrieve_active_orders(request):
         )
 
     restaurant = request.user.restaurant
-    orders = (
-        Order.objects.filter(restaurant=restaurant)
-        .prefetch_related("order_items__item", "customer__user")
-        .order_by("-start_time")
-    )
+    statuses = request.GET.get("statuses")
+    limit = int(request.GET.get("limit", 20))
+    offset_raw = request.GET.get("offset")
+    offset = int(offset_raw) if offset_raw is not None else None
 
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    orders = Order.objects.filter(restaurant=restaurant)
+
+    if statuses:
+        status_list = [s.strip() for s in statuses.split(",") if s.strip()]
+        if status_list:
+            orders = orders.filter(status__in=status_list)
+
+    orders = orders.order_by("-start_time")
+    total = orders.count()
+
+    if offset is not None:
+        paginated_orders = orders[offset:offset + limit]
+        next_offset = offset + limit if offset + limit < total else None
+    else:
+        paginated_orders = orders[:limit]
+        next_offset = limit if limit < total else None
+
+    serializer = OrderSerializer(paginated_orders, many=True)
+    return Response({
+        "results": serializer.data,
+        "total": total,
+        "next_offset": next_offset,
+    }, status=status.HTTP_200_OK)
+
 
 
 @api_view(["PATCH"])
@@ -143,14 +162,17 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             order.worker = worker
         except Worker.DoesNotExist:
             return Response({"error": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
+        order.food_status = "in_progress"
+        order.beverage_status = "in_progress"
 
     order.status = normalized_status
     order.save()
+
     if normalized_status == "completed":
         for order_item in order.order_items.all():
             order_item.item.times_ordered += order_item.quantity
             order_item.item.save()
-    
+
     if order.customer.fcm_token:
         send_fcm_httpv1(
             device_token=order.customer.fcm_token,
@@ -158,23 +180,106 @@ def update_order_status(request, restaurant_id, order_id, new_status):
             body=f"Your order #{order.id} is now {order.status}",
             data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
         )
-        
+
         send_notification_to_device(
             device_token=order.customer.fcm_token,
             title="Order Update",
             body=f"Your order #{order.id} is now {order.status}",
             data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
         )
-    
+
     recalculate_pending_etas(order.restaurant.id)
     return Response(
         {
             "message": f"Order status updated to '{normalized_status}'.",
             "order_id": order.id,
             "status": normalized_status,
+            "food_status": order.food_status,
+            "beverage_status": order.beverage_status,
         },
         status=status.HTTP_200_OK,
     )
+
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_order_category_status(request, restaurant_id, order_id, category, new_status):
+    if not hasattr(request.user, "restaurant"):
+        return Response(
+            {"error": "Only restaurant accounts can update orders."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    normalized_category = category.lower()
+    normalized_status = new_status.lower().replace(" ", "_")
+
+    if normalized_category not in ["food", "beverage"]:
+        return Response({"error": "Invalid category"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if normalized_status not in ["completed", "picked_up"]:
+        return Response({"error": f"Invalid status '{new_status}'"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        restaurant = Restaurant.objects.get(pk=restaurant_id)
+    except Restaurant.DoesNotExist:
+        return Response({"error": "Restaurant not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        order = Order.objects.get(pk=order_id, restaurant=restaurant)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Update food or beverage status
+    if normalized_category == "food":
+        order.food_status = normalized_status
+    else:
+        order.beverage_status = normalized_status
+
+
+    # Determine correct main order status based on available categories
+    status_priority = {"pending": 0, "in_progress": 1, "completed": 2, "picked_up": 3}
+    reverse_lookup = {v: k for k, v in status_priority.items()}
+
+    has_food = order.order_items.filter(item__category__iexact="food").exists()
+    has_bev = order.order_items.filter(item__category__iexact="beverage").exists()
+
+    food_val = status_priority[order.food_status] if has_food else None
+    bev_val = status_priority[order.beverage_status] if has_bev else None
+
+    if food_val is not None and bev_val is not None:
+        min_val = min(food_val, bev_val)
+    elif food_val is not None:
+        min_val = food_val
+    elif bev_val is not None:
+        min_val = bev_val
+    else:
+        min_val = status_priority["pending"]
+
+    order.status = reverse_lookup[min_val]
+    order.save()
+
+    # if order.customer.fcm_token:
+    #     send_fcm_httpv1(
+    #         device_token=order.customer.fcm_token,
+    #         title="Order Update",
+    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+    #     )
+    #     send_notification_to_device(
+    #         device_token=order.customer.fcm_token,
+    #         title="Order Update",
+    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
+    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
+    #     )
+
+    return Response({
+        "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
+        "order_id": order.id,
+        "status": order.status,
+        "food_status": order.food_status,
+        "beverage_status": order.beverage_status,
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])
@@ -207,9 +312,9 @@ def get_order(request, order_id):
             {"error": "Order not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
-
     serializer = OrderSerializer(order)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 def estimate_order_eta(request):

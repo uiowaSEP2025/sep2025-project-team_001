@@ -20,12 +20,14 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - FIREBASE_CREDENTIALS_JSON=${FIREBASE_CREDENTIALS_JSON}
       - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - ENVIRONMENT=local
     depends_on:
       - db
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./backend/media:/app/media
   frontend:
     build: ./web_app
     environment:
