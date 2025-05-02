@@ -32,6 +32,7 @@ const OrdersPage = () => {
   const [offset, setOffset] = useState(0);
   const [nextOffset, setNextOffset] = useState(null);
   const [fetching, setFetching] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState([
     'pending',
@@ -77,6 +78,7 @@ const OrdersPage = () => {
 
       setOrders(sortedOrders);
       setNextOffset(data.next_offset);
+      setTotalCount(data.total);
     } catch (err) {
       console.error('Error fetching orders:', err);
     } finally {
@@ -87,7 +89,7 @@ const OrdersPage = () => {
 
   useEffect(() => {
     fullOrderMap.current = {};
-    loadedLimit.current = 3;
+    loadedLimit.current = 20;
     fetchOrders({ statuses: statusFilter, limit: loadedLimit.current });
 
     const intervalId = setInterval(() => {
@@ -106,7 +108,7 @@ const OrdersPage = () => {
   };
 
   const handleLoadMore = () => {
-    loadedLimit.current += 3;
+    loadedLimit.current += 10;
     fetchOrders({ statuses: statusFilter, limit: loadedLimit.current });
   };
 
@@ -250,9 +252,11 @@ const OrdersPage = () => {
             </Table>
           </TableContainer>
 
-          <Box textAlign="center" mt={2}>
-            <Button variant="contained" onClick={handleLoadMore}>Load More Orders</Button>
-          </Box>
+          {orders.length < totalCount && (
+            <Box textAlign="center" mt={2}>
+              <Button variant="contained" onClick={handleLoadMore}>Load More Orders</Button>
+            </Box>
+          )}
         </>
       )}
 
