@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.utils import timezone
+from app.utils.eta_calculator import round_to_nearest_five
 
 from ..models.customer_models import Customer
 from ..models.order_models import Order, OrderItem
@@ -13,16 +15,22 @@ class OrderItemSerializer(serializers.ModelSerializer):
     unwanted_ingredients = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), many=True, required=False
     )
-
     unwanted_ingredient_names = serializers.SerializerMethodField()
     category = serializers.CharField(source="item.category", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ["item_id", "item_name", "quantity", "unwanted_ingredients", "unwanted_ingredient_names", "category"]
+        fields = [
+            "item_id",
+            "item_name",
+            "quantity",
+            "unwanted_ingredients",
+            "unwanted_ingredient_names",
+            "category",
+        ]
 
     def get_unwanted_ingredient_names(self, obj):
-        return [ingredient.name for ingredient in obj.unwanted_ingredients.all()]
+        return [ing.name for ing in obj.unwanted_ingredients.all()]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -44,12 +52,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     order_items = OrderItemSerializer(many=True)
 
-    food_eta_minutes = serializers.IntegerField(read_only=True)
-    beverage_eta_minutes = serializers.IntegerField(read_only=True)
+    food_eta_minutes = serializers.SerializerMethodField()
+    beverage_eta_minutes = serializers.SerializerMethodField()
 
     estimated_food_ready_time = serializers.DateTimeField(read_only=True)
     estimated_beverage_ready_time = serializers.DateTimeField(read_only=True)
-    
+
     worker_name = serializers.CharField(source="worker.name", read_only=True)
     reviewed = serializers.BooleanField(read_only=True)
 
@@ -76,13 +84,32 @@ class OrderSerializer(serializers.ModelSerializer):
             "worker_name",
         ]
 
+    def get_food_eta_minutes(self, obj):
+        if not obj.estimated_food_ready_time:
+            return None
+        now = timezone.now().replace(second=0, microsecond=0)
+        ready = obj.estimated_food_ready_time.replace(second=0, microsecond=0)
+        delta = int((ready - now).total_seconds() / 60)
+        if delta < 0:
+            return 0
+        return round_to_nearest_five(delta)
+
+    def get_beverage_eta_minutes(self, obj):
+        if not obj.estimated_beverage_ready_time:
+            return None
+        now = timezone.now().replace(second=0, microsecond=0)
+        ready = obj.estimated_beverage_ready_time.replace(second=0, microsecond=0)
+        delta = int((ready - now).total_seconds() / 60)
+        if delta < 0:
+            return 0
+        return round_to_nearest_five(delta)
+
     def get_worker_name(self, obj):
         return obj.worker.name if obj.worker else None
 
     def create(self, validated_data):
         order_items_data = validated_data.pop("order_items")
         order = Order.objects.create(**validated_data)
-
         for item_data in order_items_data:
             unwanted_ingredients = item_data.pop("unwanted_ingredients", [])
             order_item = OrderItem.objects.create(order=order, **item_data)

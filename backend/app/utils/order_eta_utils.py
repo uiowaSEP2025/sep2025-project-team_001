@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 
+from django.utils import timezone
 from app.models.order_models import Order
 from app.scheduler_instance import get_restaurant_scheduler
 from app.utils.eta_calculator import (
@@ -9,16 +10,13 @@ from app.utils.eta_calculator import (
     calculate_food_eta,
     round_to_nearest_five,
 )
-from django.utils import timezone
 
 
-def recalculate_pending_etas(restaurant_id, num_bartenders=2):
+def recalculate_pending_etas(restaurant_id, num_bartenders=1):
     """
     Recalculate and persist, for each pending order:
       - estimated_food_ready_time  (or None)
       - estimated_beverage_ready_time  (or None)
-      - food_eta_minutes  (or None)
-      - beverage_eta_minutes  (or None)
     """
     # Use a single “now” floored to the minute
     now = timezone.now().replace(second=0, microsecond=0)
@@ -48,14 +46,12 @@ def recalculate_pending_etas(restaurant_id, num_bartenders=2):
 
         # — FOOD ETA —
         if num_food > 0:
-            # Round to nearest 5 minutes
+            # Round to nearest 5 minutes and compute ready timestamp
             food_mins = round_to_nearest_five(calculate_food_eta(num_food))
             food_dt = now + timedelta(minutes=food_mins)
             order.estimated_food_ready_time = food_dt
-            order.food_eta_minutes = food_mins
         else:
             order.estimated_food_ready_time = None
-            order.food_eta_minutes = None
 
         # — BEVERAGE ETA —
         if num_bev > 0:
@@ -66,21 +62,14 @@ def recalculate_pending_etas(restaurant_id, num_bartenders=2):
             bev_finish_dt = bev_finish_dt.replace(second=0, microsecond=0)
             order.estimated_beverage_ready_time = bev_finish_dt
 
-            # Delta in whole minutes
-            bev_mins = int((bev_finish_dt - now).total_seconds() / 60)
-            order.beverage_eta_minutes = bev_mins
-
             # Mark that bartender slot taken
             slot_start = bev_finish_dt - timedelta(minutes=num_bev)
             scheduler.add_order_to_bartender(bart_idx, slot_start, num_bev)
         else:
             order.estimated_beverage_ready_time = None
-            order.beverage_eta_minutes = None
 
-        # Persist both timestamps and minute‐deltas
+        # Persist only the absolute ready-time fields
         order.save(update_fields=[
             "estimated_food_ready_time",
             "estimated_beverage_ready_time",
-            "food_eta_minutes",
-            "beverage_eta_minutes",
         ])

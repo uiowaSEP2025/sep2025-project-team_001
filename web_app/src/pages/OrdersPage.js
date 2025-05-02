@@ -39,7 +39,7 @@ const OrdersPage = () => {
     'in_progress',
     'completed',
     'picked_up',
-    'cancelled',
+    'cancelled'
   ]);
   const [searchTerm, setSearchTerm] = useState('');
   const [workerSearchTerm, setWorkerSearchTerm] = useState('');
@@ -61,7 +61,7 @@ const OrdersPage = () => {
     try {
       const query = new URLSearchParams({
         statuses: statuses.join(','),
-        limit: limit.toString(),
+        limit: limit.toString()
       });
 
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/retrieve/orders/?${query}`);
@@ -74,7 +74,11 @@ const OrdersPage = () => {
       fullOrderMap.current = newMap;
 
       const sortedOrders = Object.values(newMap)
-        .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+        .sort((a, b) => {
+          const aEta = a.beverage_eta_minutes != null ? a.beverage_eta_minutes : Infinity;
+          const bEta = b.beverage_eta_minutes != null ? b.beverage_eta_minutes : Infinity;
+          return aEta - bEta;
+        })
         .slice(0, limit);
 
       setOrders(sortedOrders);
@@ -137,7 +141,11 @@ const OrdersPage = () => {
         ...updatedData
       };
       const sortedOrders = Object.values(fullOrderMap.current)
-        .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+        .sort((a, b) => {
+          const aEta = a.beverage_eta_minutes != null ? a.beverage_eta_minutes : Infinity;
+          const bEta = b.beverage_eta_minutes != null ? b.beverage_eta_minutes : Infinity;
+          return aEta - bEta;
+        })
         .slice(0, loadedLimit.current);
       setOrders(sortedOrders);
       setSelectedOrder(prev => (prev ? { ...prev, ...updatedData } : null));
@@ -171,6 +179,12 @@ const OrdersPage = () => {
   const formatStatus = status =>
     status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+  const activeStatuses = ['pending', 'in_progress'];
+  const historyStatuses = ['completed', 'picked_up', 'cancelled'];
+
+  const activeOrders = orders.filter(o => activeStatuses.includes(o.status));
+  const historyOrders = orders.filter(o => historyStatuses.includes(o.status));
+
   return (
     <Box p={3} pb={8}>
       <Box mb={2}>
@@ -190,15 +204,18 @@ const OrdersPage = () => {
         {['pending', 'in_progress', 'completed', 'picked_up', 'cancelled'].map(status => (
           <FormControlLabel
             key={status}
-            control={<Checkbox checked={statusFilter.includes(status)} onChange={() => handleStatusFilterChange(status)} />}
+            control={<Checkbox checked={statusFilter.includes(status)}
+                               onChange={() => handleStatusFilterChange(status)} />}
             label={formatStatus(status)}
           />
         ))}
       </Stack>
 
       <Stack direction="row" spacing={2} mb={3}>
-        <TextField label="Search Customer" variant="outlined" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-        <TextField label="Search Worker" variant="outlined" value={workerSearchTerm} onChange={e => setWorkerSearchTerm(e.target.value)} />
+        <TextField label="Search Customer" variant="outlined" value={searchTerm}
+                   onChange={e => setSearchTerm(e.target.value)} />
+        <TextField label="Search Worker" variant="outlined" value={workerSearchTerm}
+                   onChange={e => setWorkerSearchTerm(e.target.value)} />
       </Stack>
 
       {loading ? (
@@ -218,12 +235,31 @@ const OrdersPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
+                {/* — Active Orders — */}
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ bgcolor: '#f5f5f5' }}>
+                    <strong>Active Orders</strong>
+                  </TableCell>
+                </TableRow>
                 {orders
                   .filter(order =>
+                    ['pending', 'in_progress'].includes(order.status) &&
                     statusFilter.includes(order.status) &&
                     order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
                     (workerSearchTerm === '' || order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()))
                   )
+                  .sort((a, b) => {
+                    // 1) in_progress before pending
+                    const statusOrder = { in_progress: 0, pending: 1 };
+                    const pa = statusOrder[a.status] ?? 2;
+                    const pb = statusOrder[b.status] ?? 2;
+                    if (pa !== pb) return pa - pb;
+
+                    // 2) within same status, soonest ETA first
+                    const aEta = a.beverage_eta_minutes ?? Infinity;
+                    const bEta = b.beverage_eta_minutes ?? Infinity;
+                    return aEta - bEta;
+                  })
                   .map(order => (
                     <TableRow
                       key={order.id}
@@ -242,8 +278,55 @@ const OrdersPage = () => {
                       <TableCell>{order.id}</TableCell>
                       <TableCell>{order.customer_name}</TableCell>
                       <TableCell>
-                        {order.food_eta_minutes && <div><strong>Food:</strong> {order.food_eta_minutes} min</div>}
-                        {order.beverage_eta_minutes && <div><strong>Bev:</strong> {order.beverage_eta_minutes} min</div>}
+                        {order.food_eta_minutes != null && (
+                          <div><strong>Food:</strong> {formatEta(order.food_eta_minutes)}</div>
+                        )}
+                        {order.beverage_eta_minutes != null && (
+                          <div><strong>Bev:</strong> {formatEta(order.beverage_eta_minutes)}</div>
+                        )}
+                      </TableCell>
+                      <TableCell>${Number(order.total_price).toFixed(2)}</TableCell>
+                      <TableCell>{order.worker_name || '-'}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={formatStatus(order.status)}
+                          color={statusColorMap[order.status] || 'default'}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+
+                {/* — Order History — */}
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ bgcolor: '#fafafa', pt: 2 }}>
+                    <strong>Order History</strong>
+                  </TableCell>
+                </TableRow>
+                {orders
+                  .filter(order =>
+                    ['completed', 'picked_up', 'cancelled'].includes(order.status) &&
+                    statusFilter.includes(order.status) &&
+                    order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                    (workerSearchTerm === '' || order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()))
+                  )
+                  // you can choose to sort history however you like; here we'll keep original start_time desc
+                  .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+                  .map(order => (
+                    <TableRow
+                      key={order.id}
+                      hover
+                      onClick={() => setSelectedOrder(order)}
+                      sx={{
+                        cursor: 'pointer',
+                        backgroundColor: '#fafafa',
+                        '&:hover': { backgroundColor: '#f0f0f0' }
+                      }}
+                    >
+                      <TableCell>{order.id}</TableCell>
+                      <TableCell>{order.customer_name}</TableCell>
+                      <TableCell>
+                        {/* No ETA for history */}
                       </TableCell>
                       <TableCell>${Number(order.total_price).toFixed(2)}</TableCell>
                       <TableCell>{order.worker_name || '-'}</TableCell>
@@ -353,5 +436,10 @@ const OrdersPage = () => {
     </Box>
   );
 };
+
+function formatEta(minutes) {
+  if (minutes > 0) return `${minutes} min`;
+  return 'Now';
+}
 
 export default OrdersPage;
