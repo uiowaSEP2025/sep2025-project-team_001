@@ -28,6 +28,8 @@ const StatisticsPage = () => {
           axios.get(`${process.env.REACT_APP_API_URL}/bartender-statistics/`),
         ]);
 
+        console.log(workerRes.data);
+
         setProductStats(productRes.data.items || []);
         setWorkerStats(workerRes.data.bartender_statistics || []);
       } catch (error) {

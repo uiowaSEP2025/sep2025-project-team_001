@@ -169,12 +169,6 @@ def update_order_status(request, restaurant_id, order_id, new_status):
     order.status = normalized_status
     order.save()
 
-    if normalized_status == "completed":
-        order.completion_time = timezone.now()
-        for order_item in order.order_items.all():
-            order_item.item.times_ordered += order_item.quantity
-            order_item.item.save()
-
     if order.customer.fcm_token:
         send_fcm_httpv1(
             device_token=order.customer.fcm_token,
@@ -261,19 +255,13 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
     order.status = reverse_lookup[min_val]
     order.save()
 
-    # if order.customer.fcm_token:
-    #     send_fcm_httpv1(
-    #         device_token=order.customer.fcm_token,
-    #         title="Order Update",
-    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
-    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
-    #     )
-    #     send_notification_to_device(
-    #         device_token=order.customer.fcm_token,
-    #         title="Order Update",
-    #         body=f"Your order #{order.id} {normalized_category} is now {normalized_status}",
-    #         data={"type": "ORDER_CATEGORY_UPDATE", "order_id": str(order.id)}
-    #     )
+    if order.status == "completed":
+        order.completion_time = timezone.now()
+        order.save(update_fields=["completion_time"])
+
+        for order_item in order.order_items.all():
+            order_item.item.times_ordered += order_item.quantity
+            order_item.item.save()
 
     return Response({
         "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
@@ -281,6 +269,7 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
         "status": order.status,
         "food_status": order.food_status,
         "beverage_status": order.beverage_status,
+        "completion_time": order.completion_time.isoformat() if order.completion_time else None,
     }, status=status.HTTP_200_OK)
 
 
