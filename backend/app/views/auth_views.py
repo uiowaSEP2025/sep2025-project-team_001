@@ -14,6 +14,7 @@ from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
+from app.utils.image_upload import save_image_from_base64
 
 
 def get_tokens_for_user(user):
@@ -77,8 +78,16 @@ def register_user(request):
             name=data["business_name"],
             address=data["business_address"],
             phone=data["phone"],
-            restaurant_image=data.get("restaurantImage")
         )
+
+        restaurant_image_b64 = data.get("restaurantImage")
+        if restaurant_image_b64:
+            restaurant.restaurant_image_url = save_image_from_base64(
+                restaurant_image_b64,
+                folder="restaurant-logos",
+                ref_id=restaurant.id
+            )
+            restaurant.save()
 
         # Create Worker (Manager role)
         worker = Worker.objects.create(
@@ -88,7 +97,8 @@ def register_user(request):
             role="manager"
         )
 
-        restaurant_data = RestaurantSerializer(restaurant).data
+        restaurant_data = RestaurantSerializer(restaurant, context={"request": request}).data
+
         worker_data = WorkerSerializer(worker).data
 
         tokens = get_tokens_for_user(custom_user)  # Generate JWT tokens
@@ -205,6 +215,6 @@ def validate_business(request):
 
         if not any(t in cand["types"] for t in ("bar", "restaurant")):
             return JsonResponse({"valid": False, "reason": "Not restaurant/bar"}, status=400)
-
+        
         return JsonResponse({"valid": True, "place_id": cand["place_id"]}, status=200)
     return JsonResponse({"error": "Invalid request"}, status=400)

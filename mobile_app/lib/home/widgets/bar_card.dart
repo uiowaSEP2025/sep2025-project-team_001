@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
-import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
 class BarCard extends StatelessWidget {
   final Restaurant bar;
@@ -28,10 +27,23 @@ class BarCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Base64ImageWithFallback(
-              width: screenWidth * 0.28,
-              height: screenWidth * 0.27,
-              base64ImageString: bar.base64image),
+          bar.restaurantImageUrl != null
+              ? Image.network(
+                  bar.restaurantImageUrl!,
+                  width: screenWidth * 0.28,
+                  height: screenWidth * 0.27,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.broken_image,
+                    size: 40,
+                    color: Colors.grey,
+                  ),
+                )
+              : const Icon(
+                  Icons.image_not_supported,
+                  size: 40,
+                  color: Colors.grey,
+                ),
           SizedBox(
             height: screenWidth * 0.02,
           ),
