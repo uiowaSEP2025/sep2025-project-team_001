@@ -79,7 +79,7 @@ const ItemCard = ({ item, onToggle, onDelete }) => {
           {/* Image */}
           <CardMedia
             component="img"
-            image={item.base64_image}
+            image={item.item_image_url}
             alt={item.name}
             sx={{
               width: 140,

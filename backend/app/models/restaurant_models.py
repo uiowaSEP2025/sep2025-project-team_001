@@ -10,7 +10,7 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=255)  # Business name
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50)
-    restaurant_image = models.TextField(blank=True, null=True)
+    restaurant_image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,14 +28,11 @@ class Item(models.Model):
     category = models.CharField(max_length=50, blank=True)
     stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
-    base64_image = models.TextField(blank=True, null=True)
+    item_image_url = models.URLField(blank=True, null=True)
     times_ordered = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        image_preview = (
-            self.base64_image[:30] + "..." if self.base64_image else "No image"
-        )
-        return f"{self.name} (Image: {image_preview})"
+        return f"{self.name} (Image: {self.item_image_url or 'No image'})"
 
 
 class Ingredient(models.Model):

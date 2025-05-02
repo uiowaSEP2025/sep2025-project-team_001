@@ -80,7 +80,6 @@ const MenuPage = () => {
       category: item.category,
       stock: item.stock,
       available: !item.available,
-      image: item.base64_image,
       ingredients: item.ingredients.map((ing) =>
         typeof ing === 'string' ? ing : ing.name,
       ),

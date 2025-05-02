@@ -1,11 +1,11 @@
-import json
-from django.http import JsonResponse
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+
 from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -90,6 +90,7 @@ def update_worker(request, worker_id):
             "pin": worker.pin
         }
     }, status=200)
+
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])

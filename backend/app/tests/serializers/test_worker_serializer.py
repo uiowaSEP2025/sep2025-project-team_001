@@ -29,6 +29,7 @@ def test_worker_serializer_input_valid(restaurant):
     """
     payload = {
         "restaurant": restaurant.id,
+        "name": "John Doe",
         "pin": "5678",
         "role": "bartender"
     }
@@ -37,6 +38,7 @@ def test_worker_serializer_input_valid(restaurant):
     worker = serializer.save()
 
     assert worker.restaurant == restaurant
+    assert worker.name == "John Doe"
     assert worker.pin == "5678"
     assert worker.role == "bartender"
 
@@ -48,8 +50,54 @@ def test_worker_serializer_invalid_role(restaurant):
     """
     payload = {
         "restaurant": restaurant.id,
+        "name": "John Doe",
         "pin": "0000",
         "role": "chef"  # invalid
+    }
+    serializer = WorkerSerializer(data=payload)
+    assert not serializer.is_valid()
+    assert "role" in serializer.errors
+
+
+@pytest.mark.django_db
+def test_worker_serializer_missing_name(restaurant):
+    """
+    Invalid role value should cause validation to fail.
+    """
+    payload = {
+        "restaurant": restaurant.id,
+        "pin": "0000",
+        "role": "bartender"
+    }
+    serializer = WorkerSerializer(data=payload)
+    assert not serializer.is_valid()
+    assert "name" in serializer.errors
+
+
+@pytest.mark.django_db
+def test_worker_serializer_missing_pin(restaurant):
+    """
+    Invalid role value should cause validation to fail.
+    """
+    payload = {
+        "restaurant": restaurant.id,
+        "name": "John Doe",
+        "role": "bartender"
+    }
+    serializer = WorkerSerializer(data=payload)
+    assert not serializer.is_valid()
+    assert "pin" in serializer.errors
+
+
+@pytest.mark.django_db
+def test_worker_serializer_missing_role(restaurant):
+    """
+    Invalid role value should cause validation to fail.
+    """
+    payload = {
+        "restaurant": restaurant.id,
+        "name": "John Doe",
+        "pin": "0000",
     }
     serializer = WorkerSerializer(data=payload)
     assert not serializer.is_valid()

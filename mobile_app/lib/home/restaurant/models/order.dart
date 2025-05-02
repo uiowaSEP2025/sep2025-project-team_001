@@ -8,6 +8,9 @@ class Order {
   final double totalPrice;
   final int restaurantId;
   final String restaurantName;
+  final int? foodETAminutes;
+  final int? drinksETAminutes;
+  final bool reviewed;
 
   Order(
       {required this.id,
@@ -16,7 +19,10 @@ class Order {
       required this.status,
       required this.totalPrice,
       required this.restaurantId,
-      required this.restaurantName});
+      required this.restaurantName,
+       this.foodETAminutes, 
+       this.drinksETAminutes,
+       required this.reviewed});
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
@@ -26,6 +32,9 @@ class Order {
         status: json['status'],
         totalPrice: json['total_price'],
         restaurantId: json['restaurant_id_read'],
-        restaurantName: json['restaurant_name']);
+        restaurantName: json['restaurant_name'],
+        foodETAminutes: json['food_eta_minutes'],
+        drinksETAminutes: json['beverage_eta_minutes'],
+        reviewed: json['reviewed']);
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/design/styling/app_colors.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/menu_item.dart';
-import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 
 class MenuItemCard extends StatelessWidget {
   final MenuItem item;
@@ -37,11 +36,26 @@ class MenuItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Base64ImageWithFallback(
-                        width: screenWidth * 0.28,
-                        height: screenWidth * 0.32,
-                        base64ImageString: item.base64image)),
+                  borderRadius: BorderRadius.circular(8),
+                  child: item.itemImageUrl != null
+                      ? Image.network(
+                          item.itemImageUrl!,
+                          width: screenWidth * 0.28,
+                          height: screenWidth * 0.32,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                            Icons.broken_image,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.image_not_supported,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                ),
                 SizedBox(width: horizontalSpacing),
                 Expanded(
                   child: Column(

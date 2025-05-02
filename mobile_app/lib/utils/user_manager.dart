@@ -11,6 +11,10 @@ class UserManager {
     await _storage.write(key: 'userEmail', value: userEmail);
   }
 
+  static Future<void> savePassword(String password) async {
+    await _storage.write(key: 'password', value: password);
+  }
+
   static Future<void> saveName(String userName) async {
     await _storage.write(key: 'userName', value: userName);
   }
@@ -27,6 +31,10 @@ class UserManager {
 
   static Future<String?> getEmail() async {
     return await _storage.read(key: 'userEmail');
+  }
+
+  static Future<String?> getPassword() async {
+    return await _storage.read(key: 'password');
   }
 
   static Future<String?> getName() async {

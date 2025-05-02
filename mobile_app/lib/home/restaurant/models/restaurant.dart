@@ -3,14 +3,14 @@ class Restaurant {
   final String address;
   final String phone;
   final int id;
-  final String? base64image;
+  final String? restaurantImageUrl;
 
   Restaurant({
     required this.id,
     required this.name,
     required this.address,
     required this.phone,
-    this.base64image,
+    this.restaurantImageUrl,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -19,7 +19,7 @@ class Restaurant {
       name: json['name'],
       address: json['address'],
       phone: json['phone'],
-      base64image: json['restaurant_image'],
+      restaurantImageUrl: json['restaurant_image_url'],
     );
   }
 }

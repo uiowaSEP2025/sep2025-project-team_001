@@ -49,8 +49,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
     estimated_food_ready_time = serializers.DateTimeField(read_only=True)
     estimated_beverage_ready_time = serializers.DateTimeField(read_only=True)
-
+    
     worker_name = serializers.CharField(source="worker.name", read_only=True)
+    reviewed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Order
@@ -71,6 +72,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "estimated_beverage_ready_time",
             "food_eta_minutes",
             "beverage_eta_minutes",
+            "reviewed",
             "worker_name",
         ]
 

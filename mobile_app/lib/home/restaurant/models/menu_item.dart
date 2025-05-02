@@ -5,7 +5,7 @@ class MenuItem {
   final double price;
   final String category;
   final bool available;
-  final String? base64image;
+  final String? itemImageUrl;
   final List<Ingredient> ingredients;
 
   MenuItem({
@@ -15,7 +15,7 @@ class MenuItem {
     required this.price,
     required this.category,
     required this.available,
-    this.base64image,
+    this.itemImageUrl,
     required this.ingredients,
   });
 
@@ -27,7 +27,7 @@ class MenuItem {
       price: json['price'],
       category: json['category'] ?? 'Other',
       available: json['available'],
-      base64image: json['base64_image'],
+      itemImageUrl: json['item_image_url'],
       ingredients: (json['ingredients'] as List<dynamic>?)
               ?.map((i) => Ingredient.fromJson(i))
               .toList() ??

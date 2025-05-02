@@ -81,6 +81,7 @@ resource "aws_instance" "backend_ec2" {
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   key_name               = var.key_pair_name
   associate_public_ip_address = false
+  iam_instance_profile = aws_iam_instance_profile.backend_instance_profile.name
 
   user_data = <<-EOF
     #!/bin/bash
@@ -110,6 +111,8 @@ resource "aws_instance" "backend_ec2" {
     echo "STRIPE_SECRET_KEY=${var.stripe_secret_key}" >> .env
     echo "FIREBASE_CREDENTIALS_JSON=${var.firebase_credentials_json}" >> .env
     echo "GOOGLE_PLACES_API_KEY=${var.google_places_api_key}" >> .env
+    echo "S3_BUCKET_NAME=${var.s3_bucket_name}" >> .env
+    echo "ENVIRONMENT=production" >> .env
 
     # Build Docker image from Dockerfile in your backend folder
     docker build -t backend-image .
@@ -121,4 +124,46 @@ resource "aws_instance" "backend_ec2" {
   tags = {
     Name = "${var.name_prefix}-backend-ec2"
   }
+}
+
+resource "aws_iam_instance_profile" "backend_instance_profile" {
+  name = "${var.name_prefix}-backend-instance-profile"
+  role = aws_iam_role.backend_instance_role.name
+}
+
+resource "aws_iam_role" "backend_instance_role" {
+  name = "${var.name_prefix}-backend-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "backend_s3_policy" {
+  name = "${var.name_prefix}-backend-s3-policy"
+  role = aws_iam_role.backend_instance_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        Resource = "arn:aws:s3:::${var.s3_bucket_name}/*"
+      }
+    ]
+  })
 }
