@@ -45,6 +45,7 @@ const OrdersPage = () => {
   const [workerSearchTerm, setWorkerSearchTerm] = useState('');
   const fullOrderMap = useRef({});
   const loadedLimit = useRef(3);
+  const role = sessionStorage.getItem('workerRole');
 
   const statusColorMap = {
     pending: 'secondary',
@@ -172,10 +173,17 @@ const OrdersPage = () => {
 
   return (
     <Box p={3} pb={8}>
-      <Button variant="contained" color="error" onClick={() => navigate('/dashboard')} sx={{ mb: 2 }}>
-        Log Out
-      </Button>
-
+      <Box mb={2}>
+        {role?.toLowerCase() === 'manager' ? (
+          <Button variant="contained" color="primary" onClick={() => navigate('/manager_dashboard')}>
+            Dashboard
+          </Button>
+        ) : (
+          <Button variant="contained" color="error" onClick={() => navigate('/dashboard')}>
+            Log Out
+          </Button>
+        )}
+      </Box>
       <Typography variant="h4" align="center" gutterBottom>Active Orders</Typography>
 
       <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" mb={2}>
