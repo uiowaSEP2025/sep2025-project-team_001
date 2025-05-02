@@ -170,7 +170,7 @@ module "rds" {
 # Backend EC2 Module
 module "backend_ec2" {
   source       = "./modules/backend_ec2"
-  name_prefix  = "backend"
+  name_prefix  = "streamlinebars"
   vpc_id       = var.vpc_id
   subnet_id    = aws_subnet.private_subnet_backend.id
   key_pair_name = var.key_pair_name
@@ -182,6 +182,7 @@ module "backend_ec2" {
   db_pass       = var.db_password
   dj_secret_key = "mysecretkey123"
   stripe_secret_key = "sk_test_51RAFr02cTgsJM4b1zq9w4tYcXuLKqwlvMGwEvW354FGgtknjwwV5OQgT5oLm1hfbGyZzecZn0r0kdfzr9ArKtwBW00uvzbCTbA"
+  s3_bucket_name = module.s3_images.bucket_name
 
   repo_url            = var.repo_url
   repo_branch         = var.repo_branch
@@ -194,7 +195,7 @@ module "backend_ec2" {
 # Frontend EC2 Module
 module "frontend_ec2" {
   source         = "./modules/frontend_ec2"
-  name_prefix    = "frontend"
+  name_prefix    = "streamlinebars"
   vpc_id         = var.vpc_id
   subnet_id      = aws_subnet.private_subnet_frontend.id
   key_pair_name  = var.key_pair_name
@@ -212,11 +213,16 @@ module "nginx_ec2" {
   subnet_id      = aws_subnet.public_subnet_a.id
   key_pair_name  = var.key_pair_name
   instance_type  = "t3.micro"
-  name_prefix    = "nginx"
+  name_prefix    = "streamlinebars"
   domain_name    = "streamlinebars.com"
 
   frontend_target = module.frontend_ec2.private_ip
   backend_target  = module.backend_ec2.private_ip
+}
+
+module "s3_images" {
+  source      = "./modules/s3_images"
+  name_prefix = "streamlinebars"
 }
 
 ########################################

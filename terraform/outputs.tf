@@ -24,3 +24,8 @@ output "frontend_dns" {
   description = "DNS name for the frontend"
   value       = aws_route53_record.frontend.fqdn
 }
+
+output "s3_image_bucket_name" {
+  value = module.s3_images.bucket_name
+}
+

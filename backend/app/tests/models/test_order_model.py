@@ -7,12 +7,6 @@ from app.models import CustomUser
 from app.models.order_models import Order
 from app.models.restaurant_models import Ingredient, Item
 from django.utils import timezone
-from rest_framework.test import APIClient
-
-
-@pytest.fixture
-def api_client():
-    return APIClient()
 
 
 @pytest.fixture

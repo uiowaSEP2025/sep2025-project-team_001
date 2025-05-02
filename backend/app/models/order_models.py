@@ -12,8 +12,7 @@ class Order(models.Model):
     restaurant = models.ForeignKey(
         Restaurant, on_delete=models.CASCADE, related_name="orders"
     )
-    start_time = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=50, default="pending")
+    start_time = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders")
     completion_time = models.DateTimeField(null=True, blank=True)
@@ -23,6 +22,30 @@ class Order(models.Model):
 
     estimated_food_ready_time = models.DateTimeField(null=True, blank=True)
     estimated_beverage_ready_time = models.DateTimeField(null=True, blank=True)
+    
+    reviewed = models.BooleanField(default=False)
+
+    status = models.CharField(max_length=50, default="pending")
+    food_status = models.CharField(
+        max_length=50,
+        choices=[
+            ("pending", "Pending"),
+            ("completed", "Completed"),
+            ("picked_up", "Picked Up"),
+        ],
+        default="pending",
+    )
+
+    beverage_status = models.CharField(
+        max_length=50,
+        choices=[
+            ("pending", "Pending"),
+            ("completed", "Completed"),
+            ("picked_up", "Picked Up"),
+        ],
+        default="pending",
+    )
+
 
     def __str__(self):
         return f"Order #{self.id} by {self.customer.user.username} at {self.restaurant.name}"

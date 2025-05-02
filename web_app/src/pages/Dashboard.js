@@ -51,6 +51,8 @@ const Dashboard = () => {
       const data = await response.json();
       if (response.ok) {
         sessionStorage.setItem('workerId', data.worker_id);
+        sessionStorage.setItem('workerName', data.worker_name);
+        sessionStorage.setItem('workerRole', data.role);
 
         if (data.role === 'manager') {
           navigate('/manager_dashboard');

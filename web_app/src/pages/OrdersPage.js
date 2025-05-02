@@ -1,5 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Table, Spinner, Modal, Button } from 'react-bootstrap';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  CircularProgress
+} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,208 +29,328 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const [nextOffset, setNextOffset] = useState(null);
+  const [fetching, setFetching] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState([
+    'pending',
+    'in_progress',
+    'completed',
+    'picked_up',
+    'cancelled',
+  ]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [workerSearchTerm, setWorkerSearchTerm] = useState('');
+  const fullOrderMap = useRef({});
+  const loadedLimit = useRef(3);
+  const role = sessionStorage.getItem('workerRole');
 
-  const handleUpdateOrderStatus = async (orderId, nextStatus) => {
+  const statusColorMap = {
+    pending: 'secondary',
+    in_progress: 'warning',
+    completed: 'info',
+    picked_up: 'success',
+    cancelled: 'error'
+  };
+
+  const fetchOrders = async ({ statuses, limit, replace = false }) => {
+    if (fetching) return;
+    setFetching(true);
     try {
-      const restaurantId = sessionStorage.getItem('restaurantId');
-      const workerID = sessionStorage.getItem('workerId');
+      const query = new URLSearchParams({
+        statuses: statuses.join(','),
+        limit: limit.toString(),
+      });
 
-      const currentOrder = orders.find((o) => o.id === orderId);
-      const isAssigningWorker =
-        currentOrder.status === 'pending' && nextStatus === 'in_progress';
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/retrieve/orders/?${query}`);
+      const data = response.data;
 
-      const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
-        isAssigningWorker ? { worker_id: workerID } : {},
-      );
-      console.log(`Order ${response.data.order_id} updated to ${nextStatus}`);
-
-      const updatedOrders = orders.map((order) =>
-        order.id === orderId ? { ...order, status: nextStatus } : order,
-      );
-      setOrders(updatedOrders);
-
-      // Automatically close modal if final status
-      if (nextStatus === 'picked_up') {
-        setSelectedOrder(null);
-      } else {
-        setSelectedOrder((prev) =>
-          prev ? { ...prev, status: nextStatus } : null,
-        );
+      const newMap = { ...fullOrderMap.current };
+      for (const order of data.results) {
+        newMap[order.id] = order;
       }
-    } catch (error) {
-      console.error('Error updating order status: ', error);
+      fullOrderMap.current = newMap;
+
+      const sortedOrders = Object.values(newMap)
+        .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+        .slice(0, limit);
+
+      setOrders(sortedOrders);
+      setNextOffset(data.next_offset);
+      setTotalCount(data.total);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+    } finally {
+      setLoading(false);
+      setFetching(false);
     }
   };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/retrieve/orders/`,
-        );
-        const newOrders = response.data;
+    fullOrderMap.current = {};
+    loadedLimit.current = 20;
+    fetchOrders({ statuses: statusFilter, limit: loadedLimit.current });
 
-        if (JSON.stringify(newOrders) !== JSON.stringify(orders)) {
-          //checks if orders have changed, if same do nothing
-          setOrders(newOrders);
-        }
+    const intervalId = setInterval(() => {
+      fetchOrders({ statuses: statusFilter, limit: loadedLimit.current });
+    }, 3000);
 
-        if (loading) {
-          setLoading(false); // Only clear loading on first fetch
-        }
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        if (loading) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchOrders(); // On Page entry
-
-    const intervalId = setInterval(fetchOrders, 3000); // Poll every 3s
     return () => clearInterval(intervalId);
-  }, []);
+  }, [statusFilter]);
 
-  const getNextStatus = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'in_progress';
-      case 'in_progress':
-        return 'completed';
-      case 'completed':
-        return 'picked_up';
-      default:
-        return null;
+  const handleStatusFilterChange = (status) => {
+    const newStatuses = statusFilter.includes(status)
+      ? statusFilter.filter(s => s !== status)
+      : [...statusFilter, status];
+    setStatusFilter(newStatuses);
+    setLoading(true);
+  };
+
+  const handleLoadMore = () => {
+    loadedLimit.current += 10;
+    fetchOrders({ statuses: statusFilter, limit: loadedLimit.current });
+  };
+
+  const handleUpdateOrderStatus = async (orderId, nextStatus) => {
+    try {
+      const restaurantId = sessionStorage.getItem('restaurantId');
+      const workerId = sessionStorage.getItem('workerId');
+      const workerName = sessionStorage.getItem('workerName');
+
+      const currentOrder = orders.find(o => o.id === orderId);
+      const isAssigningWorker = currentOrder.status === 'pending' && nextStatus === 'in_progress';
+
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${nextStatus}/`,
+        isAssigningWorker ? { worker_id: workerId } : {}
+      );
+
+      const updatedData = {
+        ...response.data,
+        ...(isAssigningWorker ? { worker_name: workerName } : {})
+      };
+
+      fullOrderMap.current[orderId] = {
+        ...fullOrderMap.current[orderId],
+        ...updatedData
+      };
+      const sortedOrders = Object.values(fullOrderMap.current)
+        .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+        .slice(0, loadedLimit.current);
+      setOrders(sortedOrders);
+      setSelectedOrder(prev => (prev ? { ...prev, ...updatedData } : null));
+    } catch (err) {
+      console.error('Error updating order status:', err);
     }
   };
 
-  const formatStatus = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'picked_up':
-        return 'Picked Up';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
+  const handleUpdateCategoryStatus = async (orderId, category, newStatus) => {
+    try {
+      const restaurantId = sessionStorage.getItem('restaurantId');
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`
+      );
+
+      const updated = response.data;
+      fullOrderMap.current[orderId] = {
+        ...fullOrderMap.current[orderId],
+        ...updated
+      };
+      const sortedOrders = Object.values(fullOrderMap.current)
+        .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
+        .slice(0, loadedLimit.current);
+      setOrders(sortedOrders);
+      setSelectedOrder(prev => (prev ? { ...prev, ...updated } : null));
+    } catch (err) {
+      console.error('Error updating category status:', err);
     }
   };
 
-  if (loading && orders.length === 0) {
-    return (
-      <Container className="mt-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </Container>
-    );
-  }
+  const formatStatus = status =>
+    status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
 
   return (
-    <Container className="mt-5">
-      <Button
-        variant="outline-primary"
-        className="mb-3"
-        onClick={() => navigate('/dashboard')}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          zIndex: 1051,
-        }}
-      >
-        Log Out
-      </Button>
+    <Box p={3} pb={8}>
+      <Box mb={2}>
+        {role?.toLowerCase() === 'manager' ? (
+          <Button variant="contained" color="primary" onClick={() => navigate('/manager_dashboard')}>
+            Dashboard
+          </Button>
+        ) : (
+          <Button variant="contained" color="error" onClick={() => navigate('/dashboard')}>
+            Log Out
+          </Button>
+        )}
+      </Box>
+      <Typography variant="h4" align="center" gutterBottom>Active Orders</Typography>
 
-      <h1>Active Orders</h1>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Ordered Time</th>
-            <th>Total Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr
-              key={order.id}
-              onClick={() => setSelectedOrder(order)}
-              style={{ cursor: 'pointer' }}
-            >
-              <td>{order.customer_name}</td>
-              <td>{new Date(order.start_time).toLocaleString()}</td>
-              <td>${Number(order.total_price).toFixed(2)}</td>
-              <td>{formatStatus(order.status)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" mb={2}>
+        {['pending', 'in_progress', 'completed', 'picked_up', 'cancelled'].map(status => (
+          <FormControlLabel
+            key={status}
+            control={<Checkbox checked={statusFilter.includes(status)} onChange={() => handleStatusFilterChange(status)} />}
+            label={formatStatus(status)}
+          />
+        ))}
+      </Stack>
 
-      {/* Modal for Order Details */}
-      <Modal
-        show={!!selectedOrder}
-        onHide={() => setSelectedOrder(null)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Order Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder && (
-            <>
-              <Table striped bordered hover size="sm">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.order_items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.item_name}</td>
-                      <td>{item.quantity}</td>
-                    </tr>
+      <Stack direction="row" spacing={2} mb={3}>
+        <TextField label="Search Customer" variant="outlined" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        <TextField label="Search Worker" variant="outlined" value={workerSearchTerm} onChange={e => setWorkerSearchTerm(e.target.value)} />
+      </Stack>
+
+      {loading ? (
+        <Box textAlign="center"><CircularProgress /></Box>
+      ) : (
+        <>
+          <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Order #</TableCell>
+                  <TableCell>Customer</TableCell>
+                  <TableCell>ETA</TableCell>
+                  <TableCell>Total Price</TableCell>
+                  <TableCell>Worker</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {orders
+                  .filter(order =>
+                    statusFilter.includes(order.status) &&
+                    order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                    (workerSearchTerm === '' || order.worker_name?.toLowerCase().includes(workerSearchTerm.toLowerCase()))
+                  )
+                  .map(order => (
+                    <TableRow
+                      key={order.id}
+                      hover
+                      onClick={() => setSelectedOrder(order)}
+                      sx={{
+                        cursor: 'pointer',
+                        backgroundColor: '#fafafa',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                        ...(order.status === 'cancelled' && {
+                          outline: '2px solid #f44336',
+                          backgroundColor: '#ffebee'
+                        })
+                      }}
+                    >
+                      <TableCell>{order.id}</TableCell>
+                      <TableCell>{order.customer_name}</TableCell>
+                      <TableCell>
+                        {order.food_eta_minutes && <div><strong>Food:</strong> {order.food_eta_minutes} min</div>}
+                        {order.beverage_eta_minutes && <div><strong>Bev:</strong> {order.beverage_eta_minutes} min</div>}
+                      </TableCell>
+                      <TableCell>${Number(order.total_price).toFixed(2)}</TableCell>
+                      <TableCell>{order.worker_name || '-'}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={formatStatus(order.status)}
+                          color={statusColorMap[order.status] || 'default'}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </Table>
-            </>
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {orders.length < totalCount && (
+            <Box textAlign="center" mt={2}>
+              <Button variant="contained" onClick={handleLoadMore}>Load More Orders</Button>
+            </Box>
           )}
-        </Modal.Body>
-        <Modal.Footer>
-          {selectedOrder && selectedOrder.status !== 'picked_up' && (
+        </>
+      )}
+
+      <Dialog open={!!selectedOrder} onClose={() => setSelectedOrder(null)} maxWidth="md" fullWidth>
+        <DialogTitle>Order Details</DialogTitle>
+        <DialogContent>
+          {selectedOrder && (
+            <Stack spacing={3}>
+              {['beverage', 'food'].map((category, idx) => {
+                const items = selectedOrder.order_items.filter(item =>
+                  category === 'beverage'
+                    ? item.category?.toLowerCase() === 'beverage'
+                    : item.category?.toLowerCase() !== 'beverage'
+                );
+                if (!items.length) return null;
+                const status = category === 'beverage' ? selectedOrder.beverage_status : selectedOrder.food_status;
+
+                return (
+                  <Box key={category}>
+                    {idx === 1 && <Divider sx={{ my: 2 }} />}
+                    <Typography variant="h6" gutterBottom>
+                      {category === 'beverage' ? 'Beverages' : 'Food'} (Status: {formatStatus(status)})
+                    </Typography>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Item</TableCell>
+                          <TableCell>Quantity</TableCell>
+                          <TableCell>Unwanted Ingredients</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {items.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{item.item_name}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>
+                              {item.unwanted_ingredient_names?.length > 0
+                                ? `${item.unwanted_ingredient_names.length} Ingredient(s): ${item.unwanted_ingredient_names.join(', ')}`
+                                : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    {status === 'in_progress' && (
+                      <Button
+                        variant="contained"
+                        color="info"
+                        sx={{ mt: 1 }}
+                        onClick={() => handleUpdateCategoryStatus(selectedOrder.id, category, 'completed')}
+                      >
+                        Mark {category} Completed
+                      </Button>
+                    )}
+                    {status === 'completed' && (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        sx={{ mt: 1 }}
+                        onClick={() => handleUpdateCategoryStatus(selectedOrder.id, category, 'picked_up')}
+                      >
+                        Mark {category} Picked Up
+                      </Button>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {selectedOrder?.status === 'pending' && (
             <Button
-              variant="success"
-              onClick={() => {
-                const nextStatus = getNextStatus(selectedOrder.status);
-                if (nextStatus) {
-                  handleUpdateOrderStatus(selectedOrder.id, nextStatus);
-                }
-              }}
+              variant="contained"
+              color="warning"
+              onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'in_progress')}
             >
-              {selectedOrder.status === 'pending'
-                ? 'Mark In Progress'
-                : selectedOrder.status === 'in_progress'
-                  ? 'Mark Completed'
-                  : 'Mark Picked Up'}
+              Mark In Progress
             </Button>
           )}
-          <Button variant="secondary" onClick={() => setSelectedOrder(null)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+          <Button onClick={() => setSelectedOrder(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

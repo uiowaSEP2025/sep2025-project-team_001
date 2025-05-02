@@ -6,6 +6,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
+USE_S3 = ENVIRONMENT == "production"
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-key")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "fallback-stripe-key")
@@ -29,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    'rest_framework_simplejwt.token_blacklist',
     "corsheaders",
     "app",
 ]
