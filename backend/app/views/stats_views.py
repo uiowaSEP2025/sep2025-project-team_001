@@ -1,16 +1,20 @@
 from datetime import datetime
 
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now, timedelta
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models.order_models import Order
+from ..models.order_models import Order, OrderItem
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from ..models.worker_models import Worker
 from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField, FloatField
 from ..models.restaurant_models import Item
+from django.db.models import Avg
+from app.models.review_models import Review
+
+
 
 
 @api_view(["GET"])
@@ -73,7 +77,7 @@ def get_bartender_statistics(request):
         # All completed orders with start and end time
         orders = Order.objects.filter(
             worker=worker,
-            status="completed",
+            status__in=["completed", "picked_up"],
             start_time__isnull=False,
             completion_time__isnull=False,
         ).annotate(
@@ -118,10 +122,54 @@ def get_item_statistics(request):
             sales=ExpressionWrapper(
                 F("price") * F("times_ordered"),
                 output_field=FloatField()
-            )
+            ),
+            avg_rating=Avg("orderitem__order__review__rating")
         )
         .order_by("-times_ordered")
-        .values("name", "price", "times_ordered", "sales")
+        .values("name", "price", "times_ordered", "sales", "avg_rating")
     )
 
     return Response({"items": list(items)}, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_restaurant_statistics(request):
+    if not hasattr(request.user, "restaurant"):
+        return Response({"error": "Only restaurant accounts can access this."}, status=403)
+
+    restaurant = request.user.restaurant
+    range_param = request.query_params.get("range", "week")
+
+    # Determine time window
+    today = now()
+    if range_param == "day":
+        start_time = today - timedelta(days=1)
+        interval = "hour"
+    elif range_param == "week":
+        start_time = today - timedelta(weeks=1)
+        interval = "day"
+    elif range_param == "month":
+        start_time = today - timedelta(days=30)
+        interval = "day"
+    else:  # all_time
+        start_time = restaurant.created_at
+        interval = "week"
+
+    from django.db.models.functions import Trunc
+
+    trunc_fn = {
+        "hour": Trunc("start_time", "hour"),
+        "day": Trunc("start_time", "day"),
+        "week": Trunc("start_time", "week")
+    }[interval]
+
+    data = (
+        Order.objects.filter(restaurant=restaurant, start_time__gte=start_time, status__in=["completed", "picked_up"])
+        .annotate(period=trunc_fn)
+        .values("period")
+        .annotate(total_sales=Sum("total_price"))
+        .order_by("period")
+    )
+
+    return Response(list(data))

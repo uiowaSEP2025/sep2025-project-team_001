@@ -10,27 +10,50 @@ import {
   TableRow,
   Paper,
   Button,
-  Grid,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const StatisticsPage = () => {
-  const [productStats, setProductStats] = useState([]);
+  const [itemStats, setItemStats] = useState([]);
   const [workerStats, setWorkerStats] = useState([]);
+  const [salesData, setSalesData] = useState([]);
+  const [timeRange, setTimeRange] = useState('week');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('total_sales');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedCategory, setSelectedCategory] = useState('worker');
+  const [itemSortOption, setItemSortOption] = useState('sales');
+  const [itemSortOrder, setItemSortOrder] = useState('desc');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [productRes, workerRes] = await Promise.all([
+        const [itemRes, workerRes] = await Promise.all([
           axios.get(`${process.env.REACT_APP_API_URL}/api/statistics/`),
           axios.get(`${process.env.REACT_APP_API_URL}/bartender-statistics/`),
         ]);
-
-        console.log(workerRes)
-
-        setProductStats(productRes.data.items || []);
+        setItemStats(itemRes.data.items || []);
         setWorkerStats(workerRes.data.bartender_statistics || []);
       } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -39,6 +62,57 @@ const StatisticsPage = () => {
 
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/restaurant-statistics/?range=${timeRange}`
+        );
+        const formatted = res.data.map(d => ({
+          date: new Date(d.period).toLocaleDateString(),
+          sales: d.total_sales,
+        }));
+        setSalesData(formatted);
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+      }
+    };
+
+    fetchSalesData();
+  }, [timeRange]);
+
+  const handleSort = (data) => {
+    if (!sortOption) return data;
+    const sorted = [...data].sort((a, b) => {
+      const aVal = a[sortOption] ?? '';
+      const bVal = b[sortOption] ?? '';
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return sorted;
+  };
+
+  const handleItemSort = (data) => {
+    if (!itemSortOption) return data;
+    const sorted = [...data].sort((a, b) => {
+      const aVal = a[itemSortOption] ?? '';
+      const bVal = b[itemSortOption] ?? '';
+      return itemSortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return sorted;
+  };
+
+  const filteredWorkers = handleSort(
+    workerStats.filter(w =>
+      w.worker_name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const filteredItems = handleItemSort(
+    itemStats.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   const uniformRowSx = {
     height: 56,
@@ -51,22 +125,73 @@ const StatisticsPage = () => {
     },
   };
 
-  return (
-    <Box sx={{ mt: 4, px: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Typography variant="h4" align="center">Statistics</Typography>
-      </Box>
+  const handleRangeChange = (event, newRange) => {
+    if (newRange) {
+      setTimeRange(newRange);
+    }
+  };
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+  return (
+    <Box sx={{ mt: 4, px: 4, pb: 8 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4">Statistics</Typography>
         <Button variant="outlined" onClick={() => navigate('/manager_dashboard')}>
           Back to Dashboard
         </Button>
       </Box>
 
-      <Grid container spacing={4} justifyContent="center">
-        {/* Worker Statistics */}
-        <Grid item xs={12} md={5}>
-          <Paper elevation={4} sx={{ p: 3, height: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 4 }}>
+        <FormControl>
+          <InputLabel>Select Category</InputLabel>
+          <Select
+            value={selectedCategory}
+            label="Select Category"
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            sx={{ minWidth: 220 }}
+          >
+            <MenuItem value="worker">Worker Statistics</MenuItem>
+            <MenuItem value="item">Item Statistics</MenuItem>
+            <MenuItem value="sales">Restaurant Sales</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {selectedCategory === 'worker' && (
+        <>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
+            <TextField
+              label="Search Worker"
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ minWidth: 300 }}
+            />
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={sortOption}
+                label="Sort By"
+                onChange={(e) => setSortOption(e.target.value)}
+              >
+                <MenuItem value="total_orders">Total Orders</MenuItem>
+                <MenuItem value="average_time_seconds">Average Time</MenuItem>
+                <MenuItem value="total_sales">Total Sales</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 150 }}>
+              <InputLabel>Order</InputLabel>
+              <Select
+                value={sortOrder}
+                label="Order"
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <MenuItem value="asc">Ascending</MenuItem>
+                <MenuItem value="desc">Descending</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Paper elevation={4} sx={{ p: 3, mb: 5 }}>
             <Typography variant="h6" align="center" sx={{ mb: 2 }}>
               Worker Statistics
             </Typography>
@@ -76,18 +201,16 @@ const StatisticsPage = () => {
                   <TableRow sx={uniformRowSx}>
                     <TableCell><strong>Name</strong></TableCell>
                     <TableCell><strong>Role</strong></TableCell>
-                    <TableCell><strong>Orders</strong></TableCell>
+                    <TableCell><strong># Orders</strong></TableCell>
                     <TableCell><strong>Avg Time</strong></TableCell>
                     <TableCell><strong>Sales</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {workerStats.map((worker, index) => (
+                  {filteredWorkers.map((worker, index) => (
                     <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{worker.worker_name}</TableCell>
-                      <TableCell>
-                        {worker.role ? worker.role.charAt(0).toUpperCase() + worker.role.slice(1) : ''}
-                      </TableCell>
+                      <TableCell>{worker.role?.charAt(0).toUpperCase() + worker.role.slice(1)}</TableCell>
                       <TableCell>{worker.total_orders}</TableCell>
                       <TableCell>
                         {worker.average_time_seconds !== null
@@ -101,13 +224,85 @@ const StatisticsPage = () => {
               </Table>
             </TableContainer>
           </Paper>
-        </Grid>
 
-        {/* Product Statistics */}
-        <Grid item xs={12} md={7}>
-          <Paper elevation={4} sx={{ p: 3, height: '100%' }}>
+          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <Box sx={{ flex: 1, minWidth: 400 }}>
+              <Paper elevation={4} sx={{ p: 3 }}>
+                <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+                  Worker Total Sales
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={filteredWorkers} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="worker_name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="total_sales" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+
+            <Box sx={{ flex: 1, minWidth: 400 }}>
+              <Paper elevation={4} sx={{ p: 3 }}>
+                <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+                  Worker Avg Time (sec)
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={filteredWorkers} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="worker_name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="average_time_seconds" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {selectedCategory === 'item' && (
+        <>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3 }}>
+            <TextField
+              label="Search Item"
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ minWidth: 300 }}
+            />
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={itemSortOption}
+                label="Sort By"
+                onChange={(e) => setItemSortOption(e.target.value)}
+              >
+                <MenuItem value="sales">Total Sales</MenuItem>
+                <MenuItem value="times_ordered"># Ordered</MenuItem>
+                <MenuItem value="avg_rating">Average Rating</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 150 }}>
+              <InputLabel>Order</InputLabel>
+              <Select
+                value={itemSortOrder}
+                label="Order"
+                onChange={(e) => setItemSortOrder(e.target.value)}
+              >
+                <MenuItem value="asc">Ascending</MenuItem>
+                <MenuItem value="desc">Descending</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Paper elevation={4} sx={{ p: 3, mb: 5 }}>
             <Typography variant="h6" align="center" sx={{ mb: 2 }}>
-              Product Statistics
+              Item Statistics
             </Typography>
             <TableContainer>
               <Table>
@@ -116,22 +311,87 @@ const StatisticsPage = () => {
                     <TableCell><strong>Item Name</strong></TableCell>
                     <TableCell><strong>Sales</strong></TableCell>
                     <TableCell><strong># Ordered</strong></TableCell>
+                    <TableCell><strong>Avg Rating</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {productStats.map((item, index) => (
+                  {filteredItems.map((item, index) => (
                     <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{item.name}</TableCell>
-                      <TableCell>${(parseFloat(item.price) * item.times_ordered).toFixed(2)}</TableCell>
+                      <TableCell>${parseFloat(item.sales).toFixed(2)}</TableCell>
                       <TableCell>{item.times_ordered}</TableCell>
+                      <TableCell>{item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
           </Paper>
-        </Grid>
-      </Grid>
+
+          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <Box sx={{ flex: 1, minWidth: 400 }}>
+              <Paper elevation={4} sx={{ p: 3 }}>
+                <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+                  Item Total Sales
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={filteredItems} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="sales" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+
+            <Box sx={{ flex: 1, minWidth: 400 }}>
+              <Paper elevation={4} sx={{ p: 3 }}>
+                <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+                  Item Avg Rating
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={filteredItems} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="avg_rating" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {selectedCategory === 'sales' && (
+        <Paper elevation={4} sx={{ p: 3 }}>
+          <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+            Restaurant Sales Over Time
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <ToggleButtonGroup value={timeRange} exclusive onChange={handleRangeChange}>
+              <ToggleButton value="day">1 Day</ToggleButton>
+              <ToggleButton value="week">1 Week</ToggleButton>
+              <ToggleButton value="month">1 Month</ToggleButton>
+              <ToggleButton value="all_time">All Time</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Line type="monotone" dataKey="sales" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </Paper>
+      )}
     </Box>
   );
 };
