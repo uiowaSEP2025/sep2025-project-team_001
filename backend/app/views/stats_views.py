@@ -13,6 +13,9 @@ from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationF
 from ..models.restaurant_models import Item
 from django.db.models import Avg
 from app.models.review_models import Review
+from django.db.models.functions import Trunc
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 
 
@@ -152,16 +155,16 @@ def get_restaurant_statistics(request):
     elif range_param == "month":
         start_time = today - timedelta(days=30)
         interval = "day"
-    else:  # all_time
-        start_time = restaurant.created_at
-        interval = "week"
+    elif range_param == "year":
+        start_time = make_aware(datetime(today.year, 1, 1))
+        interval = "month"
 
-    from django.db.models.functions import Trunc
 
     trunc_fn = {
         "hour": Trunc("start_time", "hour"),
         "day": Trunc("start_time", "day"),
-        "week": Trunc("start_time", "week")
+        "week": Trunc("start_time", "week"),
+        "month": Trunc("start_time", "month"),
     }[interval]
 
     data = (
@@ -172,4 +175,4 @@ def get_restaurant_statistics(request):
         .order_by("period")
     )
 
-    return Response(list(data))
+    return Response(json.loads(json.dumps(list(data), cls=DjangoJSONEncoder)))

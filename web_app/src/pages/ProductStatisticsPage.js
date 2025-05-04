@@ -69,10 +69,71 @@ const StatisticsPage = () => {
         const res = await axios.get(
           `${process.env.REACT_APP_API_URL}/restaurant-statistics/?range=${timeRange}`
         );
-        const formatted = res.data.map(d => ({
-          date: new Date(d.period).toLocaleDateString(),
-          sales: d.total_sales,
-        }));
+
+        const dataMap = new Map(
+          res.data.map((d) => [new Date(d.period).toISOString(), d.total_sales])
+        );
+
+        let formatted = [];
+        const now = new Date();
+
+        if (timeRange === 'day') {
+          for (let h = 0; h < 24; h++) {
+            const hour = new Date(now);
+            hour.setHours(h, 0, 0, 0);
+            const label = h % 4 === 0
+              ? hour.toLocaleTimeString([], { hour: 'numeric', hour12: true })
+              : '';
+              formatted.push({
+                date: label,
+                fullLabel: hour.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+                sales: dataMap.get(hour.toISOString()) || 0,
+              });              
+          }
+        } else if (timeRange === 'week') {
+          for (let i = 6; i >= 0; i--) {
+            const day = new Date(now);
+            day.setDate(now.getDate() - i);
+            const key = day.toISOString().split('T')[0];
+            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
+            formatted.push({
+              date: day.toLocaleDateString(undefined, { weekday: 'short' }),
+              fullLabel: day.toLocaleDateString(undefined, { weekday: 'long' }),
+              sales: match ? match[1] : 0,
+            });            
+          }
+        } else if (timeRange === 'month') {
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          for (let d = 1; d <= daysInMonth; d++) {
+            const day = new Date(year, month, d);
+            const key = day.toISOString().split('T')[0];
+            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
+            const label = (d % 5 === 0 || d === 1 || d === daysInMonth)
+              ? day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+              : '';
+              formatted.push({
+                date: label,
+                fullLabel: day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                sales: match ? match[1] : 0,
+              });              
+          }
+        } else if (timeRange === 'year') {
+          const today = new Date();
+          for (let i = 11; i >= 0; i--) {
+            const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const key = month.toISOString().slice(0, 7);
+            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
+            formatted.push({
+              date: month.toLocaleDateString(undefined, { month: 'short' }),  // e.g., "Jan"
+              fullLabel: month.toLocaleDateString(undefined, { month: 'long' }),  // e.g., "January"
+              sales: match ? match[1] : 0,
+            });                       
+          }
+        }
+
         setSalesData(formatted);
       } catch (error) {
         console.error('Error fetching sales data:', error);
@@ -80,7 +141,7 @@ const StatisticsPage = () => {
     };
 
     fetchSalesData();
-  }, [timeRange]);
+  }, [timeRange]);  
 
   const handleSort = (data) => {
     if (!sortOption) return data;
@@ -91,6 +152,8 @@ const StatisticsPage = () => {
     });
     return sorted;
   };
+
+  
 
   const handleItemSort = (data) => {
     if (!itemSortOption) return data;
@@ -378,7 +441,7 @@ const StatisticsPage = () => {
               <ToggleButton value="day">1 Day</ToggleButton>
               <ToggleButton value="week">1 Week</ToggleButton>
               <ToggleButton value="month">1 Month</ToggleButton>
-              <ToggleButton value="all_time">All Time</ToggleButton>
+              <ToggleButton value="year">1 Year</ToggleButton>
             </ToggleButtonGroup>
           </Box>
           <ResponsiveContainer width="100%" height={300}>
