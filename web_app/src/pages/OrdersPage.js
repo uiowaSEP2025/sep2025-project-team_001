@@ -127,6 +127,8 @@ const OrdersPage = () => {
         isAssigningWorker ? { worker_id: workerId } : {}
       );
 
+      console.log(response.data)
+
       const updatedData = {
         ...response.data,
         ...(isAssigningWorker ? { worker_name: workerName } : {})
@@ -152,6 +154,8 @@ const OrdersPage = () => {
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/orders/${restaurantId}/${orderId}/${category}/${newStatus}/`
       );
+
+      console.log(response.data)
 
       const updated = response.data;
       fullOrderMap.current[orderId] = {
