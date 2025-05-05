@@ -12,6 +12,7 @@ import PrivateRoute from './PrivateRoute';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ProductStatisticsPage from './pages/ProductStatisticsPage';
 import CustomerReviewPage from './pages/CustomerReviewPage';
+import PromotionNotificationPage from './pages/PromotionNotificationPage';
 
 function AppRoutes() {
   return (
@@ -70,6 +71,15 @@ function AppRoutes() {
           <PrivateRoute>
             {' '}
             <ProductStatisticsPage />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/promotions"
+        element={
+          <PrivateRoute>
+            {' '}
+            <PromotionNotificationPage />{' '}
           </PrivateRoute>
         }
       />

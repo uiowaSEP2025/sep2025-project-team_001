@@ -358,7 +358,7 @@ function ManagerDashboard() {
               size="lg"
               onClick={() => navigate('/product_statistics')}
             >
-              Product Statistics
+              Statistics
             </Button>
             <Button
               variant="primary"
@@ -366,6 +366,13 @@ function ManagerDashboard() {
               onClick={() => navigate('/reviews')}
             >
               Customer Reviews
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigate('/promotions')}
+            >
+              Promotions
             </Button>
           </div>
           <Button

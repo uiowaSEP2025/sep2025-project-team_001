@@ -10,4 +10,4 @@ class ApiConfig(AppConfig):
         from app import scheduler_instance
 
         # Adjust the number of bartenders as needed—here we use 2.
-        scheduler_instance.multi_bartender_scheduler = MultiBartenderScheduler(num_bartenders=2)
+        scheduler_instance.multi_bartender_scheduler = MultiBartenderScheduler(num_bartenders=1)

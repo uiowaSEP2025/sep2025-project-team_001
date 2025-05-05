@@ -199,7 +199,7 @@ module "frontend_ec2" {
   vpc_id         = var.vpc_id
   subnet_id      = aws_subnet.private_subnet_frontend.id
   key_pair_name  = var.key_pair_name
-  instance_type  = "t3.micro"
+  instance_type  = "t3.small"
 
   repo_url    = var.repo_url
   repo_branch = var.repo_branch
@@ -212,7 +212,7 @@ module "nginx_ec2" {
   vpc_id         = var.vpc_id
   subnet_id      = aws_subnet.public_subnet_a.id
   key_pair_name  = var.key_pair_name
-  instance_type  = "t3.micro"
+  instance_type  = "t3.small"
   name_prefix    = "streamlinebars"
   domain_name    = "streamlinebars.com"
 

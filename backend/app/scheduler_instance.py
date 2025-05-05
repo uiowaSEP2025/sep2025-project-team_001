@@ -4,7 +4,7 @@
 restaurant_schedulers = {}
 
 
-def get_restaurant_scheduler(restaurant_id, num_bartenders=2):
+def get_restaurant_scheduler(restaurant_id, num_bartenders=1):
     """
     Retrieve the scheduler instance for the given restaurant.
     If one doesn't exist, create it with the default number of bartenders.

@@ -52,6 +52,14 @@ void _handleMessageNavigation(RemoteMessage message) {
       arguments: {'initialIndex': 1},
     );
   }
+
+  if (data['type'] == 'PROMOTION') {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/home',
+      (route) => false,
+      arguments: {'initialIndex': 0},
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
