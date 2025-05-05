@@ -24,7 +24,8 @@ class OrderHistoryScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: EdgeInsets.all(screenWidth * 0.025),
-                  child: buildHistoryOrderTile(context,pickedUpOrders[index],screenHeight, screenWidth),
+                  child: buildHistoryOrderTile(context, pickedUpOrders[index],
+                      screenHeight, screenWidth),
                 );
               },
             ),

@@ -278,29 +278,29 @@ Future<bool> handleCheckout(double amount) async {
 Future<void> payWithSavedCard(String paymentMethodId, double amount) async {
   final accessToken = await TokenManager.getAccessToken();
 
-try{
-  final response = await Dio().post(
-    "${ApiConfig.baseUrl}/order/payment/saved_card/",
-    data: {
-      "payment_method_id": paymentMethodId,
-      "amount": (amount * 100).toInt(),
-    },
-    options: Options(headers: {
-      "Authorization": "Bearer $accessToken",
-      "Content-Type": "application/json",
-    }),
-  );
+  try {
+    final response = await Dio().post(
+      "${ApiConfig.baseUrl}/order/payment/saved_card/",
+      data: {
+        "payment_method_id": paymentMethodId,
+        "amount": (amount * 100).toInt(),
+      },
+      options: Options(headers: {
+        "Authorization": "Bearer $accessToken",
+        "Content-Type": "application/json",
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    print("Payment successful!");
-  } else {
-    print("Payment failed: ${response.data}");
-  }}
-  on DioException catch (e) {
+    if (response.statusCode == 200) {
+      print("Payment successful!");
+    } else {
+      print("Payment failed: ${response.data}");
+    }
+  } on DioException catch (e) {
     if (e.response?.statusCode == 401) {
       final refreshed = await refreshAccessToken();
       if (refreshed) {
-        return await payWithSavedCard(paymentMethodId,amount);
+        return await payWithSavedCard(paymentMethodId, amount);
       }
       throw Exception("Access token expired or unauthorized");
     }

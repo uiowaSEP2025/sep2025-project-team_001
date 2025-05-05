@@ -21,7 +21,7 @@ class Order(models.Model):
 
     estimated_food_ready_time = models.DateTimeField(null=True, blank=True)
     estimated_beverage_ready_time = models.DateTimeField(null=True, blank=True)
-    
+
     reviewed = models.BooleanField(default=False)
 
     status = models.CharField(max_length=50, default="pending")
@@ -44,7 +44,6 @@ class Order(models.Model):
         ],
         default="pending",
     )
-
 
     def __str__(self):
         return f"Order #{self.id} by {self.customer.user.username} at {self.restaurant.name}"

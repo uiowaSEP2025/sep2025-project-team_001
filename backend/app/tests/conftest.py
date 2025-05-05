@@ -1,8 +1,8 @@
 from decimal import Decimal
 
 import pytest
-from app.models import Order
 from app.models.customer_models import Customer, CustomUser
+from app.models.order_models import Order, OrderItem
 from app.models.restaurant_models import Ingredient, Item, Restaurant
 from app.models.worker_models import Worker
 from rest_framework.test import APIClient
@@ -14,7 +14,8 @@ def api_client(db):
 
 
 @pytest.fixture
-def user(db):
+def custom_user(db):
+    """Returns a test CustomUser."""
     return CustomUser.objects.create_user(
         username="user1",
         email="user1@example.com",
@@ -23,29 +24,41 @@ def user(db):
 
 
 @pytest.fixture
-def customer(db, user):
-    return Customer.objects.create(user=user)
+def customer(db, custom_user):
+    """Returns a Customer for the test user."""
+    return Customer.objects.create(user=custom_user)
 
 
 @pytest.fixture
-def restaurant(db, user):
+def customer_user(db, custom_user):
+    """Returns a (user, customer) tuple for convenience."""
+    customer = Customer.objects.create(user=custom_user)
+    return custom_user, customer
+
+
+@pytest.fixture
+def restaurant(db, custom_user):
+    """Returns a test Restaurant."""
     return Restaurant.objects.create(
-        user=user,
+        user=custom_user,
         name="Testaurant",
         address="123 Main St",
         phone="555-555-5555",
-        restaurant_image="image-data"
+        restaurant_image_url="http://example.com/test.png"
     )
 
 
 @pytest.fixture
 def restaurant_with_user(db, restaurant):
-    custom_user = CustomUser.objects.create_user(
-        username="linkeduser", email="linked@example.com", password="pass"
+    """Returns a Restaurant and a new linked CustomUser."""
+    linked_user = CustomUser.objects.create_user(
+        username="linkeduser",
+        email="linked@example.com",
+        password="pass"
     )
-    restaurant.user = custom_user
+    restaurant.user = linked_user
     restaurant.save()
-    return restaurant, custom_user
+    return restaurant, linked_user
 
 
 @pytest.fixture
@@ -54,20 +67,6 @@ def worker(db, restaurant):
         restaurant=restaurant,
         pin="1234",
         role="manager"
-    )
-
-
-@pytest.fixture
-def item(db, restaurant):
-    return Item.objects.create(
-        restaurant=restaurant,
-        name="Test Burger",
-        description="A tasty burger",
-        price=Decimal("8.99"),
-        category="Food",
-        stock=20,
-        available=True,
-        base64_image="base64-encoded-image"
     )
 
 
@@ -84,9 +83,8 @@ def burger_item(db, restaurant):
         description="Delicious beef burger",
         price=Decimal("9.99"),
         category="Food",
-        stock=10,
-        available=True,
-        base64_image="fake-image"
+        item_image_url="http://example.com/fake.png",
+        available=True
     )
 
 
@@ -99,25 +97,18 @@ def ingredients(db, burger_item):
 
 @pytest.fixture
 def manager_user_with_worker(db):
-    """
-    Returns a dict: {
-        user: CustomUser,
-        restaurant: Restaurant,
-        worker: Worker,
-        pin: str
-    }
-    """
+    """Returns a dict with user, restaurant, worker, and pin."""
     user = CustomUser.objects.create_user(
         username="manageruser",
         email="manager@example.com",
-        password="securepass"
+        password="pass"
     )
     restaurant = Restaurant.objects.create(
         user=user,
-        name="PinTestaurant",
-        address="123 Pin St",
-        phone="999-888-7777",
-        restaurant_image="restaurant-img"
+        name="Manageraurant",
+        address="456 Side St",
+        phone="555-123-4567",
+        restaurant_image_url="http://example.com/test.png"
     )
     worker = Worker.objects.create(
         restaurant=restaurant,
@@ -133,10 +124,44 @@ def manager_user_with_worker(db):
 
 
 @pytest.fixture
+def manager_client(db, api_client, manager_user_with_worker):
+    """Authenticated APIClient for a manager user."""
+    api_client.force_authenticate(user=manager_user_with_worker["user"])
+    return api_client
+
+
+@pytest.fixture
 def auth_client(db, api_client):
-    """
-    Returns an authenticated APIClient using a test user.
-    """
-    user = CustomUser.objects.create_user(username="stripeuser", email="stripe@example.com", password="testpass")
+    """Returns an authenticated APIClient using a test user."""
+    user = CustomUser.objects.create_user(
+        username="stripeuser",
+        email="stripe@example.com",
+        password="testpass"
+    )
     api_client.force_authenticate(user=user)
     return api_client
+
+
+@pytest.fixture
+def order_item(db, order, burger_item):
+    """Returns an OrderItem linking order to burger_item."""
+    return OrderItem.objects.create(order=order, item=burger_item, quantity=1)
+
+
+@pytest.fixture
+def order_with_item(order_item):
+    """Returns an Order with one OrderItem."""
+    return order_item.order
+
+
+@pytest.fixture
+def new_item_payload():
+    """Returns a sample payload for creating an Item."""
+    return {
+        "name": "Test Item",
+        "description": "Test description",
+        "price": "10.00",
+        "category": "Food",
+        "item_image_url": "http://example.com/test.png",
+        "available": True
+    }

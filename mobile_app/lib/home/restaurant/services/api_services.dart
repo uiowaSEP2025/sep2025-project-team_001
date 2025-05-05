@@ -32,7 +32,7 @@ Future<List<MenuItem>> fetchMenuItems(int restaurantId) async {
   } on DioException catch (e) {
     if (e.response?.statusCode == 401) {
       final refreshed = await refreshAccessToken();
-      if(refreshed){
+      if (refreshed) {
         return await fetchMenuItems(restaurantId);
       }
       throw Exception("Access token expired or unauthorized");

@@ -112,7 +112,6 @@ def retrieve_active_orders(request):
     }, status=status.HTTP_200_OK)
 
 
-
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_order_status(request, restaurant_id, order_id, new_status):
@@ -201,7 +200,6 @@ def update_order_status(request, restaurant_id, order_id, new_status):
     )
 
 
-
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_order_category_status(request, restaurant_id, order_id, category, new_status):
@@ -235,7 +233,6 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
         order.food_status = normalized_status
     else:
         order.beverage_status = normalized_status
-
 
     # Determine correct main order status based on available categories
     status_priority = {"pending": 0, "in_progress": 1, "completed": 2, "picked_up": 3}
@@ -301,6 +298,7 @@ def get_customer_orders(request):
 
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

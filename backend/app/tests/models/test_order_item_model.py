@@ -1,37 +1,41 @@
+# app/tests/models/test_order_item_model.py
 import pytest
 from app.models.order_models import OrderItem
+from django.core.exceptions import ValidationError
 
 
 @pytest.mark.django_db
-def test_order_item_str(order, burger_item):
-    """
-    The string representation of an OrderItem should include item name and quantity.
-    """
-    order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=2)
-    assert str(order_item) == f"2x {burger_item.name} (Order #{order.id})"
+def test_order_item_str(order_item):
+    expected = f"{order_item.quantity}x {order_item.item.name} (Order #{order_item.order.id})"
+    assert str(order_item) == expected
 
 
 @pytest.mark.django_db
-def test_order_item_multiple(order, burger_item):
-    """
-    Creating multiple OrderItems for the same order should result in multiple linked entries.
-    """
-    oi1 = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
-    oi2 = OrderItem.objects.create(order=order, item=burger_item, quantity=2)
-
-    items = order.order_items.all()
-    assert len(items) == 2
-    assert str(oi1) == f"1x {burger_item.name} (Order #{order.id})"
-    assert str(oi2) == f"2x {burger_item.name} (Order #{order.id})"
+def test_order_item_default_quantity(order, burger_item):
+    oi = OrderItem.objects.create(order=order, item=burger_item)
+    assert oi.quantity == 1
 
 
 @pytest.mark.django_db
-def test_order_item_unwanted_ingredients(order, burger_item, ingredients):
-    """
-    Unwanted ingredients should be correctly assigned to the OrderItem.
-    """
-    order_item = OrderItem.objects.create(order=order, item=burger_item, quantity=1)
+def test_order_item_unwanted_ingredients(order_item, ingredients):
+    # attach ingredients
     order_item.unwanted_ingredients.set(ingredients)
+    stored = list(order_item.unwanted_ingredients.all())
+    assert set(stored) == set(ingredients)
 
-    unwanted = order_item.unwanted_ingredients.all()
-    assert set(unwanted) == set(ingredients)
+
+@pytest.mark.django_db
+def test_negative_quantity_validation(order, burger_item):
+    # Negative quantity should not pass model validation
+    oi = OrderItem(order=order, item=burger_item, quantity=-1)
+    with pytest.raises(ValidationError):
+        oi.full_clean()
+
+
+@pytest.mark.django_db
+def test_duplicate_unwanted_ingredients_are_deduped(order_item, ingredients):
+    # adding the same ingredient twice
+    ing = ingredients[0]
+    order_item.unwanted_ingredients.add(ing, ing)
+    stored = list(order_item.unwanted_ingredients.all())
+    assert stored.count(ing) == 1

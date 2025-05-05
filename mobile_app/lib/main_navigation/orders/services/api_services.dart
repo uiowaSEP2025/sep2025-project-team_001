@@ -40,7 +40,7 @@ Future<int> cancelOrder(
     if (e.response?.statusCode == 401) {
       final refreshed = await refreshAccessToken();
       if (refreshed) {
-        return await cancelOrder(orderId: orderId,restaurantId: restaurantId);
+        return await cancelOrder(orderId: orderId, restaurantId: restaurantId);
       }
       throw Exception("Access token expired or unauthorized");
     }
@@ -50,7 +50,9 @@ Future<int> cancelOrder(
 }
 
 Future<int> reviewOrder(
-    {required int orderId, required double rating, required String review}) async {
+    {required int orderId,
+    required double rating,
+    required String review}) async {
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {
@@ -91,7 +93,8 @@ Future<int> reviewOrder(
       final refreshed = await refreshAccessToken();
 
       if (refreshed) {
-        return await reviewOrder(orderId: orderId, rating: rating, review: review);
+        return await reviewOrder(
+            orderId: orderId, rating: rating, review: review);
       }
       throw Exception("Access token expired or unauthorized");
     }
@@ -100,8 +103,7 @@ Future<int> reviewOrder(
   }
 }
 
-Future<Order> getOrder(
-    {required int orderId}) async {
+Future<Order> getOrder({required int orderId}) async {
   final accessToken = await TokenManager.getAccessToken();
 
   if (accessToken == null) {

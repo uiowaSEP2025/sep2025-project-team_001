@@ -1,5 +1,3 @@
-from app.mobileViews.utils import send_fcm_httpv1, send_notification_to_device
-from app.models.order_models import Order
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -22,11 +20,11 @@ def create_review(request):
     serializer = ReviewSerializer(data=request.data)
     if serializer.is_valid():
         review = serializer.save()
-        
+
         order = review.order
         order.reviewed = True
         order.save()
-        
+
         return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -43,7 +41,8 @@ def list_reviews(request):
         )
     restaurant = request.user.restaurant
     reviews = (
-        Review.objects.select_related("order__customer__user", "order__worker").filter(order__restaurant=restaurant).order_by("-created_at")
+        Review.objects.select_related("order__customer__user", "order__worker").filter(
+            order__restaurant=restaurant).order_by("-created_at")
     )
 
     serializer = ReviewSerializer(reviews, many=True)

@@ -28,4 +28,3 @@ output "frontend_dns" {
 output "s3_image_bucket_name" {
   value = module.s3_images.bucket_name
 }
-

@@ -44,9 +44,15 @@ const StatisticsPage = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><strong>Item Name</strong></TableCell>
-              <TableCell><strong>Price</strong></TableCell>
-              <TableCell><strong># Ordered</strong></TableCell>
+              <TableCell>
+                <strong>Item Name</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Price</strong>
+              </TableCell>
+              <TableCell>
+                <strong># Ordered</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
