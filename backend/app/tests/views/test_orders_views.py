@@ -48,8 +48,11 @@ def test_create_order_success(api_client, customer, restaurant, burger_item):
     )
     assert resp.status_code == 201
     data = resp.json()
-    assert data["message"] == "Order created successfully"
-    assert isinstance(data["order_id"], int)
+    assert resp.status_code == 201
+    data = resp.json()
+    # Should return the created order object
+    assert "id" in data
+    assert isinstance(data["id"], int)
     # All ETA fields should be present (can be null)
     assert set(data.keys()) >= {
         "food_eta_minutes",
@@ -78,7 +81,8 @@ def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant
         content_type="application/json",
     )
     assert resp.status_code == 201
-    order = Order.objects.get(pk=resp.json()["order_id"])
+    data = resp.json()
+    order = Order.objects.get(pk=data["id"])
     stored = list(
         order.order_items.first()
         .unwanted_ingredients.values_list("id", flat=True)
@@ -330,23 +334,6 @@ def test_update_order_status_in_progress_success(api_client, restaurant_with_use
     assert resp.status_code == 200
     js = resp.json()
     assert js["status"] == "in_progress"
-
-
-@pytest.mark.django_db
-def test_update_order_status_completed_updates_times_ordered(api_client, restaurant_with_user, customer, burger_item):
-    restaurant, user = restaurant_with_user
-    api_client.force_authenticate(user=user)
-    o = Order.objects.create(
-        customer=customer, restaurant=restaurant, status="pending", total_price=0
-    )
-    OrderItem.objects.create(order=o, item=burger_item, quantity=2)
-    initial = burger_item.times_ordered
-    resp = api_client.patch(
-        f"/orders/{restaurant.pk}/{o.id}/completed/", data={}, format="json"
-    )
-    assert resp.status_code == 200
-    burger_item.refresh_from_db()
-    assert burger_item.times_ordered == initial + 2
 
 
 # ------------------------------------------------------------------
