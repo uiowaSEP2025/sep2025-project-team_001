@@ -91,12 +91,13 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                                   width: screenWidth * 0.35,
                                   height: screenWidth * 0.34,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(
+                                  errorBuilder: (context, error, stackTrace) {
+                                  print("image error: $error");
+                                      return Icon(
                                     Icons.broken_image,
                                     size: 40,
                                     color: Colors.grey,
-                                  ),
+                                  );}
                                 ),
                               ),
                           SizedBox(
@@ -183,18 +184,21 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                       ),
                       Column(
                         children: widget.order.items.map((item) {
-                          return Row(
-                            children: [
-                              Container(
-                                color: AppColors.secondary,
-                                height: 20,
-                                width: 20,
-                                child:
-                                    Center(child: Text("${item['quantity']}")),
-                              ),
-                              SizedBox(width: horizontalSpacing),
-                              Text(item['item_name'] ?? '')
-                            ],
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: horizontalSpacing),
+                            child: Row(
+                              children: [
+                                Container(
+                                  color: AppColors.secondary,
+                                  height: 20,
+                                  width: 20,
+                                  child:
+                                      Center(child: Text("${item['quantity']}")),
+                                ),
+                                SizedBox(width: horizontalSpacing),
+                                Text(item['item_name'] ?? '')
+                              ],
+                            ),
                           );
                         }).toList(),
                       ),

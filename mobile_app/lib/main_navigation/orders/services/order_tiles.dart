@@ -7,73 +7,73 @@ import 'package:mobile_app/main_navigation/orders/order_review_screen.dart';
 import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 import 'package:mobile_app/main_navigation/orders/widgets/custom_expandable_tile.dart';
 
-Widget buildHistoryOrderTile(BuildContext context,Order order, double screenHeight, double screenWidth) {
+Widget buildHistoryOrderTile(BuildContext context, Order order,
+    double screenHeight, double screenWidth) {
   return GestureDetector(
-    onTap: (){
+    onTap: () {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => OrderReviewScreen(order: order)),
       );
     },
     child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.secondary,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(screenHeight * 0.02),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Order #${order.id} for ${order.restaurantName}",
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(screenHeight * 0.02),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Order #${order.id} for ${order.restaurantName}",
+                  style: AppTextStyles.buttonText(
+                      screenHeight * 0.9, Colors.black),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                Text("${order.items.length} items"),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text("\$${order.totalPrice}",
                     style: AppTextStyles.buttonText(
-                        screenHeight * 0.9, Colors.black),
-                  ),
-                  SizedBox(height: screenHeight * 0.01),
-                  Text("${order.items.length} items"),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text("\$${order.totalPrice}",
-                      style: AppTextStyles.buttonText(
-                          screenHeight * 0.8, Colors.black)),
-                  SizedBox(height: screenWidth * 0.03),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => OrderReviewScreen(order: order)),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      textStyle: AppTextStyles.buttonText(
-                          screenHeight * 0.7, AppColors.whiteText),
+                        screenHeight * 0.8, Colors.black)),
+                SizedBox(height: screenWidth * 0.03),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => OrderReviewScreen(order: order)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text("View Details"),
-                  )
-                ],
-              ),
-            ],
-          ),
+                    textStyle: AppTextStyles.buttonText(
+                        screenHeight * 0.7, AppColors.whiteText),
+                  ),
+                  child: const Text("View Details"),
+                )
+              ],
+            ),
+          ],
         ),
       ),
+    ),
   );
-
 }
 
 int getTotalItems(List<dynamic> items) {
@@ -150,10 +150,8 @@ Widget buildPendingOrderTile(
   );
 }
 
-Widget buildProgressOrderTile(
-    Order order,
-    double screenHeight,
-    double screenWidth) {
+Widget buildProgressOrderTile( BuildContext context,
+    Order order, double screenHeight, double screenWidth) {
   return CustomExpandableTile(
     screenHeight: screenHeight,
     collapsedChild: Container(
@@ -176,12 +174,68 @@ Widget buildProgressOrderTile(
                       screenHeight * 0.9, Colors.black),
                 ),
                 SizedBox(height: screenHeight * 0.01),
-                if (order.drinksETAminutes != null)
+                if (order.drinksETAminutes != null &&
+                    order.drinkStatus != 'completed')
                   Text("Drinks ready in ${order.drinksETAminutes} minutes"),
+                if (order.drinkStatus == 'completed')
+                  ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => OrderReceiptScreen(order: order)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    textStyle: AppTextStyles.buttonText(
+                        screenHeight * 0.7, AppColors.whiteText),
+                  ),
+                  child: const Text("Pick up Drinks Now!"),
+                ),
+                  // Text(
+                  //   "Pick up Drinks now!",
+                  //   style: AppTextStyles.buttonText(
+                  //       screenHeight, AppColors.primaryColor),
+                  // ),
                 SizedBox(height: screenHeight * 0.01),
-                if (order.foodETAminutes != null)
+                if (order.foodETAminutes != null &&
+                    order.foodStatus != 'completed')
                   Text(
-                      "Food will be ready in ${order.drinksETAminutes} minutes")
+                      "Food will be ready in ${order.drinksETAminutes} minutes"),
+                if (order.foodStatus == 'completed')
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => OrderReceiptScreen(order: order)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    textStyle: AppTextStyles.buttonText(
+                        screenHeight * 0.7, AppColors.whiteText),
+                  ),
+                  child: const Text("Pick up Food Now!"),
+                ),
+                  // Text(
+                  //     "Pick up Food now!",
+                  //     style: AppTextStyles.buttonText(
+                  //         screenHeight, AppColors.primaryColor),
+                  //   ),
               ],
             ),
             Column(
@@ -198,7 +252,6 @@ Widget buildProgressOrderTile(
         ),
       ),
     ),
-    
     expandedChild: Padding(
       padding: EdgeInsets.only(
           left: screenWidth * 0.015, right: screenWidth * 0.015),
@@ -289,6 +342,4 @@ Widget buildPickupOrderTile(BuildContext context, Order order,
       ),
     ),
   );
-
-  
 }

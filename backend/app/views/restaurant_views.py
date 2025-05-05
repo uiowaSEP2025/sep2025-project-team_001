@@ -27,5 +27,5 @@ def get_menu_items(request, restaurant_id):
 @permission_classes([IsAuthenticated])
 def get_restaurant(request, restaurant_id):
     restaurant = Restaurant.objects.get(id=restaurant_id)
-    serializer = RestaurantSerializer(restaurant)
+    serializer = RestaurantSerializer(restaurant,context={"request": request})
     return Response(serializer.data)

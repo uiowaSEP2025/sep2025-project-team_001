@@ -106,6 +106,7 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
                     width: screenWidth,
                     child: Column(
                       children: [
+                        
                         if (order.status == "picked_up" && !order.reviewed)
                           RatingWidget(
                               order: order,

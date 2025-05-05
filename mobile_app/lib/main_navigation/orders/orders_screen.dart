@@ -75,17 +75,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final newPickedUp =
           fetchedOrders.where((o) => o.status == 'picked_up').toList();
 
-      if (!_listEquals(pendingOrders, newPending) ||
-          !_listEquals(completedOrders, newCompleted) ||
-          !_listEquals(inProgressOrders, newInProgress) ||
-          !_listEquals(pickedUpOrders, newPickedUp)) {
-        setState(() {
+      // if (!_listEquals(pendingOrders, newPending) ||
+      //     !_listEquals(completedOrders, newCompleted) ||
+      //     !_listEquals(inProgressOrders, newInProgress) ||
+      //     !_listEquals(pickedUpOrders, newPickedUp)) {
+      //   setState(() {
+      //     pendingOrders = newPending;
+      //     completedOrders = newCompleted;
+      //     inProgressOrders = newInProgress;
+      //     pickedUpOrders = newPickedUp;
+      //   });
+      // }
+
+      setState(() {
           pendingOrders = newPending;
           completedOrders = newCompleted;
           inProgressOrders = newInProgress;
           pickedUpOrders = newPickedUp;
         });
-      }
 
     } catch (e) {
       print("Error loading orders: $e");
@@ -146,7 +153,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ? const Center(child: CircularProgressIndicator())
           : errorFetching
               ? const Center(child: Text('Failed to load orders. Try again.'))
-              : (pendingOrders.isEmpty && completedOrders.isEmpty)
+              : (pendingOrders.isEmpty && completedOrders.isEmpty && inProgressOrders.isEmpty)
                   ? const Center(
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
@@ -175,7 +182,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ...inProgressOrders.map((order) => Padding(
                                 padding:
                                     EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildProgressOrderTile(
+                                child: buildProgressOrderTile(context,
                                     order, screenHeight, screenWidth),
                               )),
                         ],
