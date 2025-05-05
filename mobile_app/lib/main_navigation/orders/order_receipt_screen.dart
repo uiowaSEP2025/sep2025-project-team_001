@@ -7,7 +7,6 @@ import 'package:mobile_app/home/restaurant/models/order.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 import 'package:mobile_app/main_navigation/orders/services/methods.dart';
-import 'package:mobile_app/utils/base_64_image_with_fallback.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 class OrderReceiptScreen extends StatefulWidget {
@@ -84,13 +83,22 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (restaurant != null)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Base64ImageWithFallback(
+                            if (restaurant!.restaurantImageUrl != null)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  restaurant!.restaurantImageUrl!,
                                   width: screenWidth * 0.35,
                                   height: screenWidth * 0.34,
-                                  base64ImageString: restaurant?.base64image),
-                            ),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                    Icons.broken_image,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
                           SizedBox(
                             width: horizontalSpacing,
                           ),
