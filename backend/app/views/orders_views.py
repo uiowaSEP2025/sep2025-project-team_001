@@ -31,45 +31,12 @@ def create_order(request):
     order.total_price = order.get_total()
     order.save(update_fields=["total_price"])
 
-    # 2) Recalculate ETAs (they get rounded/floored inside order_eta_utils)
+    # Recalculate ETAs
     recalculate_pending_etas(order.restaurant.id)
     order.refresh_from_db()
 
-    # 3) Floor everything to the minute
-    now = timezone.now().replace(second=0, microsecond=0)
-
-    # 4) Compute separate minute deltas and re‑round to nearest 5
-    if order.estimated_food_ready_time:
-        fr = order.estimated_food_ready_time.replace(second=0, microsecond=0)
-        raw_food_delta = int((fr - now).total_seconds() / 60)
-        food_eta_minutes = round_to_nearest_five(raw_food_delta)
-        food_ready_iso = fr.isoformat()
-    else:
-        food_eta_minutes = None
-        food_ready_iso = None
-
-    if order.estimated_beverage_ready_time:
-        br = order.estimated_beverage_ready_time.replace(second=0, microsecond=0)
-        raw_bev_delta = int((br - now).total_seconds() / 60)
-        beverage_eta_minutes = round_to_nearest_five(raw_bev_delta)
-        bev_ready_iso = br.isoformat()
-    else:
-        beverage_eta_minutes = None
-        bev_ready_iso = None
-
-    # 5) Save the rounded ETAs back onto the order
-    order.food_eta_minutes = food_eta_minutes
-    order.beverage_eta_minutes = beverage_eta_minutes
-    order.save(update_fields=["food_eta_minutes", "beverage_eta_minutes"])
-
-    return Response({
-        "message": "Order created successfully",
-        "order_id": order.id,
-        "food_eta_minutes": food_eta_minutes,
-        "beverage_eta_minutes": beverage_eta_minutes,
-        "estimated_food_ready_time": food_ready_iso,
-        "estimated_beverage_ready_time": bev_ready_iso,
-    }, status=status.HTTP_201_CREATED)
+    serializer = OrderSerializer(order)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @api_view(["GET"])
@@ -185,17 +152,9 @@ def update_order_status(request, restaurant_id, order_id, new_status):
         )
 
     recalculate_pending_etas(order.restaurant.id)
-    return Response(
-        {
-            "message": f"Order status updated to '{normalized_status}'.",
-            "order_id": order.id,
-            "status": normalized_status,
-            "food_status": order.food_status,
-            "beverage_status": order.beverage_status,
-        },
-        status=status.HTTP_200_OK,
-    )
-
+    order.refresh_from_db()
+    serializer = OrderSerializer(order)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["PATCH"])
@@ -263,6 +222,11 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
             order_item.item.times_ordered += order_item.quantity
             order_item.item.save()
 
+
+#     order.refresh_from_db()
+#     serializer = OrderSerializer(order)
+#     return Response(serializer.data, status=status.HTTP_200_OK)
+
     return Response({
         "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
         "order_id": order.id,
@@ -271,6 +235,7 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
         "beverage_status": order.beverage_status,
         "completion_time": order.completion_time.isoformat() if order.completion_time else None,
     }, status=status.HTTP_200_OK)
+
 
 
 @api_view(["GET"])
@@ -337,7 +302,7 @@ def estimate_order_eta(request):
             num_food += qty
 
     # Prepare scheduler (does not mutate its state for this estimate)
-    scheduler = get_restaurant_scheduler(restaurant_id, num_bartenders=2)
+    scheduler = get_restaurant_scheduler(restaurant_id, num_bartenders=1)
 
     now = timezone.now()
 
