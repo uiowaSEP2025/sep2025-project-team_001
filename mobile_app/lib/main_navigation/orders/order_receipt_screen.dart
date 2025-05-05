@@ -241,6 +241,7 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                               ))),
                     ]),
               )
+           
             ],
           ),
         

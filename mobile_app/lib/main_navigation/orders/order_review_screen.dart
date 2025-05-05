@@ -51,25 +51,24 @@ class _OrderReviewScreenState extends State<OrderReviewScreen> {
   }
 
   void submitReview(int orderId, double rating, String comment) async {
+    try {
+      final returnOrderId =
+          await reviewOrder(orderId: orderId, rating: rating, review: comment);
 
-try {
-  final returnOrderId = await reviewOrder(orderId: orderId, rating: rating, review: comment);
-
-  if(returnOrderId == order.id){
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Review submitted"),
-          backgroundColor: AppColors.validGreen,
-        ),
-      );
-    setState(() {
-      needsReview = false;
-    });
-  }
-}
-catch (e) {
-  throw Exception();
-}
+      if (returnOrderId == order.id) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Review submitted"),
+            backgroundColor: AppColors.validGreen,
+          ),
+        );
+        setState(() {
+          needsReview = false;
+        });
+      }
+    } catch (e) {
+      throw Exception();
+    }
   }
 
   void fetchRestaurant() async {
@@ -217,7 +216,6 @@ catch (e) {
                                                           : "You can collect your food now, your drinks will be ready shortly!",
                                                   overflow:
                                                       TextOverflow.visible,
-                                                  //maxLines: 2,
                                                   softWrap: true,
                                                   style: AppTextStyles
                                                       .subtitleParagraph(
@@ -255,7 +253,6 @@ catch (e) {
                                             screenHeight * 0.7,
                                             AppColors.whiteText),
                                       ),
-                                      
                                     ],
                                   ),
                                 ),
@@ -263,140 +260,237 @@ catch (e) {
                               SizedBox(
                                 height: verticalSpacing,
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    left: horizontalSpacing,
-                                    right: horizontalSpacing),
-                                
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: verticalSpacing * 0.5),
-
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          isExpanded = !isExpanded;
-                                        });
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "Items",
-                                            style: AppTextStyles.appBarText(
-                                                screenHeight, Colors.black),
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Icon(
-                                            isExpanded
-                                                ? Icons.expand_less
-                                                : Icons.expand_more,
-                                            size: 20,
-                                            color: Colors.black,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-
-                                    AnimatedCrossFade(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      crossFadeState: isExpanded
-                                          ? CrossFadeState.showSecond
-                                          : CrossFadeState.showFirst,
-                                      firstChild: const SizedBox.shrink(),
-                                      secondChild: Column(
+                              (needsReview)
+                                  ? Padding(
+                                      padding: EdgeInsets.only(
+                                          left: horizontalSpacing,
+                                          right: horizontalSpacing),
+                                      child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           SizedBox(
                                               height: verticalSpacing * 0.5),
-
-                                          Column(
-                                            children: widget.order.items
-                                                .map((item) {
-                                              return Padding(
-                                                padding: EdgeInsets.only(
-                                                    bottom:
-                                                        horizontalSpacing),
-                                                child: Row(
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                isExpanded = !isExpanded;
+                                              });
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  "Items",
+                                                  style:
+                                                      AppTextStyles.appBarText(
+                                                          screenHeight,
+                                                          Colors.black),
+                                                ),
+                                                const SizedBox(width: 5),
+                                                Icon(
+                                                  isExpanded
+                                                      ? Icons.expand_less
+                                                      : Icons.expand_more,
+                                                  size: 20,
+                                                  color: Colors.black,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          AnimatedCrossFade(
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            crossFadeState: isExpanded
+                                                ? CrossFadeState.showSecond
+                                                : CrossFadeState.showFirst,
+                                            firstChild: const SizedBox.shrink(),
+                                            secondChild: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                    height:
+                                                        verticalSpacing * 0.5),
+                                                Column(
+                                                  children: widget.order.items
+                                                      .map((item) {
+                                                    return Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom:
+                                                              horizontalSpacing),
+                                                      child: Row(
+                                                        children: [
+                                                          Container(
+                                                            color: AppColors
+                                                                .secondary,
+                                                            height: 20,
+                                                            width: 20,
+                                                            child: Center(
+                                                                child: Text(
+                                                                    "${item['quantity']}")),
+                                                          ),
+                                                          SizedBox(
+                                                              width:
+                                                                  horizontalSpacing),
+                                                          Text(item[
+                                                                  'item_name'] ??
+                                                              '')
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                SizedBox(
+                                                    height:
+                                                        verticalSpacing * 0.5),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
                                                   children: [
-                                                    Container(
-                                                      color:
-                                                          AppColors.secondary,
-                                                      height: 20,
-                                                      width: 20,
-                                                      child: Center(
-                                                          child: Text(
-                                                              "${item['quantity']}")),
+                                                    Text(
+                                                      "Total: ${widget.order.totalPrice}",
+                                                      style: AppTextStyles
+                                                          .appBarText(
+                                                              screenHeight,
+                                                              Colors.black),
                                                     ),
-                                                    SizedBox(
-                                                        width:
-                                                            horizontalSpacing),
-                                                    Text(item['item_name'] ??
-                                                        '')
                                                   ],
                                                 ),
-                                              );
-                                            }).toList(),
-                                          ),
-
-                                          SizedBox(
-                                              height: verticalSpacing * 0.5),
-
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "Total: ${widget.order.totalPrice}",
-                                                style:
-                                                    AppTextStyles.appBarText(
-                                                        screenHeight,
-                                                        Colors.black),
-                                              ),
-                                            ],
-                                          ),
-
-                                          SizedBox(height: verticalSpacing),
-
-                                          SizedBox(
-                                            height: screenWidth * 0.12,
-                                            width: screenWidth -
-                                                horizontalSpacing * 2,
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    AppColors.primaryColor,
-                                              ),
-                                              onPressed: () {
-                                                generateAndPrintReceipt(
-                                                    widget.order,
-                                                    customerName,
-                                                    restaurant);
-                                              },
-                                              child: Center(
-                                                child: Text(
-                                                  "Get Receipt",
-                                                  style: AppTextStyles
-                                                      .buttonText(
-                                                          screenHeight,
-                                                          AppColors
-                                                              .whiteText),
+                                                SizedBox(
+                                                    height: verticalSpacing),
+                                                SizedBox(
+                                                  height: screenWidth * 0.12,
+                                                  width: screenWidth -
+                                                      horizontalSpacing * 2,
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor: AppColors
+                                                          .primaryColor,
+                                                    ),
+                                                    onPressed: () {
+                                                      generateAndPrintReceipt(
+                                                          widget.order,
+                                                          customerName,
+                                                          restaurant);
+                                                    },
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Get Receipt",
+                                                        style: AppTextStyles
+                                                            .buttonText(
+                                                                screenHeight,
+                                                                AppColors
+                                                                    .whiteText),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
                                           ),
                                         ],
-                                      ),
+                                      ))
+                                  : Padding(
+                                      padding: EdgeInsets.only(
+                                          left: horizontalSpacing,
+                                          right: horizontalSpacing),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: verticalSpacing * 0.5,
+                                            ),
+                                            Text(
+                                              "Items: ",
+                                              style: AppTextStyles.appBarText(
+                                                  screenHeight, Colors.black),
+                                            ),
+                                            SizedBox(
+                                              height: verticalSpacing * 0.5,
+                                            ),
+                                            Column(
+                                              children: widget.order.items
+                                                  .map((item) {
+                                                return Padding(
+                                                  padding: EdgeInsets.only(
+                                                      bottom:
+                                                          horizontalSpacing),
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        color:
+                                                            AppColors.secondary,
+                                                        height: 20,
+                                                        width: 20,
+                                                        child: Center(
+                                                            child: Text(
+                                                                "${item['quantity']}")),
+                                                      ),
+                                                      SizedBox(
+                                                          width:
+                                                              horizontalSpacing),
+                                                      Text(item['item_name'] ??
+                                                          '')
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                            SizedBox(
+                                              height: verticalSpacing * 2,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  "Total: ${widget.order.totalPrice}",
+                                                  style:
+                                                      AppTextStyles.appBarText(
+                                                          screenHeight,
+                                                          Colors.black),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: verticalSpacing,
+                                            ),
+                                            SizedBox(
+                                                height: screenWidth * 0.12,
+                                                width: screenWidth -
+                                                    horizontalSpacing * 2,
+                                                child: ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                            backgroundColor:
+                                                                AppColors
+                                                                    .primaryColor),
+                                                    onPressed: () {
+                                                      generateAndPrintReceipt(
+                                                          widget.order,
+                                                          customerName,
+                                                          restaurant);
+                                                    },
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Get Receipt",
+                                                        style: AppTextStyles
+                                                            .buttonText(
+                                                                screenHeight,
+                                                                AppColors
+                                                                    .whiteText),
+                                                      ),
+                                                    ))),
+                                          ]),
                                     ),
-                                  ],
-                                )
+                              SizedBox(
+                                height: verticalSpacing,
                               ),
-                              SizedBox(height: verticalSpacing,),
                               if (order.status == "picked_up" &&
-                                  !order.reviewed && needsReview)
+                                  !order.reviewed &&
+                                  needsReview)
                                 RatingWidget(
                                     order: order,
                                     screenHeight: screenHeight,
@@ -458,7 +552,9 @@ class _RatingWidgetState extends State<RatingWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-          SizedBox(width:widget.horizontalSpacing,),
+            SizedBox(
+              width: widget.horizontalSpacing,
+            ),
             Text(
               "How was ${widget.order.restaurantName}?",
               style: AppTextStyles.subtitleParagraph(
