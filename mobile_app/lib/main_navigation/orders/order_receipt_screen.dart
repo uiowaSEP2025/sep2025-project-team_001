@@ -54,7 +54,7 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Order ready!",
+          "Order: #${widget.order.id}",
           style: AppTextStyles.appBarText(screenHeight, Colors.black),
         ),
       ),
@@ -67,7 +67,7 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: screenHeight * 0.35,
+                height: screenHeight * 0.32,
                 color: AppColors.greenBackground,
                 child: Padding(
                   padding: EdgeInsets.only(
@@ -87,18 +87,18 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.network(
-                                  restaurant!.restaurantImageUrl!,
-                                  width: screenWidth * 0.35,
-                                  height: screenWidth * 0.34,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
+                                    restaurant!.restaurantImageUrl!,
+                                    width: screenWidth * 0.35,
+                                    height: screenWidth * 0.34,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
                                   print("image error: $error");
-                                      return Icon(
+                                  return Icon(
                                     Icons.broken_image,
                                     size: 40,
                                     color: Colors.grey,
-                                  );}
-                                ),
+                                  );
+                                }),
                               ),
                           SizedBox(
                             width: horizontalSpacing,
@@ -117,9 +117,13 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                               Container(
                                 width: screenWidth * 0.5,
                                 child: Text(
-                                  "You can collect your items now. Enjoy!",
+                                  widget.order.status == "completed"
+                                      ? "You can collect your items now. Enjoy!"
+                                      : widget.order.drinkStatus == "completed"
+                                          ? "You can collect your drinks now, your food will be ready shortly!"
+                                          : "You can collect your food now, your drinks will be ready shortly!",
                                   overflow: TextOverflow.visible,
-                                  maxLines: 2,
+                                  //maxLines: 2,
                                   softWrap: true,
                                   style: AppTextStyles.subtitleParagraph(
                                       screenHeight * 1.1, AppColors.whiteText),
@@ -153,14 +157,14 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                         style: AppTextStyles.bigBoldLetters(
                             screenHeight * 0.7, AppColors.whiteText),
                       ),
-                      SizedBox(
-                        height: verticalSpacing * 0.5,
-                      ),
-                      Text(
-                        "Order #${widget.order.id}",
-                        style: AppTextStyles.subtitleParagraph(
-                            screenHeight, Colors.white),
-                      ),
+                      // SizedBox(
+                      //   height: verticalSpacing * 0.5,
+                      // ),
+                      // Text(
+                      //   "Order #${widget.order.id}",
+                      //   style: AppTextStyles.subtitleParagraph(
+                      //       screenHeight, Colors.white),
+                      // ),
                     ],
                   ),
                 ),
@@ -192,8 +196,8 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
                                   color: AppColors.secondary,
                                   height: 20,
                                   width: 20,
-                                  child:
-                                      Center(child: Text("${item['quantity']}")),
+                                  child: Center(
+                                      child: Text("${item['quantity']}")),
                                 ),
                                 SizedBox(width: horizontalSpacing),
                                 Text(item['item_name'] ?? '')
@@ -239,6 +243,7 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
               )
             ],
           ),
+        
         ),
       ),
     );
