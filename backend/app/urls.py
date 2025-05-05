@@ -12,6 +12,7 @@ from .views.restaurant_views import get_menu_items, get_restaurants
 from .views.review_views import create_review, list_reviews
 from .views.stats_views import daily_stats, get_bartender_statistics, get_item_statistics, get_restaurant_statistics
 from .views.worker_views import create_worker, delete_worker, get_workers, update_worker
+from .views.promotion_views import list_promotions, create_promotion, update_promotion, delete_promotion, send_promotion
 
 
 urlpatterns = [
@@ -50,4 +51,9 @@ urlpatterns = [
     path('api/statistics/', get_item_statistics, name="get_item_statistics"),
     path('bartender-statistics/', get_bartender_statistics, name="get_bartender_statistics"),
     path('restaurant-statistics/', get_restaurant_statistics, name="get_restaurant_statistics"),
+    path("promotions/", list_promotions, name="list_promotions"),
+    path("promotions/create/", create_promotion, name="create_promotion"),
+    path("promotions/<int:promotion_id>/update/", update_promotion, name="update_promotion"),
+    path("promotions/<int:promotion_id>/delete/", delete_promotion, name="delete_promotion"),
+    path("promotions/<int:promotion_id>/send/", send_promotion, name="send_promotion"),
 ]

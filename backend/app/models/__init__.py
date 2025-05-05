@@ -3,6 +3,7 @@ from .order_models import Order, OrderItem
 from .restaurant_models import Ingredient, Item, Restaurant
 from .review_models import Review
 from .worker_models import Worker
+from .promotion_models import PromotionNotification
 
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "Order",
     "Worker",
     "Review",
+    "PromotionNotification",
 ]
