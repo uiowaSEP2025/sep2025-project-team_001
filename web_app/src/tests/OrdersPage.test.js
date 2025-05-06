@@ -1,194 +1,230 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+  act,
+} from '@testing-library/react';
+import '@testing-library/jest-dom';
 import OrdersPage from '../pages/OrdersPage';
-import axios from 'axios';
 import { MemoryRouter } from 'react-router-dom';
+import axios from 'axios';
 
 jest.mock('axios');
 
-describe('OrdersPage Component', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
 
-  it('displays a loading spinner initially', () => {
-    // Make axios.get return a promise that never resolves immediately.
-    const promise = new Promise(() => {});
-    axios.get.mockReturnValue(promise);
-    render(
-      <MemoryRouter>
-        <OrdersPage />
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole('status')).toBeInTheDocument();
-  });
+beforeAll(() => jest.useFakeTimers());
+afterAll(() => jest.useRealTimers());
 
-  it('renders orders in the table after successful fetch', async () => {
-    const orders = [
+const setSessionMocks = () => {
+  Storage.prototype.getItem = jest.fn((key) => {
+    switch (key) {
+      case 'workerRole':
+        return 'manager';
+      case 'restaurantId':
+        return '1';
+      case 'workerId':
+        return '42';
+      case 'workerName':
+        return 'Alice';
+      default:
+        return null;
+    }
+  });
+};
+
+const baseOrders = [
+  {
+    id: 1,
+    customer_name: 'Bob',
+    total_price: 25,
+    status: 'pending',
+    worker_name: '',
+    food_eta_minutes: 10,
+    beverage_eta_minutes: 5,
+    food_status: 'pending',
+    beverage_status: 'pending',
+    order_items: [
       {
-        id: 1,
-        customer_name: 'Burger Customer',
-        start_time: '2022-01-01T00:00:00Z',
-        status: 'Pending',
+        item_name: 'Burger',
+        quantity: 1,
+        category: 'food',
+        unwanted_ingredient_names: ['Lettuce'],
       },
-      {
-        id: 2,
-        customer_name: 'Fries Customer',
-        start_time: '2022-01-01T01:00:00Z',
-        status: 'Served',
-      },
-    ];
-    axios.get.mockResolvedValue({ data: orders });
+    ],
+  },
+  {
+    id: 2,
+    customer_name: 'Charlie',
+    total_price: 15,
+    status: 'completed',
+    worker_name: 'Sam',
+    food_eta_minutes: null,
+    beverage_eta_minutes: null,
+    food_status: 'completed',
+    beverage_status: 'completed',
+    order_items: [],
+  },
+];
+
+const mockGetOnce = (results, next_offset = null, total = results.length) => {
+  axios.get.mockResolvedValueOnce({
+    data: {
+      results,
+      next_offset,
+      total,
+    },
+  });
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  setSessionMocks();
+});
+
+describe('OrdersPage', () => {
+  test('renders headings and Dashboard button (manager role)', async () => {
+    mockGetOnce(baseOrders);
+
     render(
       <MemoryRouter>
         <OrdersPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    // Wait for the header to appear (loading done)
-    await waitFor(() =>
-      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
-    );
-
-    // Check that orders are rendered.
-    expect(screen.getByText('Burger Customer')).toBeInTheDocument();
-    expect(screen.getByText('Pending')).toBeInTheDocument();
-    const startTimeFormatted = new Date(
-      '2022-01-01T00:00:00Z',
-    ).toLocaleString();
-    expect(screen.getByText(startTimeFormatted)).toBeInTheDocument();
-
-    expect(screen.getByText('Fries Customer')).toBeInTheDocument();
-    expect(screen.getByText('Served')).toBeInTheDocument();
-    const startTimeFormatted2 = new Date(
-      '2022-01-01T01:00:00Z',
-    ).toLocaleString();
-    expect(screen.getByText(startTimeFormatted2)).toBeInTheDocument();
+    expect(await screen.findByText(/Active Orders/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Dashboard/i })).toBeInTheDocument();
   });
 
-  it('renders table with no orders when axios fetch fails', async () => {
-    axios.get.mockRejectedValue(new Error('Network Error'));
+  test('search filters customer list', async () => {
+    mockGetOnce(baseOrders);
+
     render(
       <MemoryRouter>
         <OrdersPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    // Wait for loading to finish.
-    await waitFor(() =>
-      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
-    );
+    expect(await screen.findByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('Charlie')).toBeInTheDocument();
 
-    // Loading spinner should be gone.
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Search Customer/i), {
+      target: { value: 'Bob' },
+    });
 
-    // Only header row should be rendered.
-    const rows = screen.getAllByRole('row');
-    expect(rows.length).toBe(1);
-  });
-
-  // --- New tests for modal and complete order functionality ---
-
-  it('opens order details modal when clicking on an order row', async () => {
-    const order = {
-      id: 1,
-      customer_name: 'Test Customer',
-      start_time: '2022-01-01T00:00:00Z',
-      status: 'Pending',
-      order_items: [{ item_name: 'Test Item', quantity: 2 }],
-    };
-    axios.get.mockResolvedValue({ data: [order] });
-    render(
-      <MemoryRouter>
-        <OrdersPage />
-      </MemoryRouter>,
-    );
-    await waitFor(() =>
-      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
-    );
-
-    // Simulate clicking the order row by clicking on the customer's name.
-    fireEvent.click(screen.getByText('Test Customer'));
-    // Modal should now appear.
-    await waitFor(() =>
-      expect(screen.getByText('Order Details')).toBeInTheDocument(),
-    );
-    // Verify that the order items are displayed.
-    expect(screen.getByText('Test Item')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-  });
-
-  it('completes order successfully', async () => {
-    const order = {
-      id: 1,
-      customer_name: 'Test Customer',
-      start_time: '2022-01-01T00:00:00Z',
-      status: 'Pending',
-      order_items: [{ item_name: 'Test Item', quantity: 2 }],
-    };
-    axios.get.mockResolvedValue({ data: [order] });
-    axios.patch.mockResolvedValue({ data: { order_id: 1 } });
-    render(
-      <MemoryRouter>
-        <OrdersPage />
-      </MemoryRouter>,
-    );
-    await waitFor(() =>
-      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
-    );
-
-    // Open the order details modal.
-    fireEvent.click(screen.getByText('Test Customer'));
-    await waitFor(() =>
-      expect(screen.getByText('Order Details')).toBeInTheDocument(),
-    );
-
-    // "Complete Order" button should be visible.
-    const completeButton = screen.getByText('Complete Order');
-    fireEvent.click(completeButton);
-
-    // After completion, the modal should update and hide the complete button.
     await waitFor(() => {
-      expect(screen.queryByText('Complete Order')).not.toBeInTheDocument();
+      expect(screen.getByText('Bob')).toBeInTheDocument();
+      expect(screen.queryByText('Charlie')).not.toBeInTheDocument();
     });
   });
 
-  it('handles error in completing order', async () => {
-    const order = {
-      id: 1,
-      customer_name: 'Test Customer',
-      start_time: '2022-01-01T00:00:00Z',
-      status: 'Pending',
-      order_items: [{ item_name: 'Test Item', quantity: 2 }],
-    };
-    axios.get.mockResolvedValue({ data: [order] });
-    const consoleErrorSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-    axios.patch.mockRejectedValue(new Error('Patch error'));
+  test('opens order dialog and closes it', async () => {
+    mockGetOnce(baseOrders);
+
     render(
       <MemoryRouter>
         <OrdersPage />
-      </MemoryRouter>,
-    );
-    await waitFor(() =>
-      expect(screen.getByText('Active Orders')).toBeInTheDocument(),
+      </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByText('Test Customer'));
+    fireEvent.click(await screen.findByText('Bob'));
+    expect(await screen.findByText(/Order Details/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Close/i }));
     await waitFor(() =>
-      expect(screen.getByText('Order Details')).toBeInTheDocument(),
+      expect(screen.queryByText(/Order Details/i)).not.toBeInTheDocument()
+    );
+  });
+
+  test('marks order In Progress and updates UI', async () => {
+    mockGetOnce(baseOrders);
+
+    axios.patch.mockResolvedValueOnce({
+      data: { status: 'in_progress' },
+    });
+
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
     );
 
-    const completeButton = screen.getByText('Complete Order');
-    fireEvent.click(completeButton);
+    fireEvent.click(await screen.findByText('Bob'));
+    const markBtn = await screen.findByRole('button', { name: /Mark In Progress/i });
+
+    await act(async () => {
+      fireEvent.click(markBtn);
+    });
 
     await waitFor(() =>
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error marking order as completed:',
-        expect.any(Error),
-      ),
+      expect(screen.getAllByText(/In Progress/i).length).toBeGreaterThan(0)
     );
-    consoleErrorSpy.mockRestore();
+    expect(axios.patch).toHaveBeenCalledTimes(1);
+  });
+
+  test('updates food status from in_progress → completed', async () => {
+    const updated = {
+      ...baseOrders[0],
+      status: 'in_progress',
+      worker_name: 'Alice',
+      food_status: 'in_progress',
+      beverage_status: 'completed',
+    };
+    mockGetOnce([updated]);
+
+    axios.patch.mockResolvedValueOnce({
+      data: { food_status: 'completed' },
+    });
+
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByText('Bob'));
+
+    const foodBtn = await screen.findByRole('button', { name: /Mark food Completed/i });
+
+    await act(async () => {
+      fireEvent.click(foodBtn);
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText(/Food.*Completed/i)).toBeInTheDocument()
+    );
+  });
+
+  test('load more button fetches additional records', async () => {
+    mockGetOnce(baseOrders, 20, 50);
+
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>
+    );
+
+    const loadBtn = await screen.findByRole('button', { name: /Load More Orders/i });
+    mockGetOnce(baseOrders);
+
+    await act(async () => {
+      fireEvent.click(loadBtn);
+    });
+
+    expect(axios.get).toHaveBeenCalledTimes(2);
   });
 });

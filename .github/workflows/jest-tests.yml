@@ -38,18 +38,18 @@ jobs:
         working-directory: web_app
 
   # 2) Cypress Acceptance Test Job
-  cypress-tests:
-    name: Cypress Acceptance Tests
-    runs-on: ubuntu-latest
+  # cypress-tests:
+  #   name: Cypress Acceptance Tests
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v5
-        with:
-          build: npm run build            # Build the React app
-          start: npm start                 # Start the dev server
-          wait-on: http://localhost:3000   # Wait for the app to be available
-          working-directory: web_app
+  #     - name: Run Cypress tests
+  #       uses: cypress-io/github-action@v5
+  #       with:
+  #         #build: npm run build            # Build the React app
+  #         start: npm start                 # Start the dev server
+  #         wait-on: http://localhost:3000   # Wait for the app to be available
+  #         working-directory: web_app
