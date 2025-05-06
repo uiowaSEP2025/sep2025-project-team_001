@@ -188,7 +188,7 @@ def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, b
     assert body["food_eta_minutes"] is None
     assert body["beverage_eta_minutes"] == 5
     food_dt = body["estimated_food_ready_time"]
-    bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
+    bev_dt = isoparse(body["estimated_beverage_ready_time"])
     assert food_dt is None
     assert bev_dt == now + timedelta(minutes=2)
 
@@ -225,8 +225,8 @@ def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_it
 
     assert body["food_eta_minutes"] == 20
     assert body["beverage_eta_minutes"] == 10
-    food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
-    bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
+    food_dt = isoparse(body["estimated_food_ready_time"])
+    bev_dt = isoparse(body["estimated_beverage_ready_time"])
     assert food_dt == now + timedelta(minutes=20)
     assert bev_dt == now + timedelta(minutes=10)
 
