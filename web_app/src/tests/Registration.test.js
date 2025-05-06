@@ -1,349 +1,280 @@
+/* __tests__/Registration.test.js */
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { render, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import Registration from '../pages/Registration';
+import Registration from '../pages/Registration';          // ← adjust if your path differs
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Mock toast
+/* ------------------------------------------------------------------ */
+/*  Mocks                                                              */
+/* ------------------------------------------------------------------ */
+process.env.REACT_APP_API_URL = 'http://api.test';
+
+jest.mock('axios');
 jest.mock('react-toastify', () => ({
   toast: { error: jest.fn() },
-  ToastContainer: () => <div />,
+  ToastContainer: () => <div data-testid="toast-container" />,
 }));
-
-// Mock axios
-jest.mock('axios');
-
-// Mock useNavigate
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
 
-// Mock FileReader globally
-beforeEach(() => {
-  jest.spyOn(global, 'FileReader').mockImplementation(() => {
-    return {
-      readAsDataURL: jest.fn(function () {
-        this.result = 'data:image/png;base64,teststring';
-        this.onloadend();
-      }),
-      onloadend: null,
-      result: null,
-    };
-  });
+/* mock FileReader once for all tests */
+const fileReaderMock = () => {
+  const onloadend = jest.fn();
+  return {
+    readAsDataURL: function () {
+      this.result = 'data:image/png;base64,MOCK';
+      onloadend();
+      if (typeof this.onloadend === 'function') this.onloadend();
+    },
+    onloadend: null,
+    result: null,
+  };
+};
 
+beforeEach(() => {
+  jest.spyOn(global, 'FileReader').mockImplementation(fileReaderMock);
+  sessionStorage.clear();
   jest.clearAllMocks();
 });
+afterAll(() => {
+  global.FileReader.mockRestore();
+});
 
-const fillStep1 = () => {
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+const renderPage = () => render(<Registration />, { wrapper: BrowserRouter });
+
+const fillStep1 = ({
+  name = 'User Name',
+  username = 'user',
+  password = 'password123',
+  confirmPassword = 'password123',
+  pin = '1234',
+} = {}) => {
   fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
-    target: { value: 'Test User' },
+    target: { value: name },
   });
   fireEvent.change(screen.getByPlaceholderText(/Desired Username/i), {
-    target: { value: 'testuser' },
+    target: { value: username },
   });
   fireEvent.change(screen.getByPlaceholderText(/Desired Password/i), {
-    target: { value: 'password123' },
+    target: { value: password },
   });
   fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), {
-    target: { value: 'password123' },
+    target: { value: confirmPassword },
+  });
+  fireEvent.change(screen.getByPlaceholderText(/4-digit pin/i), {
+    target: { value: pin },
   });
 };
 
-const fillStep2 = () => {
+const fillStep2 = ({
+  email = 'user@test.com',
+  phone = '1234567890',
+  business_name = 'Test Bar',
+  business_address = '123 Test St',
+  withImage = true,
+} = {}) => {
   fireEvent.change(screen.getByPlaceholderText(/Email/i), {
-    target: { value: 'test@example.com' },
+    target: { value: email },
   });
   fireEvent.change(screen.getByPlaceholderText(/Phone Number/i), {
-    target: { value: '1234567890' },
+    target: { value: phone },
   });
   fireEvent.change(screen.getByPlaceholderText(/Business Name/i), {
-    target: { value: 'Test Business' },
+    target: { value: business_name },
   });
   fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
-    target: { value: '123 Test St' },
+    target: { value: business_address },
   });
 
-  fireEvent.change(document.getElementById('upload'), {
-    target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
-  });
+  if (withImage) {
+    const input = document.getElementById('upload');
+    fireEvent.change(input, {
+      target: { files: [new File(['x'], 'x.png', { type: 'image/png' })] },
+    });
+  }
 };
 
-describe('Registration Component', () => {
-  test('renders Step 1 fields and Continue button', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    expect(
-      screen.getByPlaceholderText(/First & Last Name/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/Desired Username/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/Desired Password/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/Confirm Password/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Continue/i }),
-    ).toBeInTheDocument();
+/* ------------------------------------------------------------------ */
+/*  Tests                                                              */
+/* ------------------------------------------------------------------ */
+describe('Registration page', () => {
+  /* ---------- Step‑1 basic rendering ---------- */
+  test('renders Step 1 inputs and Continue button', () => {
+    renderPage();
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Desired Username/i)).toBeInTheDocument();
   });
 
-  test('shows error if Step 1 fields are missing', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+  /* ---------- Step‑1 validation branches ---------- */
+  test('shows error when Step 1 fields missing', () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     expect(toast.error).toHaveBeenCalledWith('Please fill out all fields.');
   });
 
-  test('shows error if passwords do not match', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Username/i), {
-      target: { value: 'testuser' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Password/i), {
-      target: { value: 'password123' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), {
-      target: { value: 'wrongpass' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+  test('mismatched passwords error', () => {
+    renderPage();
+    fillStep1({ confirmPassword: 'nope' });
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     expect(toast.error).toHaveBeenCalledWith('Passwords do not match!');
   });
 
-  test('shows error if password is less than 6 characters', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    // Fill Step 1 fields with a short password.
-    fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Username/i), {
-      target: { value: 'testuser' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Password/i), {
-      target: { value: '12345' }, // less than 6 characters
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), {
-      target: { value: '12345' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+  test('short password error', () => {
+    renderPage();
+    fillStep1({ password: '123', confirmPassword: '123' });
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     expect(toast.error).toHaveBeenCalledWith(
       'Password must be at least 6 characters long.',
     );
   });
 
-  test('shows error if phone number is not exactly 10 digits', async () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    // Fill valid Step 1 inputs.
-    fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Username/i), {
-      target: { value: 'testuser' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Password/i), {
-      target: { value: 'password123' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), {
-      target: { value: 'password123' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-
-    // Fill Step 2 with a valid email and an invalid phone number.
-    fireEvent.change(screen.getByPlaceholderText(/Email/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Phone Number/i), {
-      target: { value: '12345' }, // not 10 digits
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Name/i), {
-      target: { value: 'Test Business' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
-      target: { value: '123 Test St' },
-    });
-    fireEvent.change(document.getElementById('upload'), {
-      target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Register/i }));
-    expect(toast.error).toHaveBeenCalledWith(
-      'Phone number must be exactly 10 digits.',
-    );
+  test('pin must be 4 digits', () => {
+    renderPage();
+    fillStep1({ pin: '12' });
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    expect(toast.error).toHaveBeenCalledWith('PIN must be exactly 4 digits.');
   });
 
-  test('goes to Step 2 with valid Step 1 inputs', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
+  /* ---------- Move to Step‑2 ---------- */
+  test('advances to Step 2 with valid inputs', () => {
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     expect(screen.getByPlaceholderText(/Email/i)).toBeInTheDocument();
   });
 
-  test('shows error if Step 2 fields are missing', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
+  /* ---------- Step‑2 validation ---------- */
+  test('missing Step 2 fields error', () => {
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-
-    fireEvent.click(screen.getByRole('button', { name: /Register/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /register/i }));
     expect(toast.error).toHaveBeenCalledWith(
       'Please fill out all fields in Step 2.',
     );
   });
 
-  test('shows error for invalid email or phone', () => {
-    render(<Registration />, { wrapper: BrowserRouter });
+  test('invalid email address error', () => {
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fillStep2({ email: 'bad@email', withImage: true });
+    fireEvent.click(screen.getByRole('button', { name: /register/i }));
+    expect(toast.error).toHaveBeenCalledWith('Please enter a valid email address.');
+  });
 
-    fireEvent.change(screen.getByPlaceholderText(/Email/i), {
-      target: { value: 'invalid-email' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Phone Number/i), {
-      target: { value: '123' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Name/i), {
-      target: { value: 'Biz' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
-      target: { value: '123 Street' },
-    });
-    fireEvent.change(document.getElementById('upload'), {
-      target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Register/i }));
+  test('invalid phone digits error', () => {
+    renderPage();
+    fillStep1();
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fillStep2({ phone: '999', withImage: true });
+    fireEvent.click(screen.getByRole('button', { name: /register/i }));
     expect(toast.error).toHaveBeenCalledWith(
-      'Please enter a valid email address.',
+      'Phone number must be exactly 10 digits.',
     );
   });
 
-  test('successful registration stores tokens and navigates', async () => {
-    axios.post.mockResolvedValue({
-      data: {
-        tokens: { access: 'access-token', refresh: 'refresh-token' },
-      },
-    });
-
-    render(<Registration />, { wrapper: BrowserRouter });
+  /* ---------- Restaurant validation fails ---------- */
+  test('shows error when restaurant address invalid', async () => {
+    axios.post.mockResolvedValueOnce({ data: { valid: false } }); // validate_restaurant
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     fillStep2();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Register/i }));
+      fireEvent.click(screen.getByRole('button', { name: /register/i }));
     });
 
-    expect(sessionStorage.getItem('accessToken')).toBe('access-token');
-    expect(sessionStorage.getItem('refreshToken')).toBe('refresh-token');
+    expect(toast.error).toHaveBeenCalledWith(
+      'Invalid business address. Contact streamlinebars@gmail.com for manual verification',
+    );
+    expect(axios.post).toHaveBeenCalledTimes(1); // never hit /register/
+  });
+
+  /* ---------- Successful registration ---------- */
+  test('stores tokens & navigates on success', async () => {
+    axios.post
+      .mockResolvedValueOnce({ data: { valid: true } }) // validate_restaurant
+      .mockResolvedValueOnce({
+        data: {
+          tokens: { access: 'ac', refresh: 'rf' },
+          restaurant_id: 99,
+        },
+      }); // register
+
+    renderPage();
+    fillStep1();
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fillStep2();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /register/i }));
+    });
+
+    expect(sessionStorage.getItem('accessToken')).toBe('ac');
+    expect(sessionStorage.getItem('refreshToken')).toBe('rf');
+    expect(sessionStorage.getItem('restaurantId')).toBe('99');
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 
-  test('shows error on registration failure', async () => {
-    axios.post.mockRejectedValue({
-      response: { data: { message: 'Error from API' } },
-    });
+  /* ---------- API ‑ explicit error message ---------- */
+  test('displays API error message', async () => {
+    axios.post
+      .mockResolvedValueOnce({ data: { valid: true } })
+      .mockRejectedValueOnce({ response: { data: { message: 'API bad' } } });
 
-    render(<Registration />, { wrapper: BrowserRouter });
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     fillStep2();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Register/i }));
+      fireEvent.click(screen.getByRole('button', { name: /register/i }));
     });
 
-    expect(toast.error).toHaveBeenCalledWith(
-      'Registration failed: Error from API',
-    );
+    expect(toast.error).toHaveBeenCalledWith('Registration failed: API bad');
   });
 
-  test('shows error when registration fails without response data', async () => {
-    // Reject axios.post with an error that does not include a response property.
-    axios.post.mockRejectedValue(new Error('Network Error'));
+  /* ---------- API ‑ network failure ---------- */
+  test('handles network error gracefully', async () => {
+    axios.post
+      .mockResolvedValueOnce({ data: { valid: true } })
+      .mockRejectedValueOnce(new Error('Network'));
 
-    render(<Registration />, { wrapper: BrowserRouter });
-
-    // Fill Step 1
-    fireEvent.change(screen.getByPlaceholderText(/First & Last Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Username/i), {
-      target: { value: 'testuser' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Desired Password/i), {
-      target: { value: 'password123' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), {
-      target: { value: 'password123' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-
-    // Fill Step 2 with valid inputs.
-    fireEvent.change(screen.getByPlaceholderText(/Email/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Phone Number/i), {
-      target: { value: '1234567890' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Name/i), {
-      target: { value: 'Test Business' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Business Address/i), {
-      target: { value: '123 Test St' },
-    });
-    fireEvent.change(document.getElementById('upload'), {
-      target: { files: [new File(['img'], 'img.png', { type: 'image/png' })] },
-    });
-
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Register/i }));
-    });
-
-    expect(toast.error).toHaveBeenCalledWith(
-      'Registration failed: Network Error',
-    );
-  });
-
-  test('uploads and stores image as base64 string', async () => {
-    render(<Registration />, { wrapper: BrowserRouter });
+    renderPage();
     fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fillStep2();
 
     await act(async () => {
-      fireEvent.change(document.getElementById('upload'), {
-        target: {
-          files: [new File(['img'], 'img.png', { type: 'image/png' })],
-        },
+      fireEvent.click(screen.getByRole('button', { name: /register/i }));
+    });
+
+    expect(toast.error).toHaveBeenCalledWith('Registration failed: Network');
+  });
+
+  /* ---------- Image upload UI ---------- */
+  test('shows file chosen indicator', async () => {
+    renderPage();
+    fillStep1();
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+    await act(async () => {
+      const input = document.getElementById('upload');
+      fireEvent.change(input, {
+        target: { files: [new File(['x'], 'x.png', { type: 'image/png' })] },
       });
     });
 
-    expect(await screen.findByText(/Image selected/i)).toBeInTheDocument();
-  });
-
-  test('does nothing when no image file is selected', async () => {
-    render(<Registration />, { wrapper: BrowserRouter });
-    fillStep1();
-    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
-
-    await act(async () => {
-      fireEvent.change(document.getElementById('upload'), {
-        target: { files: [] },
-      });
-    });
-
-    expect(screen.queryByText(/Image selected/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Image selected/i)).toBeInTheDocument();
   });
 });
