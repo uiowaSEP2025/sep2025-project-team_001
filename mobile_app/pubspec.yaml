@@ -51,6 +51,8 @@ dependencies:
   geolocator: ^12.0.0
   flutter_launcher_icons: ^0.14.3
   intl: ^0.20.2
+  http: ^1.2.2
+  flutter_dotenv: ^5.2.1
 
 
 dev_dependencies:
@@ -87,6 +89,7 @@ flutter:
     - assets/logos/GoogleLogo.png
     - assets/logos/AppleLogo.png
     - assets/images/partyDancingPicture.jpg
+    - .env
 
   # To add assets to your application, add an assets section, like this:
   # assets:
