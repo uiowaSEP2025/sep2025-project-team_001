@@ -27,17 +27,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<Order> completedOrders = [];
   List<Order> inProgressOrders = [];
   List<Order> pickedUpOrders = [];
+  late final StreamSubscription<RemoteMessage> _messageSubscription;
 
   @override
   void initState() {
     super.initState();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("getting something");
-      print(message.data);
+  _messageSubscription =  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.data['type'] == 'ORDER_UPDATE') {
         print("automatically updating");
-        _loadOrders();
+        if (mounted) {
+          _loadOrders();
+        }
       }
     });
 
@@ -47,6 +48,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void dispose() {
     _pollingTimer?.cancel();
+    _messageSubscription.cancel();
     super.dispose();
   }
 
@@ -73,17 +75,25 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final newPickedUp =
           fetchedOrders.where((o) => o.status == 'picked_up').toList();
 
-      if (!_listEquals(pendingOrders, newPending) ||
-          !_listEquals(completedOrders, newCompleted) ||
-          !_listEquals(inProgressOrders, newInProgress) ||
-          !_listEquals(pickedUpOrders, newPickedUp)) {
-        setState(() {
+      // if (!_listEquals(pendingOrders, newPending) ||
+      //     !_listEquals(completedOrders, newCompleted) ||
+      //     !_listEquals(inProgressOrders, newInProgress) ||
+      //     !_listEquals(pickedUpOrders, newPickedUp)) {
+      //   setState(() {
+      //     pendingOrders = newPending;
+      //     completedOrders = newCompleted;
+      //     inProgressOrders = newInProgress;
+      //     pickedUpOrders = newPickedUp;
+      //   });
+      // }
+
+      setState(() {
           pendingOrders = newPending;
           completedOrders = newCompleted;
           inProgressOrders = newInProgress;
           pickedUpOrders = newPickedUp;
         });
-      }
+
     } catch (e) {
       print("Error loading orders: $e");
       if (!_initialLoadDone) {
@@ -143,12 +153,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ? const Center(child: CircularProgressIndicator())
           : errorFetching
               ? const Center(child: Text('Failed to load orders. Try again.'))
-              : (pendingOrders.isEmpty && completedOrders.isEmpty)
+              : (pendingOrders.isEmpty && completedOrders.isEmpty && inProgressOrders.isEmpty)
                   ? const Center(
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
                       children: [
-                        
                         if (completedOrders.isNotEmpty) ...[
                           Padding(
                             padding: EdgeInsets.all(verticalSpacing),
@@ -156,10 +165,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...completedOrders
-                              .map((order) => Padding(
-                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildPickupOrderTile(context,order, screenHeight, screenWidth),
+                          ...completedOrders.map((order) => Padding(
+                                padding:
+                                    EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildPickupOrderTile(
+                                    context, order, screenHeight, screenWidth),
                               )),
                         ],
                         if (inProgressOrders.isNotEmpty) ...[
@@ -169,10 +179,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...inProgressOrders
-                              .map((order) => Padding(
-                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildProgressOrderTile(order,screenHeight, screenWidth),
+                          ...inProgressOrders.map((order) => Padding(
+                                padding:
+                                    EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildProgressOrderTile(context,
+                                    order, screenHeight, screenWidth),
                               )),
                         ],
                         if (pendingOrders.isNotEmpty) ...[
@@ -192,8 +203,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     order, screenHeight, screenWidth),
                               )),
                         ],
-                        
-                        
                       ],
                     ),
     );

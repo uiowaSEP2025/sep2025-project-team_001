@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:mobile_app/api_services.dart';
 import 'package:mobile_app/constants.dart';
 import 'package:mobile_app/home/restaurant/models/order.dart';
+import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/utils/token_manager.dart';
 
 Future<int> cancelOrder(
@@ -140,5 +141,52 @@ Future<Order> getOrder(
     }
     print("Order error: ${e.response?.data}");
     throw Exception("Error getting order: ${e.response?.statusCode}");
+  }
+}
+
+
+Future<Restaurant> getRestaurant(
+    {required int restaurantId}) async {
+  final accessToken = await TokenManager.getAccessToken();
+
+  if (accessToken == null) {
+    throw Exception('Access token not found');
+  }
+  final String endpoint = "${ApiConfig.baseUrl}/restaurant/$restaurantId/";
+
+  final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+
+  try {
+    final response = await dio.get(
+      endpoint,
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final restaurant = Restaurant.fromJson(response.data);
+      return restaurant;
+    } else {
+      print("Failed to get restaurant: ${response.statusCode}");
+      throw Exception("Failed to get restaurant");
+    }
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+
+      if (refreshed) {
+        return await getRestaurant(restaurantId: restaurantId);
+      }
+      else{
+        
+      }
+      throw Exception("Access token expired or unauthorized");
+    }
+    print("Order restaurant: ${e.response?.data}");
+    throw Exception("Error getting restaurant: ${e.response?.statusCode}");
   }
 }

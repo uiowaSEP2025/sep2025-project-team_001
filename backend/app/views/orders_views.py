@@ -202,6 +202,21 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
     food_val = status_priority[order.food_status] if has_food else None
     bev_val = status_priority[order.beverage_status] if has_bev else None
 
+    if order.customer.fcm_token:
+        send_fcm_httpv1(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} is now {order.status}",
+            data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
+        )
+
+        send_notification_to_device(
+            device_token=order.customer.fcm_token,
+            title="Order Update",
+            body=f"Your order #{order.id} is now {order.status}",
+            data={"type": "ORDER_UPDATE", "order_id": str(order.id)}
+        )
+
     if food_val is not None and bev_val is not None:
         min_val = min(food_val, bev_val)
     elif food_val is not None:
