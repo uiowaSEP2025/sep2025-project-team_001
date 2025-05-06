@@ -258,28 +258,28 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                 onSubmitted: authenticate,
                               ),
                             ),
-                            SizedBox(
-                              height: verticalSpacing * 0.4,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                          context, "/recover_password");
-                                    },
-                                    child: Text(
-                                      "Forgot Password?",
-                                      style: AppTextStyles.smallFooters(
-                                          screenHeight,
-                                          AppColors.paragraphText),
-                                    )),
-                                SizedBox(
-                                  width: horizontalSpacing,
-                                )
-                              ],
-                            ),
+                            // SizedBox(
+                            //   height: verticalSpacing * 0.4,
+                            // ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.end,
+                            //   children: [
+                            //     GestureDetector(
+                            //         onTap: () {
+                            //           Navigator.pushNamed(
+                            //               context, "/recover_password");
+                            //         },
+                            //         child: Text(
+                            //           "Forgot Password?",
+                            //           style: AppTextStyles.smallFooters(
+                            //               screenHeight,
+                            //               AppColors.paragraphText),
+                            //         )),
+                            //     SizedBox(
+                            //       width: horizontalSpacing,
+                            //     )
+                            //   ],
+                            // ),
                             SizedBox(
                               height: verticalSpacing,
                             ),

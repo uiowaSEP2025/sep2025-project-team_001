@@ -2,7 +2,6 @@
 
 from datetime import timedelta
 
-from django.utils import timezone
 from app.models.order_models import Order
 from app.scheduler_instance import get_restaurant_scheduler
 from app.utils.eta_calculator import (
@@ -10,6 +9,7 @@ from app.utils.eta_calculator import (
     calculate_food_eta,
     round_to_nearest_five,
 )
+from django.utils import timezone
 
 
 def recalculate_pending_etas(restaurant_id, num_bartenders=1):

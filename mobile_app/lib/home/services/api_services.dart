@@ -94,8 +94,8 @@ Future<int> placeOrder({
     );
 
     if (response.statusCode == 201) {
-      print("Order placed! ID: ${response.data['order_id']}");
-      final orderId = response.data['order_id'];
+      print("Order placed! ID: ${response.data}");
+      final orderId = response.data['id'];
       return orderId;
     } else {
       print("Failed to place order: ${response.data}");

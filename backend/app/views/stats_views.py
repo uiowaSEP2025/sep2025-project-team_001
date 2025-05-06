@@ -1,23 +1,26 @@
+import json
 from datetime import datetime
 
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import (
+    Avg,
+    DurationField,
+    ExpressionWrapper,
+    F,
+    FloatField,
+    Max,
+    Min,
+    Sum,
+)
+from django.db.models.functions import Trunc
 from django.utils.timezone import make_aware, now, timedelta
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models.order_models import Order, OrderItem
-from rest_framework.permissions import IsAuthenticated
-from datetime import datetime
-from ..models.worker_models import Worker
-from django.db.models import Avg, Min, Max, Sum, F, ExpressionWrapper, DurationField, FloatField
+from ..models.order_models import Order
 from ..models.restaurant_models import Item
-from django.db.models import Avg
-from app.models.review_models import Review
-from django.db.models.functions import Trunc
-from django.core.serializers.json import DjangoJSONEncoder
-import json
-
-
+from ..models.worker_models import Worker
 
 
 @api_view(["GET"])
@@ -62,9 +65,6 @@ def daily_stats(request):
         "active_workers": active_workers,
     })
 
-
-from django.db.models.functions import Cast
-from django.db.models import DurationField, ExpressionWrapper
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -158,7 +158,6 @@ def get_restaurant_statistics(request):
     elif range_param == "year":
         start_time = make_aware(datetime(today.year, 1, 1))
         interval = "month"
-
 
     trunc_fn = {
         "hour": Trunc("start_time", "hour"),

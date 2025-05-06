@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ..models.restaurant_models import Ingredient, Item
-from ..utils.image_upload import save_image_from_base64, delete_s3_image
+from ..utils.image_upload import delete_s3_image, save_image_from_base64
 
 
 @api_view(["GET"])

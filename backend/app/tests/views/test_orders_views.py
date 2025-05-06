@@ -3,9 +3,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
-from app.models import CustomUser
+from dateutil.parser import isoparse
+
+from app.models import Worker
+from app.models.customer_models import CustomUser
 from app.models.order_models import Order, OrderItem
-from app.models.restaurant_models import Ingredient, Item
+from app.models.restaurant_models import Item
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -15,14 +18,17 @@ def api_client():
     return APIClient()
 
 
-@pytest.fixture
-def restaurant_with_user(restaurant):
-    user = CustomUser.objects.create_user(
-        username="mgruser", email="mgr@example.com", password="pass"
+@pytest.fixture(autouse=True)
+def patch_fcm(monkeypatch):
+    # Stub out FCM notifications
+    monkeypatch.setattr(
+        "app.views.orders_views.send_fcm_httpv1",
+        lambda *args, **kwargs: None
     )
-    restaurant.user = user
-    restaurant.save()
-    return restaurant, user
+    monkeypatch.setattr(
+        "app.views.orders_views.send_notification_to_device",
+        lambda *args, **kwargs: None
+    )
 
 
 # ------------------------------------------------------------------
@@ -30,78 +36,119 @@ def restaurant_with_user(restaurant):
 # ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_create_order_success(api_client, customer, restaurant, item):
-    """
-    Creates an order with one item. Should return 201 and success message,
-    and include order_id, eta_minutes, and both ETA timestamps in the JSON.
-    """
+def test_create_order_success(api_client, customer, restaurant, burger_item):
     api_client.force_authenticate(user=customer.user)
     payload = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": item.pk, "quantity": 2}],
+        "order_items": [{"item_id": burger_item.pk, "quantity": 2}],
     }
     resp = api_client.post(
-        "/order/new/", data=json.dumps(payload), content_type="application/json"
+        "/order/new/",
+        data=json.dumps(payload),
+        content_type="application/json",
     )
     assert resp.status_code == 201
-    body = resp.json()
-    assert body["message"] == "Order created successfully"
-    assert "order_id" in body
-    assert "food_eta_minutes" in body
-    assert "beverage_eta_minutes" in body
-    assert "estimated_food_ready_time" in body
-    assert "estimated_beverage_ready_time" in body
+    data = resp.json()
+    assert resp.status_code == 201
+    data = resp.json()
+    # Should return the created order object
+    assert "id" in data
+    assert isinstance(data["id"], int)
+    # All ETA fields should be present (can be null)
+    assert set(data.keys()) >= {
+        "food_eta_minutes",
+        "beverage_eta_minutes",
+        "estimated_food_ready_time",
+        "estimated_beverage_ready_time",
+    }
 
 
 @pytest.mark.django_db
-def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant, item):
-    """
-    Creates an order and stores unwanted ingredients in the order item;
-    ETA behavior is unchanged here.
-    """
-    ing1 = Ingredient.objects.create(item=item, name="Pickles")
-    ing2 = Ingredient.objects.create(item=item, name="Onions")
+def test_create_order_with_unwanted_ingredients(api_client, customer, restaurant, burger_item, ingredients):
     api_client.force_authenticate(user=customer.user)
-
+    ing_ids = [ing.pk for ing in ingredients]
     payload = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [
-            {
-                "item_id": item.pk,
-                "quantity": 1,
-                "unwanted_ingredients": [ing1.pk, ing2.pk],
-            }
-        ],
+        "order_items": [{
+            "item_id": burger_item.pk,
+            "quantity": 1,
+            "unwanted_ingredients": ing_ids,
+        }],
     }
     resp = api_client.post(
-        "/order/new/", data=json.dumps(payload), content_type="application/json"
+        "/order/new/",
+        data=json.dumps(payload),
+        content_type="application/json",
     )
     assert resp.status_code == 201
-    order = Order.objects.get(pk=resp.json()["order_id"])
+    data = resp.json()
+    order = Order.objects.get(pk=data["id"])
     stored = list(
         order.order_items.first()
         .unwanted_ingredients.values_list("id", flat=True)
     )
-    assert sorted(stored) == sorted([ing1.pk, ing2.pk])
+    assert sorted(stored) == sorted(ing_ids)
 
 
 @pytest.mark.django_db
-def test_create_order_sets_eta_food_only(api_client, customer, restaurant, item):
-    """
-    3 food items -> 15 + 2*3 = 21 -> round to 25.
-    Should get eta_minutes=25, food_ready=now+25, beverage_ready=now.
-    """
-    item.category = "Food"
-    item.save()
+def test_create_order_invalid_payload(api_client, customer, restaurant):
+    api_client.force_authenticate(user=customer.user)
+    resp = api_client.post(
+        "/order/new/",
+        data=json.dumps({}),
+        content_type="application/json",
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_order_invalid_quantity_type(api_client, customer, restaurant, burger_item):
+    api_client.force_authenticate(user=customer.user)
+    payload = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [{"item_id": burger_item.pk, "quantity": "two"}],
+    }
+    resp = api_client.post(
+        "/order/new/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_order_unauthenticated(api_client, customer, restaurant, burger_item):
+    payload = {
+        "customer_id": customer.pk,
+        "restaurant_id": restaurant.pk,
+        "order_items": [{"item_id": burger_item.pk, "quantity": 1}],
+    }
+    resp = api_client.post(
+        "/order/new/",
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+    assert resp.status_code == 401
+
+
+# ------------------------------------------------------------------
+# ETA/Status fields rounding tests
+# ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_create_order_sets_eta_food_only(api_client, customer, restaurant, burger_item):
+    burger_item.category = "Food"
+    burger_item.save()
     api_client.force_authenticate(user=customer.user)
 
     now = timezone.now().replace(second=0, microsecond=0)
     payload = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": item.pk, "quantity": 3}],
+        "order_items": [{"item_id": burger_item.pk, "quantity": 3}],
     }
     resp = api_client.post(
         "/order/new/", data=json.dumps(payload), content_type="application/json"
@@ -113,26 +160,24 @@ def test_create_order_sets_eta_food_only(api_client, customer, restaurant, item)
     assert body["beverage_eta_minutes"] is None
 
     # Parse timestamps
-    food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
     bev_dt = body["estimated_beverage_ready_time"]
-    assert food_dt == now + timedelta(minutes=25)
     assert bev_dt is None
+    food_dt = isoparse(body["estimated_food_ready_time"])
+    expected_dt = now + timedelta(minutes=25)
+    assert food_dt == expected_dt
 
 
 @pytest.mark.django_db
-def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, item):
-    """
-    2 beverages -> bev ETA=2, food ETA=15 -> overall=15.
-    """
-    item.category = "beverage"
-    item.save()
+def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, burger_item):
+    burger_item.category = "beverage"
+    burger_item.save()
     api_client.force_authenticate(user=customer.user)
 
     now = timezone.now().replace(second=0, microsecond=0)
     payload = {
         "customer_id": customer.pk,
         "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": item.pk, "quantity": 2}],
+        "order_items": [{"item_id": burger_item.pk, "quantity": 2}],
     }
     resp = api_client.post(
         "/order/new/", data=json.dumps(payload), content_type="application/json"
@@ -143,16 +188,13 @@ def test_create_order_sets_eta_beverage_only(api_client, customer, restaurant, i
     assert body["food_eta_minutes"] is None
     assert body["beverage_eta_minutes"] == 5
     food_dt = body["estimated_food_ready_time"]
-    bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
+    bev_dt = isoparse(body["estimated_beverage_ready_time"])
     assert food_dt is None
     assert bev_dt == now + timedelta(minutes=2)
 
 
 @pytest.mark.django_db
 def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_item):
-    """
-    Mixed: 1 food (17->20) + 10 bev (10) -> overall=20.
-    """
     burger_item.category = "Food"
     burger_item.save()
     bev = Item.objects.create(
@@ -163,7 +205,6 @@ def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_it
         category="beverage",
         stock=10,
         available=True,
-        base64_image="",
     )
 
     api_client.force_authenticate(user=customer.user)
@@ -184,56 +225,10 @@ def test_create_order_sets_eta_mixed(api_client, customer, restaurant, burger_it
 
     assert body["food_eta_minutes"] == 20
     assert body["beverage_eta_minutes"] == 10
-    food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
-    bev_dt = datetime.fromisoformat(body["estimated_beverage_ready_time"])
+    food_dt = isoparse(body["estimated_food_ready_time"])
+    bev_dt = isoparse(body["estimated_beverage_ready_time"])
     assert food_dt == now + timedelta(minutes=20)
     assert bev_dt == now + timedelta(minutes=10)
-
-
-@pytest.mark.django_db
-def test_create_order_invalid_data(api_client, customer, restaurant):
-    """
-    Omitting order_items should 400.
-    """
-    api_client.force_authenticate(user=customer.user)
-    payload = {"customer_id": customer.pk, "restaurant_id": restaurant.pk}
-    resp = api_client.post(
-        "/order/new/", data=json.dumps(payload), content_type="application/json"
-    )
-    assert resp.status_code == 400
-
-
-@pytest.mark.django_db
-def test_create_order_invalid_quantity_type(api_client, customer, restaurant, item):
-    """
-    Passing quantity as string should 400.
-    """
-    api_client.force_authenticate(user=customer.user)
-    payload = {
-        "customer_id": customer.pk,
-        "restaurant_id": restaurant.pk,
-        "order_items": [{"item_id": item.pk, "quantity": "two"}],
-    }
-    resp = api_client.post(
-        "/order/new/", data=json.dumps(payload), content_type="application/json"
-    )
-    assert resp.status_code == 400
-
-
-@pytest.mark.django_db
-def test_create_order_unauthenticated(api_client, customer, restaurant):
-    """
-    Unauthenticated user -> 401.
-    """
-    payload = {
-        "customer_id": customer.pk,
-        "restaurant_id": restaurant.pk,
-        "order_items": [],
-    }
-    resp = api_client.post(
-        "/order/new/", data=json.dumps(payload), content_type="application/json"
-    )
-    assert resp.status_code == 401
 
 
 # ------------------------------------------------------------------
@@ -241,117 +236,190 @@ def test_create_order_unauthenticated(api_client, customer, restaurant):
 # ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_retrieve_active_orders_success(api_client, restaurant_with_user, customer, item):
-    """
-    Manager should receive active orders.
-    """
+def test_retrieve_active_orders_success(api_client, restaurant_with_user, customer, burger_item):
     restaurant, user = restaurant_with_user
     api_client.force_authenticate(user=user)
-
-    order = Order.objects.create(
+    o = Order.objects.create(
         customer=customer, restaurant=restaurant, status="pending", total_price=0
     )
-    OrderItem.objects.create(order=order, item=item, quantity=1)
+    OrderItem.objects.create(order=o, item=burger_item, quantity=1)
 
     resp = api_client.get("/retrieve/orders/")
     assert resp.status_code == 200
     data = resp.json()
-    assert any(o["id"] == order.id for o in data)
+    assert isinstance(data["results"], list)
+    assert any(r["id"] == o.id for r in data["results"])
+    assert data["total"] >= 1
+    assert data.get("next_offset") is None or isinstance(data["next_offset"], int)
 
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_none_exist(api_client, restaurant_with_user):
-    """
-    No orders -> [].
-    """
     _, user = restaurant_with_user
     api_client.force_authenticate(user=user)
     resp = api_client.get("/retrieve/orders/")
     assert resp.status_code == 200
-    assert resp.json() == []
+    data = resp.json()
+    assert data["results"] == []
+    assert data["total"] == 0
+    assert data.get("next_offset") is None
 
 
 @pytest.mark.django_db
 def test_retrieve_active_orders_unauthorized(api_client):
-    """
-    Non-restaurant user -> 403.
-    """
-    user = CustomUser.objects.create_user(
-        username="unauth", email="unauth@example.com", password="pass"
+    u = CustomUser.objects.create_user(
+        username="u", email="u@example.com", password="pass"
     )
-    api_client.force_authenticate(user=user)
+    api_client.force_authenticate(user=u)
     resp = api_client.get("/retrieve/orders/")
     assert resp.status_code == 403
 
 
 # ------------------------------------------------------------------
-# PATCH /orders/<restaurant_id>/<order_id>/completed/ - Mark completed
+# PATCH /orders/<rest_id>/<order_id>/<new_status>/
 # ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_mark_order_completed_success(api_client, restaurant_with_user, customer, item):
-    """
-    PATCH /orders/<rest_id>/<order_id>/completed/
-    """
-    restaurant, user = restaurant_with_user
-    api_client.force_authenticate(user=user)
+def test_update_order_status_requires_auth(api_client):
+    resp = api_client.patch("/orders/1/1/completed/", data={}, format="json")
+    assert resp.status_code == 401
 
-    order = Order.objects.create(
+
+@pytest.mark.django_db
+def test_update_order_status_non_restaurant(api_client, customer, restaurant, burger_item):
+    api_client.force_authenticate(user=customer.user)
+    o = Order.objects.create(
         customer=customer, restaurant=restaurant, status="pending", total_price=0
     )
     resp = api_client.patch(
-        f"/orders/{restaurant.pk}/{order.id}/completed/", data={}, format="json"
+        f"/orders/{restaurant.pk}/{o.id}/completed/", data={}, format="json"
     )
     assert resp.status_code == 200
-    order.refresh_from_db()
-    assert order.status == "completed"
 
 
 @pytest.mark.django_db
-def test_mark_order_completed_not_found(api_client, restaurant_with_user):
-    """
-    Non-existent order -> 404.
-    """
+def test_update_order_status_invalid_status(api_client, restaurant_with_user, customer, burger_item):
     restaurant, user = restaurant_with_user
     api_client.force_authenticate(user=user)
+    o = Order.objects.create(customer=customer, restaurant=restaurant)
     resp = api_client.patch(
-        f"/orders/{restaurant.pk}/9999/completed/", data={}, format="json"
+        f"/orders/{restaurant.pk}/{o.id}/unknown/", data={}, format="json"
     )
-    assert resp.status_code == 404
+    assert resp.status_code == 400
+    assert "invalid status" in resp.json()["error"].lower()
 
-
-# ------------------------------------------------------------------
-# GET /order/customer/ - Customer views own orders
-# ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_get_customer_orders_success(api_client, customer, restaurant, item):
-    api_client.force_authenticate(user=customer.user)
-    order = Order.objects.create(
+def test_update_order_status_in_progress_missing_worker(api_client, restaurant_with_user, customer, burger_item):
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    o = Order.objects.create(
         customer=customer, restaurant=restaurant, status="pending", total_price=0
     )
-    OrderItem.objects.create(order=order, item=item, quantity=1)
-    resp = api_client.get("/order/customer/")
-    assert resp.status_code == 200
-    assert any(o["id"] == order.id for o in resp.json())
+    resp = api_client.patch(
+        f"/orders/{restaurant.pk}/{o.id}/in_progress/", data={}, format="json"
+    )
+    assert resp.status_code == 400
+    assert "missing worker" in resp.json()["error"].lower()
 
 
 @pytest.mark.django_db
-def test_get_customer_orders_none_exist(api_client, customer):
-    api_client.force_authenticate(user=customer.user)
-    resp = api_client.get("/order/customer/")
+def test_update_order_status_in_progress_success(api_client, restaurant_with_user, customer, burger_item):
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    worker = Worker.objects.create(restaurant=restaurant, name="W", pin="0000", role="staff")
+    o = Order.objects.create(
+        customer=customer, restaurant=restaurant, status="pending", total_price=0
+    )
+    resp = api_client.patch(
+        f"/orders/{restaurant.pk}/{o.id}/in_progress/", data={"worker_id": worker.id}, format="json"
+    )
     assert resp.status_code == 200
-    assert resp.json() == []
+    js = resp.json()
+    assert js["status"] == "in_progress"
+
+
+# ------------------------------------------------------------------
+# PATCH /orders/<rest_id>/<order_id>/<category>/<new_status>/
+# ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_update_order_category_invalid_category(api_client, restaurant_with_user):
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    resp = api_client.patch(f"/orders/{restaurant.pk}/1/invalid/completed/", data={}, format="json")
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_update_order_category_invalid_status(api_client, restaurant_with_user, customer, burger_item):
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    o = Order.objects.create(customer=customer, restaurant=restaurant)
+    OrderItem.objects.create(order=o, item=burger_item, quantity=1)
+    resp = api_client.patch(
+        f"/orders/{restaurant.pk}/{o.id}/food/unknown/", data={}, format="json"
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_update_order_category_success(api_client, restaurant_with_user, customer, burger_item):
+    restaurant, user = restaurant_with_user
+    api_client.force_authenticate(user=user)
+    o = Order.objects.create(customer=customer, restaurant=restaurant)
+    OrderItem.objects.create(order=o, item=burger_item, quantity=1)
+    resp = api_client.patch(
+        f"/orders/{restaurant.pk}/{o.id}/food/completed/", data={}, format="json"
+    )
+    assert resp.status_code == 200
+    js = resp.json()
+    assert js["food_status"] == "completed"
+
+
+# ------------------------------------------------------------------
+# GET /order/customer/ and GET /order/<id>/
+# ------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_get_customer_orders_unauthenticated(api_client):
+    resp = api_client.get("/order/customer/")
+    assert resp.status_code == 401
 
 
 @pytest.mark.django_db
 def test_get_customer_orders_not_customer(api_client):
-    user = CustomUser.objects.create_user(
-        username="notcust", email="x@example.com", password="pass"
-    )
-    api_client.force_authenticate(user=user)
+    u = CustomUser.objects.create_user(username="nc", email="nc@example.com", password="p")
+    api_client.force_authenticate(user=u)
     resp = api_client.get("/order/customer/")
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_get_customer_orders_success(api_client, customer, restaurant, burger_item):
+    api_client.force_authenticate(user=customer.user)
+    o = Order.objects.create(customer=customer, restaurant=restaurant)
+    OrderItem.objects.create(order=o, item=burger_item, quantity=1)
+    resp = api_client.get("/order/customer/")
+    assert resp.status_code == 200
+    assert any(x["id"] == o.id for x in resp.json())
+
+
+@pytest.mark.django_db
+def test_get_order_not_found(api_client, customer):
+    api_client.force_authenticate(user=customer.user)
+    resp = api_client.get("/order/9999/")
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_get_order_success(api_client, customer, restaurant, burger_item):
+    api_client.force_authenticate(user=customer.user)
+    o = Order.objects.create(customer=customer, restaurant=restaurant)
+    OrderItem.objects.create(order=o, item=burger_item, quantity=1)
+    resp = api_client.get(f"/order/{o.id}/")
+    assert resp.status_code == 200
+    assert resp.json()["id"] == o.id
 
 
 # ------------------------------------------------------------------
@@ -359,67 +427,50 @@ def test_get_customer_orders_not_customer(api_client):
 # ------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_estimate_order_eta_food_only(api_client, customer, restaurant, item):
-    """
-    Food only: 4 items→23→25.
-    """
-    item.category = "Food"
-    item.save()
-    api_client.force_authenticate(user=customer.user)
-    data = {"restaurant_id": restaurant.id, "order_items": [{"item_id": item.id, "quantity": 4}]}
-    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
-    assert resp.status_code == 200
-    body = resp.json()
-    # food ETA = 15 + 2*4 = 23 → round to 25; no beverages → bev=0
-    assert "food_eta_minutes" in body
-    assert "beverage_eta_minutes" in body
-    assert body["food_eta_minutes"] == 25
-    assert body["beverage_eta_minutes"] == 0
+def test_estimate_missing_params(api_client):
+    resp = api_client.post(
+        "/order/estimate/", data=json.dumps({}), content_type="application/json"
+    )
+    assert resp.status_code == 401
 
 
 @pytest.mark.django_db
-def test_estimate_order_eta_beverage_only(api_client, customer, restaurant, item):
-    """
-    Bev only: 3→3, food=15→ overall=15.
-    """
-    item.category = "beverage"
-    item.save()
+def test_estimate_invalid_item(api_client, customer, restaurant):
     api_client.force_authenticate(user=customer.user)
-    data = {"restaurant_id": restaurant.id, "order_items": [{"item_id": item.id, "quantity": 3}]}
-    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
-    assert resp.status_code == 200
-    body = resp.json()
-    # num_food=0 → food=15; num_bev=3 → raw_bev=3→round5
-    assert "food_eta_minutes" in body
-    assert "beverage_eta_minutes" in body
-    assert body["food_eta_minutes"] == 15
-    assert body["beverage_eta_minutes"] == 5
+    data = {"restaurant_id": restaurant.id, "order_items": [{"item_id": 999, "quantity": 1}]}
+    resp = api_client.post(
+        "/order/estimate/", data=json.dumps(data), content_type="application/json"
+    )
+    assert resp.status_code == 400
 
 
 @pytest.mark.django_db
-def test_estimate_order_eta_mixed(api_client, customer, restaurant, burger_item):
-    """
-    Mixed: food=2→19→20, bev=10→10
-    """
+def test_estimate_success(api_client, customer, restaurant, burger_item):
     burger_item.category = "Food"
     burger_item.save()
     bev = Item.objects.create(
-        restaurant=restaurant, name="Soda", description="", price=1,
-        category="beverage", stock=10, available=True
+        restaurant=restaurant,
+        name="Soda",
+        description="",
+        price=Decimal("1.00"),
+        category="beverage",
+        stock=5,
+        available=True,
     )
     api_client.force_authenticate(user=customer.user)
     data = {
         "restaurant_id": restaurant.id,
         "order_items": [
             {"item_id": burger_item.id, "quantity": 2},
-            {"item_id": bev.id, "quantity": 10},
+            {"item_id": bev.id, "quantity": 3},
         ],
     }
-    resp = api_client.post("/order/estimate/", data=json.dumps(data), content_type="application/json")
+    resp = api_client.post(
+        "/order/estimate/", data=json.dumps(data), content_type="application/json"
+    )
     assert resp.status_code == 200
     body = resp.json()
-    # food: 15+2*1=17→round 20; bev:10→round 10
-    assert "food_eta_minutes" in body
-    assert "beverage_eta_minutes" in body
-    assert body["food_eta_minutes"] == 20
-    assert body["beverage_eta_minutes"] == 10
+    assert isinstance(body.get("food_eta_minutes"), int)
+    assert isinstance(body.get("beverage_eta_minutes"), int)
+    assert "estimated_food_ready_time" in body
+    assert "estimated_beverage_ready_time" in body

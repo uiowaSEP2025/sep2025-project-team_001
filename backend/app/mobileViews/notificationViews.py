@@ -13,7 +13,14 @@ def save_fcm_token(request):
     customer_id = data.get('customer_id')
     fcm_token = data.get('fcm_token')
 
-    customer = Customer.objects.get(id=customer_id)
+    try:
+        customer = Customer.objects.get(id=customer_id)
+    except Customer.DoesNotExist:
+        return JsonResponse(
+            {"error": "Customer not found."},
+            status=404,
+        )
+
     customer.fcm_token = fcm_token
     customer.save()
     return JsonResponse({"message": "Token saved successfully"})

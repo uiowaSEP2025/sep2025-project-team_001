@@ -6,7 +6,9 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -37,6 +39,7 @@ def create_payment_intent(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_saved_payment_methods(request):
@@ -59,6 +62,7 @@ def list_saved_payment_methods(request):
         return JsonResponse({"paymentMethods": methods_data})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -84,6 +88,7 @@ def pay_with_saved_card(request):
         return JsonResponse({'error': str(e.user_message)}, status=402)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])

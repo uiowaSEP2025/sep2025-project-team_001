@@ -1,10 +1,11 @@
+from app.mobileViews.utils import send_notification_to_device
+from app.models import Customer, PromotionNotification
+from app.serializers.promotion_serializer import PromotionNotificationSerializer
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from app.models import PromotionNotification, Customer
-from app.serializers.promotion_serializer import PromotionNotificationSerializer
-from app.mobileViews.utils import send_notification_to_device
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -13,6 +14,7 @@ def list_promotions(request):
     promotions = PromotionNotification.objects.filter(restaurant=restaurant).order_by("-created_at")
     serializer = PromotionNotificationSerializer(promotions, many=True)
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -24,6 +26,7 @@ def create_promotion(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
@@ -39,6 +42,7 @@ def update_promotion(request, promotion_id):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_promotion(request, promotion_id):
@@ -48,6 +52,7 @@ def delete_promotion(request, promotion_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
     except PromotionNotification.DoesNotExist:
         return Response({"error": "Promotion not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

@@ -1,7 +1,9 @@
 # app/models/promotion_models.py
 
 from django.db import models
+
 from .restaurant_models import Restaurant
+
 
 class PromotionNotification(models.Model):
     restaurant = models.ForeignKey(

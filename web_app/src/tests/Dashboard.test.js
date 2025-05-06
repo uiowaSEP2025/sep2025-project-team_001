@@ -2,43 +2,54 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Dashboard from '../pages/Dashboard';
 
-// Create a mock for useNavigate so we can check that it is called correctly.
+// Mock useNavigate from react-router-dom
 const mockedUsedNavigate = jest.fn();
-
 jest.mock('react-router-dom', () => ({
-  // Preserve other exports if needed.
   useNavigate: () => mockedUsedNavigate,
 }));
 
 describe('Dashboard Component', () => {
+  const getPinDisplay = () => screen.getByRole('heading', { level: 4 });
+
   beforeEach(() => {
-    // Clear sessionStorage and reset the navigate mock before each test.
     sessionStorage.clear();
     mockedUsedNavigate.mockReset();
   });
 
-  it('renders the restaurant name when barName is in sessionStorage', () => {
-    sessionStorage.setItem('barName', 'Test Restaurant');
+  it('renders the barName from sessionStorage', () => {
+    sessionStorage.setItem('barName', 'Test Bar');
     render(<Dashboard />);
-    expect(screen.getByText(/Restaurant: Test Restaurant/)).toBeInTheDocument();
+    expect(screen.getByText('Test Bar')).toBeInTheDocument();
   });
 
-  it('does not render the restaurant name when barName is not in sessionStorage', () => {
+  it('falls back to "Welcome" when no barName is in sessionStorage', () => {
     render(<Dashboard />);
-    expect(screen.queryByText(/Restaurant:/)).not.toBeInTheDocument();
+    expect(screen.getByText('Welcome')).toBeInTheDocument();
   });
 
-  it('navigates to "/orders" when the Orders button is clicked', () => {
+  it('calls logout and navigates to root when Logout is clicked', () => {
     render(<Dashboard />);
-    const ordersButton = screen.getByRole('button', { name: /Orders/i });
-    fireEvent.click(ordersButton);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith('/orders');
+    fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+    expect(mockedUsedNavigate).toHaveBeenCalledWith('/');
   });
 
-  it('navigates to "/menu" when the Menu button is clicked', () => {
+  it('updates the PIN when digits are pressed on NumberPad', () => {
     render(<Dashboard />);
-    const menuButton = screen.getByRole('button', { name: /Menu/i });
-    fireEvent.click(menuButton);
-    expect(mockedUsedNavigate).toHaveBeenCalledWith('/menu');
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
+    expect(getPinDisplay()).toHaveTextContent('*');
+  });
+
+  it('clears the PIN when Clear is pressed', () => {
+    render(<Dashboard />);
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(getPinDisplay().textContent.trim()).toBe('');
+  });
+
+  it('deletes the last digit when ← is pressed', () => {
+    render(<Dashboard />);
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
+    fireEvent.click(screen.getByRole('button', { name: '←' }));
+    expect(getPinDisplay().textContent.trim()).toBe('');
   });
 });

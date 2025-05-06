@@ -4,6 +4,7 @@ import unicodedata
 import logging
 
 import requests
+from app.utils.image_upload import save_image_from_base64
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
@@ -15,8 +16,6 @@ from ..models.restaurant_models import Restaurant
 from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
-from app.utils.image_upload import save_image_from_base64
-logger = logging.getLogger(__name__)
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)

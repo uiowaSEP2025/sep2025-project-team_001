@@ -79,7 +79,6 @@ def retrieve_active_orders(request):
     }, status=status.HTTP_200_OK)
 
 
-
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def update_order_status(request, restaurant_id, order_id, new_status):
@@ -191,7 +190,6 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
     else:
         order.beverage_status = normalized_status
 
-
     # Determine correct main order status based on available categories
     status_priority = {"pending": 0, "in_progress": 1, "completed": 2, "picked_up": 3}
     reverse_lookup = {v: k for k, v in status_priority.items()}
@@ -237,10 +235,9 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
             order_item.item.times_ordered += order_item.quantity
             order_item.item.save()
 
-
-#     order.refresh_from_db()
-#     serializer = OrderSerializer(order)
-#     return Response(serializer.data, status=status.HTTP_200_OK)
+    #     order.refresh_from_db()
+    #     serializer = OrderSerializer(order)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response({
         "message": f"{normalized_category.capitalize()} status updated to '{normalized_status}'.",
@@ -250,7 +247,6 @@ def update_order_category_status(request, restaurant_id, order_id, category, new
         "beverage_status": order.beverage_status,
         "completion_time": order.completion_time.isoformat() if order.completion_time else None,
     }, status=status.HTTP_200_OK)
-
 
 
 @api_view(["GET"])
@@ -272,6 +268,7 @@ def get_customer_orders(request):
 
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

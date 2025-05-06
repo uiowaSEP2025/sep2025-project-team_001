@@ -26,7 +26,11 @@ function PromotionNotificationPage() {
   const [newPromotion, setNewPromotion] = useState({ title: '', body: '' });
   const [editing, setEditing] = useState(null);
   const [confirmSendId, setConfirmSendId] = useState(null);
-  const [flash, setFlash] = useState({ open: false, message: '', severity: 'success' });
+  const [flash, setFlash] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const showFlash = (message, severity = 'success') => {
     setFlash({ open: true, message, severity });
@@ -34,7 +38,9 @@ function PromotionNotificationPage() {
 
   const fetchPromotions = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/promotions/`);
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/promotions/`,
+      );
       setPromotions(res.data);
     } catch (err) {
       showFlash('Failed to load promotions.', 'error');
@@ -51,7 +57,10 @@ function PromotionNotificationPage() {
     }
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/promotions/create/`, newPromotion);
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/promotions/create/`,
+        newPromotion,
+      );
       setNewPromotion({ title: '', body: '' });
       fetchPromotions();
       showFlash('Promotion created!');
@@ -62,7 +71,10 @@ function PromotionNotificationPage() {
 
   const handleUpdate = async (promotionId, updated) => {
     try {
-      await axios.patch(`${process.env.REACT_APP_API_URL}/promotions/${promotionId}/update/`, updated);
+      await axios.patch(
+        `${process.env.REACT_APP_API_URL}/promotions/${promotionId}/update/`,
+        updated,
+      );
       setEditing(null);
       fetchPromotions();
       showFlash('Promotion updated!');
@@ -73,7 +85,9 @@ function PromotionNotificationPage() {
 
   const handleDelete = async (promotionId) => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/promotions/${promotionId}/delete/`);
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/promotions/${promotionId}/delete/`,
+      );
       fetchPromotions();
       showFlash('Promotion deleted!');
     } catch (err) {
@@ -83,7 +97,9 @@ function PromotionNotificationPage() {
 
   const handleSend = async (promotionId) => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/promotions/${promotionId}/send/`);
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/promotions/${promotionId}/send/`,
+      );
       setConfirmSendId(null);
       fetchPromotions();
       showFlash('Promotion sent to all customers!');
@@ -94,7 +110,9 @@ function PromotionNotificationPage() {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>Promotions</Typography>
+      <Typography variant="h4" gutterBottom>
+        Promotions
+      </Typography>
 
       <Paper elevation={3} sx={{ p: 2, mb: 4 }}>
         <Typography variant="h6">Create New Promotion</Typography>
@@ -102,16 +120,22 @@ function PromotionNotificationPage() {
           <TextField
             label="Title"
             value={newPromotion.title}
-            onChange={(e) => setNewPromotion({ ...newPromotion, title: e.target.value })}
+            onChange={(e) =>
+              setNewPromotion({ ...newPromotion, title: e.target.value })
+            }
           />
           <TextField
             label="Body"
             multiline
             rows={3}
             value={newPromotion.body}
-            onChange={(e) => setNewPromotion({ ...newPromotion, body: e.target.value })}
+            onChange={(e) =>
+              setNewPromotion({ ...newPromotion, body: e.target.value })
+            }
           />
-          <Button variant="contained" onClick={handleCreate}>Create</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            Create
+          </Button>
         </Stack>
       </Paper>
 
@@ -127,7 +151,9 @@ function PromotionNotificationPage() {
                   value={promo.title}
                   onChange={(e) =>
                     setPromotions((prev) =>
-                      prev.map((p) => (p.id === promo.id ? { ...p, title: e.target.value } : p))
+                      prev.map((p) =>
+                        p.id === promo.id ? { ...p, title: e.target.value } : p,
+                      ),
                     )
                   }
                 />
@@ -138,12 +164,19 @@ function PromotionNotificationPage() {
                   value={promo.body}
                   onChange={(e) =>
                     setPromotions((prev) =>
-                      prev.map((p) => (p.id === promo.id ? { ...p, body: e.target.value } : p))
+                      prev.map((p) =>
+                        p.id === promo.id ? { ...p, body: e.target.value } : p,
+                      ),
                     )
                   }
                 />
                 <Stack direction="row" spacing={1}>
-                  <Button onClick={() => handleUpdate(promo.id, promo)} variant="contained">Save</Button>
+                  <Button
+                    onClick={() => handleUpdate(promo.id, promo)}
+                    variant="contained"
+                  >
+                    Save
+                  </Button>
                   <Button onClick={() => setEditing(null)}>Cancel</Button>
                 </Stack>
               </Stack>
@@ -152,10 +185,16 @@ function PromotionNotificationPage() {
                 <Typography variant="h6">{promo.title}</Typography>
                 <Typography>{promo.body}</Typography>
                 <Stack direction="row" spacing={1} mt={1}>
-                  <IconButton color="primary" onClick={() => setEditing(promo.id)}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => setEditing(promo.id)}
+                  >
                     <EditIcon />
                   </IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(promo.id)}>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(promo.id)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                   <IconButton
@@ -177,15 +216,13 @@ function PromotionNotificationPage() {
         <DialogTitle>Confirm Send</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to send this promotion to all customers using the Streamline app?
+            Are you sure you want to send this promotion to all customers using
+            the Streamline app?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmSendId(null)}>No</Button>
-          <Button
-            variant="contained"
-            onClick={() => handleSend(confirmSendId)}
-          >
+          <Button variant="contained" onClick={() => handleSend(confirmSendId)}>
             Yes, Send
           </Button>
         </DialogActions>
