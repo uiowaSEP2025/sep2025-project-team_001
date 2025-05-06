@@ -3,7 +3,7 @@ import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 
 class Order {
   final int id;
-  final String startTime;
+  final String? startTime;
   final List<dynamic> items;
   final String status;
   final double totalPrice;

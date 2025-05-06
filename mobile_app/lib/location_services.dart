@@ -35,7 +35,7 @@ Future<bool> isInsideRestaurant(
       restaurantLatLong.latitude,
       restaurantLatLong.longitude,
     );
-    return distance <= 50;
+    return distance <= 100;
   }
   return false;
 }
