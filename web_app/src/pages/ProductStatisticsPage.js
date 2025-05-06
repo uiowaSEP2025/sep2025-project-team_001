@@ -67,11 +67,14 @@ const StatisticsPage = () => {
     const fetchSalesData = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/restaurant-statistics/?range=${timeRange}`
+          `${process.env.REACT_APP_API_URL}/restaurant-statistics/?range=${timeRange}`,
         );
 
         const dataMap = new Map(
-          res.data.map((d) => [new Date(d.period).toISOString(), d.total_sales])
+          res.data.map((d) => [
+            new Date(d.period).toISOString(),
+            d.total_sales,
+          ]),
         );
 
         let formatted = [];
@@ -81,26 +84,32 @@ const StatisticsPage = () => {
           for (let h = 0; h < 24; h++) {
             const hour = new Date(now);
             hour.setHours(h, 0, 0, 0);
-            const label = h % 4 === 0
-              ? hour.toLocaleTimeString([], { hour: 'numeric', hour12: true })
-              : '';
-              formatted.push({
-                date: label,
-                fullLabel: hour.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-                sales: dataMap.get(hour.toISOString()) || 0,
-              });              
+            const label =
+              h % 4 === 0
+                ? hour.toLocaleTimeString([], { hour: 'numeric', hour12: true })
+                : '';
+            formatted.push({
+              date: label,
+              fullLabel: hour.toLocaleTimeString([], {
+                hour: 'numeric',
+                minute: '2-digit',
+              }),
+              sales: dataMap.get(hour.toISOString()) || 0,
+            });
           }
         } else if (timeRange === 'week') {
           for (let i = 6; i >= 0; i--) {
             const day = new Date(now);
             day.setDate(now.getDate() - i);
             const key = day.toISOString().split('T')[0];
-            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
+            const match = Array.from(dataMap.entries()).find(([k]) =>
+              k.startsWith(key),
+            );
             formatted.push({
               date: day.toLocaleDateString(undefined, { weekday: 'short' }),
               fullLabel: day.toLocaleDateString(undefined, { weekday: 'long' }),
               sales: match ? match[1] : 0,
-            });            
+            });
           }
         } else if (timeRange === 'month') {
           const year = now.getFullYear();
@@ -110,27 +119,42 @@ const StatisticsPage = () => {
           for (let d = 1; d <= daysInMonth; d++) {
             const day = new Date(year, month, d);
             const key = day.toISOString().split('T')[0];
-            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
-            const label = (d % 5 === 0 || d === 1 || d === daysInMonth)
-              ? day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-              : '';
-              formatted.push({
-                date: label,
-                fullLabel: day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-                sales: match ? match[1] : 0,
-              });              
+            const match = Array.from(dataMap.entries()).find(([k]) =>
+              k.startsWith(key),
+            );
+            const label =
+              d % 5 === 0 || d === 1 || d === daysInMonth
+                ? day.toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                : '';
+            formatted.push({
+              date: label,
+              fullLabel: day.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              }),
+              sales: match ? match[1] : 0,
+            });
           }
         } else if (timeRange === 'year') {
           const today = new Date();
           for (let i = 11; i >= 0; i--) {
-            const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const month = new Date(
+              today.getFullYear(),
+              today.getMonth() - i,
+              1,
+            );
             const key = month.toISOString().slice(0, 7);
-            const match = Array.from(dataMap.entries()).find(([k]) => k.startsWith(key));
+            const match = Array.from(dataMap.entries()).find(([k]) =>
+              k.startsWith(key),
+            );
             formatted.push({
-              date: month.toLocaleDateString(undefined, { month: 'short' }),  // e.g., "Jan"
-              fullLabel: month.toLocaleDateString(undefined, { month: 'long' }),  // e.g., "January"
+              date: month.toLocaleDateString(undefined, { month: 'short' }), // e.g., "Jan"
+              fullLabel: month.toLocaleDateString(undefined, { month: 'long' }), // e.g., "January"
               sales: match ? match[1] : 0,
-            });                       
+            });
           }
         }
 
@@ -141,7 +165,7 @@ const StatisticsPage = () => {
     };
 
     fetchSalesData();
-  }, [timeRange]);  
+  }, [timeRange]);
 
   const handleSort = (data) => {
     if (!sortOption) return data;
@@ -152,8 +176,6 @@ const StatisticsPage = () => {
     });
     return sorted;
   };
-
-  
 
   const handleItemSort = (data) => {
     if (!itemSortOption) return data;
@@ -166,15 +188,15 @@ const StatisticsPage = () => {
   };
 
   const filteredWorkers = handleSort(
-    workerStats.filter(w =>
-      w.worker_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    workerStats.filter((w) =>
+      w.worker_name.toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const filteredItems = handleItemSort(
-    itemStats.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    itemStats.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const uniformRowSx = {
@@ -196,9 +218,19 @@ const StatisticsPage = () => {
 
   return (
     <Box sx={{ mt: 4, px: 4, pb: 8 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Typography variant="h4">Statistics</Typography>
-        <Button variant="outlined" onClick={() => navigate('/manager_dashboard')}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/manager_dashboard')}
+        >
           Back to Dashboard
         </Button>
       </Box>
@@ -262,18 +294,31 @@ const StatisticsPage = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={uniformRowSx}>
-                    <TableCell><strong>Name</strong></TableCell>
-                    <TableCell><strong>Role</strong></TableCell>
-                    <TableCell><strong># Orders</strong></TableCell>
-                    <TableCell><strong>Avg Time</strong></TableCell>
-                    <TableCell><strong>Sales</strong></TableCell>
+                    <TableCell>
+                      <strong>Name</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Role</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong># Orders</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Avg Time</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Sales</strong>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredWorkers.map((worker, index) => (
                     <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{worker.worker_name}</TableCell>
-                      <TableCell>{worker.role?.charAt(0).toUpperCase() + worker.role.slice(1)}</TableCell>
+                      <TableCell>
+                        {worker.role?.charAt(0).toUpperCase() +
+                          worker.role.slice(1)}
+                      </TableCell>
                       <TableCell>{worker.total_orders}</TableCell>
                       <TableCell>
                         {worker.average_time_seconds !== null
@@ -295,7 +340,10 @@ const StatisticsPage = () => {
                   Worker Total Sales
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredWorkers} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={filteredWorkers}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="worker_name" />
                     <YAxis />
@@ -313,7 +361,10 @@ const StatisticsPage = () => {
                   Worker Avg Time (sec)
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredWorkers} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={filteredWorkers}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="worker_name" />
                     <YAxis />
@@ -371,19 +422,33 @@ const StatisticsPage = () => {
               <Table>
                 <TableHead>
                   <TableRow sx={uniformRowSx}>
-                    <TableCell><strong>Item Name</strong></TableCell>
-                    <TableCell><strong>Sales</strong></TableCell>
-                    <TableCell><strong># Ordered</strong></TableCell>
-                    <TableCell><strong>Avg Rating</strong></TableCell>
+                    <TableCell>
+                      <strong>Item Name</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Sales</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong># Ordered</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Avg Rating</strong>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredItems.map((item, index) => (
                     <TableRow key={index} sx={uniformRowSx}>
                       <TableCell>{item.name}</TableCell>
-                      <TableCell>${parseFloat(item.sales).toFixed(2)}</TableCell>
+                      <TableCell>
+                        ${parseFloat(item.sales).toFixed(2)}
+                      </TableCell>
                       <TableCell>{item.times_ordered}</TableCell>
-                      <TableCell>{item.avg_rating !== null ? item.avg_rating.toFixed(1) : 'N/A'}</TableCell>
+                      <TableCell>
+                        {item.avg_rating !== null
+                          ? item.avg_rating.toFixed(1)
+                          : 'N/A'}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -398,7 +463,10 @@ const StatisticsPage = () => {
                   Item Total Sales
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredItems} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={filteredItems}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -416,7 +484,10 @@ const StatisticsPage = () => {
                   Item Avg Rating
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredItems} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <BarChart
+                    data={filteredItems}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -437,7 +508,11 @@ const StatisticsPage = () => {
             Restaurant Sales Over Time
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <ToggleButtonGroup value={timeRange} exclusive onChange={handleRangeChange}>
+            <ToggleButtonGroup
+              value={timeRange}
+              exclusive
+              onChange={handleRangeChange}
+            >
               <ToggleButton value="day">1 Day</ToggleButton>
               <ToggleButton value="week">1 Week</ToggleButton>
               <ToggleButton value="month">1 Month</ToggleButton>
@@ -445,12 +520,20 @@ const StatisticsPage = () => {
             </ToggleButtonGroup>
           </Box>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <LineChart
+              data={salesData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="sales" stroke="#8884d8" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="sales"
+                stroke="#8884d8"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         </Paper>

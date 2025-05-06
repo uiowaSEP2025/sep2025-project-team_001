@@ -20,15 +20,70 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Registration />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<PrivateRoute> <Dashboard /> </PrivateRoute>}/>
-      <Route path="/manager_dashboard" element={<PrivateRoute> <ManagerDashboard /> </PrivateRoute>}/>
-      <Route path="/orders" element={<PrivateRoute> <OrdersPage /> </PrivateRoute>}/>
-      <Route path="/menu" element={<PrivateRoute> <MenuPage /> </PrivateRoute>}/>
-      <Route path="/reviews" element={<PrivateRoute> <CustomerReviewPage /> </PrivateRoute>}/>
-      <Route path="/product_statistics" element={<PrivateRoute> <ProductStatisticsPage /> </PrivateRoute>}/>
-      <Route path="/promotions" element={<PrivateRoute> <PromotionNotificationPage /> </PrivateRoute>}/>
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            {' '}
+            <Dashboard />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/manager_dashboard"
+        element={
+          <PrivateRoute>
+            {' '}
+            <ManagerDashboard />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <PrivateRoute>
+            {' '}
+            <OrdersPage />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/menu"
+        element={
+          <PrivateRoute>
+            {' '}
+            <MenuPage />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/reviews"
+        element={
+          <PrivateRoute>
+            {' '}
+            <CustomerReviewPage />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/product_statistics"
+        element={
+          <PrivateRoute>
+            {' '}
+            <ProductStatisticsPage />{' '}
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/promotions"
+        element={
+          <PrivateRoute>
+            {' '}
+            <PromotionNotificationPage />{' '}
+          </PrivateRoute>
+        }
+      />
     </Routes>
-
   );
 }
 

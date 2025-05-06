@@ -1,6 +1,6 @@
-from rest_framework import serializers
-from django.utils import timezone
 from app.utils.eta_calculator import round_to_nearest_five
+from django.utils import timezone
+from rest_framework import serializers
 
 from ..models.customer_models import Customer
 from ..models.order_models import Order, OrderItem

@@ -24,7 +24,7 @@ from .views.promotion_views import list_promotions, create_promotion, update_pro
 
 
 urlpatterns = [
-   path("login_restaurant/", login_restaurant, name="login_restaurant"),
+    path("login_restaurant/", login_restaurant, name="login_restaurant"),
     path("login_user/", login_user, name="login_user"),
     path("register/", register_user, name="register"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -36,9 +36,9 @@ urlpatterns = [
     path("restaurants/list/", get_restaurants, name="get_restaurants"),
     path("restaurants/<int:restaurant_id>/menu/", get_menu_items, name="get_menu_items"),
     path("restaurant/<int:restaurant_id>/", get_restaurant, name="get_restaurant"),
-    
+
     path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
-    
+
     path("order/new/", create_order, name="create_order"),
     path("order/customer/", get_customer_orders, name="get_customer_orders"),
     path("order/payment/", create_payment_intent, name="create_payment"),
@@ -47,13 +47,15 @@ urlpatterns = [
     path("order/payment/saved_card/<str:payment_method_id>/", delete_payment_method, name="pay_with_saved_card"),
     path("order/<int:order_id>/", get_order, name="get_order"),
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
-    
+
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),
     path("retrieve/orders/", retrieve_active_orders, name="retrieve_active_orders"),
-    path("orders/<int:restaurant_id>/<int:order_id>/<str:new_status>/", update_order_status, name="update_order_status"),
-    path("orders/<int:restaurant_id>/<int:order_id>/<str:category>/<str:new_status>/", update_order_category_status, name="update_order_category_status"),
+    path("orders/<int:restaurant_id>/<int:order_id>/<str:new_status>/", update_order_status,
+         name="update_order_status"),
+    path("orders/<int:restaurant_id>/<int:order_id>/<str:category>/<str:new_status>/", update_order_category_status,
+         name="update_order_category_status"),
     path("create-worker/", create_worker, name="create_worker"),
     path("reviews/", list_reviews, name="list_reviews"),
     path("get-workers/", get_workers, name="get_workers"),

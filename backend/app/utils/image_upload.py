@@ -1,9 +1,10 @@
-import os
-import uuid
 import base64
+import uuid
 from pathlib import Path
-from django.conf import settings
+
 import boto3
+from django.conf import settings
+
 
 # Check settings.py to decide whether to use S3 or local media
 USE_S3 = getattr(settings, "USE_S3", False)

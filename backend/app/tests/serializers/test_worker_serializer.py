@@ -10,6 +10,7 @@ def test_worker_serializer_output(restaurant):
     """
     worker = Worker.objects.create(
         restaurant=restaurant,
+        name="Test Worker",
         pin="1234",
         role="manager"
     )
@@ -18,6 +19,7 @@ def test_worker_serializer_output(restaurant):
 
     assert data["id"] == worker.id
     assert data["restaurant"] == restaurant.id
+    assert data["name"] == "Test Worker"
     assert data["pin"] == "1234"
     assert data["role"] == "manager"
 
@@ -25,7 +27,7 @@ def test_worker_serializer_output(restaurant):
 @pytest.mark.django_db
 def test_worker_serializer_input_valid(restaurant):
     """
-    Valid input should create a Worker instance through deserialization.
+    Valid input should deserialize and create a Worker instance.
     """
     payload = {
         "restaurant": restaurant.id,
@@ -62,7 +64,7 @@ def test_worker_serializer_invalid_role(restaurant):
 @pytest.mark.django_db
 def test_worker_serializer_missing_name(restaurant):
     """
-    Invalid role value should cause validation to fail.
+    Omitting 'name' should cause validation to fail.
     """
     payload = {
         "restaurant": restaurant.id,
@@ -77,7 +79,7 @@ def test_worker_serializer_missing_name(restaurant):
 @pytest.mark.django_db
 def test_worker_serializer_missing_pin(restaurant):
     """
-    Invalid role value should cause validation to fail.
+    Omitting 'pin' should cause validation to fail.
     """
     payload = {
         "restaurant": restaurant.id,
@@ -92,7 +94,7 @@ def test_worker_serializer_missing_pin(restaurant):
 @pytest.mark.django_db
 def test_worker_serializer_missing_role(restaurant):
     """
-    Invalid role value should cause validation to fail.
+    Omitting 'role' should cause validation to fail.
     """
     payload = {
         "restaurant": restaurant.id,
@@ -102,3 +104,36 @@ def test_worker_serializer_missing_role(restaurant):
     serializer = WorkerSerializer(data=payload)
     assert not serializer.is_valid()
     assert "role" in serializer.errors
+
+
+@pytest.mark.django_db
+def test_name_max_length_serializer(restaurant):
+    """
+    Name longer than 100 chars should fail validation.
+    """
+    long_name = "x" * 101
+    payload = {
+        "restaurant": restaurant.id,
+        "name": long_name,
+        "pin": "1234",
+        "role": "manager"
+    }
+    serializer = WorkerSerializer(data=payload)
+    assert not serializer.is_valid()
+    assert "name" in serializer.errors
+
+
+@pytest.mark.django_db
+def test_pin_max_length_serializer(restaurant):
+    """
+    Pin longer than 4 chars should fail validation.
+    """
+    payload = {
+        "restaurant": restaurant.id,
+        "name": "Jane Doe",
+        "pin": "12345",
+        "role": "manager"
+    }
+    serializer = WorkerSerializer(data=payload)
+    assert not serializer.is_valid()
+    assert "pin" in serializer.errors
