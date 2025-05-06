@@ -48,4 +48,8 @@ class UserManager {
   static Future<void> clearName() async {
     await _storage.delete(key: 'userName');
   }
+
+  static Future<void> clearPassword() async {
+    await _storage.delete(key: 'password');
+  }
 }

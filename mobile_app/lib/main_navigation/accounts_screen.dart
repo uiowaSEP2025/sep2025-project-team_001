@@ -19,6 +19,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
   void _logout(BuildContext context) async {
     await TokenManager.clearTokens();
+    await UserManager.clearEmail();
+    await UserManager.clearName();
+    await UserManager.clearPassword();
     Navigator.pushReplacementNamed(context, "/"); // back to login
   }
 
