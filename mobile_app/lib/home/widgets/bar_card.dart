@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/design/styling/app_colors.dart';
+import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 
 class BarCard extends StatelessWidget {
@@ -16,7 +18,7 @@ class BarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: screenWidth * 0.41,
-      height: screenWidth * 0.6,
+     // height: screenWidth * 0.6,
       padding: EdgeInsets.all(screenWidth * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -48,11 +50,9 @@ class BarCard extends StatelessWidget {
             height: screenWidth * 0.02,
           ),
           Text(bar.name,
+          softWrap: true,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black)),
+              style: AppTextStyles.textFieldLabel(screenHeight, Colors.black)),
         ],
       ),
     );

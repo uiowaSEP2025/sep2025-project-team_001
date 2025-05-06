@@ -176,7 +176,7 @@ Widget buildProgressOrderTile( BuildContext context,
                 SizedBox(height: screenHeight * 0.01),
                 if (order.drinksETAminutes != null &&
                     order.drinkStatus != 'completed')
-                  Text("Drinks ready in ${order.drinksETAminutes} minutes"),
+                  Text("Drinks ready around ${order.drinksETAminutes}"),
                 if (order.drinkStatus == 'completed')
                   ElevatedButton(
                   onPressed: () {
@@ -208,7 +208,7 @@ Widget buildProgressOrderTile( BuildContext context,
                 if (order.foodETAminutes != null &&
                     order.foodStatus != 'completed')
                   Text(
-                      "Food will be ready in ${order.drinksETAminutes} minutes"),
+                      "Food ready around ${order.drinksETAminutes}"),
                 if (order.foodStatus == 'completed')
                 ElevatedButton(
                   onPressed: () {
