@@ -35,10 +35,13 @@ class _OrderReceiptScreenState extends State<OrderReceiptScreen> {
     super.initState();
   }
 
-  void submitReview(int orderId, double rating, String comment) {
+  void submitReview(int orderId, double rating, String comment){
     setState(() async {
-      await reviewOrder(orderId: orderId, rating: rating, review: comment);
-    });
+                  await reviewOrder(
+                      orderId: orderId,
+                      rating: rating,
+                      review: comment);
+                });
   }
 
   void loadOrder(int orderId) async {
@@ -128,8 +131,7 @@ class RatingWidget extends StatefulWidget {
       required this.verticalSpacing,
       required this.screenWidth,
       required this.horizontalSpacing,
-      required TextEditingController reviewController,
-      required this.onSubmit})
+      required TextEditingController reviewController, required this.onSubmit})
       : _reviewController = reviewController;
 
   final Order order;
@@ -138,7 +140,8 @@ class RatingWidget extends StatefulWidget {
   final double screenWidth;
   final double horizontalSpacing;
   final TextEditingController _reviewController;
-  final void Function(int, double, String) onSubmit;
+  final void Function(int,double,String) onSubmit;
+  
 
   @override
   State<RatingWidget> createState() => _RatingWidgetState();
@@ -218,8 +221,7 @@ class _RatingWidgetState extends State<RatingWidget> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor),
               onPressed: () {
-                widget.onSubmit(
-                    widget.order.id, rating, widget._reviewController.text);
+                widget.onSubmit(widget.order.id, rating, widget._reviewController.text);
               },
               child: Center(
                 child: Text(

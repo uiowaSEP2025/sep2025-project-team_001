@@ -20,9 +20,9 @@ class Order {
       required this.totalPrice,
       required this.restaurantId,
       required this.restaurantName,
-      this.foodETAminutes,
-      this.drinksETAminutes,
-      required this.reviewed});
+       this.foodETAminutes, 
+       this.drinksETAminutes,
+       required this.reviewed});
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(

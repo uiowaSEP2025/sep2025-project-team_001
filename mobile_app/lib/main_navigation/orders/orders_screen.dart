@@ -148,6 +148,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       child: Text("You haven't placed any orders yet."))
                   : ListView(
                       children: [
+                        
                         if (completedOrders.isNotEmpty) ...[
                           Padding(
                             padding: EdgeInsets.all(verticalSpacing),
@@ -155,11 +156,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...completedOrders.map((order) => Padding(
-                                padding:
-                                    EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildPickupOrderTile(
-                                    context, order, screenHeight, screenWidth),
+                          ...completedOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildPickupOrderTile(context,order, screenHeight, screenWidth),
                               )),
                         ],
                         if (inProgressOrders.isNotEmpty) ...[
@@ -169,11 +169,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
-                          ...inProgressOrders.map((order) => Padding(
-                                padding:
-                                    EdgeInsets.all(horizontalSpacing * 0.5),
-                                child: buildProgressOrderTile(
-                                    order, screenHeight, screenWidth),
+                          ...inProgressOrders
+                              .map((order) => Padding(
+                                padding: EdgeInsets.all(horizontalSpacing * 0.5),
+                                child: buildProgressOrderTile(order,screenHeight, screenWidth),
                               )),
                         ],
                         if (pendingOrders.isNotEmpty) ...[
@@ -193,6 +192,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     order, screenHeight, screenWidth),
                               )),
                         ],
+                        
+                        
                       ],
                     ),
     );

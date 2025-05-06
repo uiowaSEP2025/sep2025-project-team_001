@@ -63,7 +63,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   void authenticate() async {
     final String email = _emailController.text.trim();
     UserManager.saveEmail(email);
-
+    
     final String password = _passwordController.text.trim();
     UserManager.savePassword(password);
 

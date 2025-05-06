@@ -75,7 +75,8 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
           case '/':
-            return MaterialPageRoute(builder: (_) => const SplashScreen());
+            return MaterialPageRoute(
+                builder: (_) => const SplashScreen());
           // case '/home':
           //   return MaterialPageRoute(
           //       builder: (_) => const RestaurantSelectionScreen());

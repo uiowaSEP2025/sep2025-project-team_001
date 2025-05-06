@@ -37,12 +37,12 @@ void registerFcmToken(int customerId) async {
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        final refreshed = await refreshAccessToken();
-        if (refreshed) {
-          registerFcmToken(customerId);
-        }
-        throw Exception("Access token expired or unauthorized");
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        registerFcmToken(customerId);
       }
+      throw Exception("Access token expired or unauthorized");
+    }
       print("Error sending firebase token: ${e.response?.data}");
       throw Exception(
           "Error sending firebase token: ${e.response?.statusCode}");

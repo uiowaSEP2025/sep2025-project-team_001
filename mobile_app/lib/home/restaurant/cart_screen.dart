@@ -68,55 +68,56 @@ class _CartScreenState extends State<CartScreen> {
     //   }
     // }
 
-    void submitOrder() async {
-      final customerId = await UserManager.getUser();
-      final restaurantId = widget.restaurant.id;
+   void submitOrder() async {
+  final customerId = await UserManager.getUser();
+  final restaurantId = widget.restaurant.id;
 
-      if (customerId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Customer ID not found")),
-        );
-        return;
-      }
+  if (customerId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Customer ID not found")),
+    );
+    return;
+  }
 
-      double total = _cart.values.fold<double>(
-        0,
-        (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
-      );
+  double total = _cart.values.fold<double>(
+    0,
+    (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+  );
 
-      try {
-        final paymentSuccess = await handleCheckout(total);
+  try {
+    final paymentSuccess = await handleCheckout(total);
 
-        if (!paymentSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Payment failed or cancelled")),
-          );
-          return;
-        }
-
-        final orderId = await placeOrder(
-          customerId: customerId,
-          restaurantId: restaurantId,
-          cart: _cart,
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Order placed with ID $orderId")),
-        );
-
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-          arguments: {'initialIndex': 1},
-        );
-      } catch (e) {
-        print("Payment/order error: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment failed or cancelled")),
-        );
-      }
+    if(!paymentSuccess){
+      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Payment failed or cancelled")),
+    );
+    return;
     }
+
+    final orderId = await placeOrder(
+      customerId: customerId,
+      restaurantId: restaurantId,
+      cart: _cart,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Order placed with ID $orderId")),
+    );
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
+      arguments: {'initialIndex': 1},
+    );
+  } catch (e) {
+    print("Payment/order error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Payment failed or cancelled")),
+    );
+  }
+}
+
 
     double total = _cart.values.fold<double>(
         0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
@@ -268,6 +269,7 @@ class CartNavigatorObserver extends NavigatorObserver {
   }
 }
 
+
 Future<String?> showCardPicker(List<dynamic> savedMethods) async {
   return await showDialog<String>(
     context: navigatorKey.currentContext!,
@@ -293,8 +295,7 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
                       context: navigatorKey.currentContext!,
                       builder: (context) => AlertDialog(
                         title: Text('Delete Card?'),
-                        content: Text(
-                            'Are you sure you want to delete this saved card?'),
+                        content: Text('Are you sure you want to delete this saved card?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
@@ -310,7 +311,7 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
 
                     if (confirmDelete == true) {
                       await deletePaymentMethod(paymentMethodId);
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); 
                     }
                   },
                 ),
@@ -331,3 +332,4 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
     },
   );
 }
+
