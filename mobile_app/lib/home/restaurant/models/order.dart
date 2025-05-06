@@ -40,7 +40,7 @@ class Order {
         foodETAminutes: json['food_eta_minutes'],
         drinksETAminutes: json['beverage_eta_minutes'],
         reviewed: json['reviewed'],
-        foodStatus: json['food_status'],
-        drinkStatus: json['beverage_status']);
+        foodStatus: json['estimated_food_ready_time'],
+        drinkStatus: json['estimated_beverage_ready_time']);
   }
 }
