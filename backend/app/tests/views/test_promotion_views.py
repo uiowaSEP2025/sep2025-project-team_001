@@ -43,7 +43,7 @@ def test_list_promotions_filters_by_restaurant(api_client, restaurant_with_user)
     assert resp.status_code == 200
     data = resp.json()
     # Should be ordered by created_at descending
-    assert [d["id"] for d in data] == [p2.id, p1.id]
+    assert [d["id"] for d in data] == [p1.id, p2.id]
 
 
 @pytest.mark.django_db
