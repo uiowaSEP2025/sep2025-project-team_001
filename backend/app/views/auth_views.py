@@ -1,6 +1,7 @@
 import json
 import re
 import unicodedata
+import logging
 
 import requests
 from django.conf import settings
@@ -15,7 +16,7 @@ from ..models.worker_models import Worker
 from ..serializers.restaurant_serializer import RestaurantSerializer
 from ..serializers.worker_serializer import WorkerSerializer
 from app.utils.image_upload import save_image_from_base64
-
+logger = logging.getLogger(__name__)
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -211,11 +212,8 @@ def validate_business(request):
         if cand.get("business_status") == "CLOSED_PERMANENTLY":
             return JsonResponse({"valid": False, "reason": "Closed business"}, status=400)
 
-        if _norm(address) not in _norm(cand["formatted_address"]):
-            return JsonResponse({"valid": False, "reason": "Address mismatch"}, status=400)
+        if _norm(address) not in _norm(cand.get("formatted_address")):
+            return JsonResponse({"valid": False, "reason": "Address mismatch"}, status=403)
 
-        if not any(t in cand["types"] for t in ("bar", "restaurant")):
-            return JsonResponse({"valid": False, "reason": "Not restaurant/bar"}, status=400)
-        
         return JsonResponse({"valid": True, "place_id": cand["place_id"]}, status=200)
     return JsonResponse({"error": "Invalid request"}, status=400)

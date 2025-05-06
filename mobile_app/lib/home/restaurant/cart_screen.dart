@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mobile_app/design/styling/app_text_styles.dart';
 import 'package:mobile_app/home/restaurant/models/restaurant.dart';
 import 'package:mobile_app/home/restaurant/models/cart_item.dart';
 import 'package:mobile_app/home/services/api_services.dart';
+import 'package:mobile_app/location_services.dart';
 import 'package:mobile_app/main.dart';
+import 'package:mobile_app/main_navigation/orders/services/api_services.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 class CartScreen extends StatefulWidget {
@@ -68,56 +71,77 @@ class _CartScreenState extends State<CartScreen> {
     //   }
     // }
 
-   void submitOrder() async {
-  final customerId = await UserManager.getUser();
-  final restaurantId = widget.restaurant.id;
+    void submitOrder() async {
+      final customerId = await UserManager.getUser();
+      final restaurantId = widget.restaurant.id;
 
-  if (customerId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Customer ID not found")),
-    );
-    return;
-  }
+      if (customerId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Customer ID not found")),
+        );
+        return;
+      }
 
-  double total = _cart.values.fold<double>(
-    0,
-    (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
-  );
+      Position? position = await getCurrentLocation();
+      Restaurant restaurant = await getRestaurant(restaurantId: restaurantId);
 
-  try {
-    final paymentSuccess = await handleCheckout(total);
+      if (position == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Location access is required to place an order.")),
+        );
+        return;
+      }
 
-    if(!paymentSuccess){
-      ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Payment failed or cancelled")),
-    );
-    return;
+      final inside = await isInsideRestaurant(position, restaurant.address);
+      if (!inside) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "You need to be at the restaurant to place this order.")),
+        );
+        return;
+      }
+      //todo handle if the user is not inside the restaurant display a pop up
+
+      double total = _cart.values.fold<double>(
+        0,
+        (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity,
+      );
+
+      try {
+        final paymentSuccess = await handleCheckout(total);
+
+        if (!paymentSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Payment failed or cancelled")),
+          );
+          return;
+        }
+
+        final orderId = await placeOrder(
+          customerId: customerId,
+          restaurantId: restaurantId,
+          cart: _cart,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Order placed with ID $orderId")),
+        );
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
+          arguments: {'initialIndex': 1},
+        );
+      } catch (e) {
+        print("Payment/order error: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Payment failed or cancelled")),
+        );
+      }
     }
-
-    final orderId = await placeOrder(
-      customerId: customerId,
-      restaurantId: restaurantId,
-      cart: _cart,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Order placed with ID $orderId")),
-    );
-
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/home',
-      (route) => false,
-      arguments: {'initialIndex': 1},
-    );
-  } catch (e) {
-    print("Payment/order error: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Payment failed or cancelled")),
-    );
-  }
-}
-
 
     double total = _cart.values.fold<double>(
         0, (sum, cartItem) => sum + cartItem.item.price * cartItem.quantity);
@@ -269,7 +293,6 @@ class CartNavigatorObserver extends NavigatorObserver {
   }
 }
 
-
 Future<String?> showCardPicker(List<dynamic> savedMethods) async {
   return await showDialog<String>(
     context: navigatorKey.currentContext!,
@@ -295,7 +318,8 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
                       context: navigatorKey.currentContext!,
                       builder: (context) => AlertDialog(
                         title: Text('Delete Card?'),
-                        content: Text('Are you sure you want to delete this saved card?'),
+                        content: Text(
+                            'Are you sure you want to delete this saved card?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
@@ -311,7 +335,7 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
 
                     if (confirmDelete == true) {
                       await deletePaymentMethod(paymentMethodId);
-                      Navigator.of(context).pop(); 
+                      Navigator.of(context).pop();
                     }
                   },
                 ),
@@ -332,4 +356,3 @@ Future<String?> showCardPicker(List<dynamic> savedMethods) async {
     },
   );
 }
-
