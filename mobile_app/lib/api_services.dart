@@ -5,13 +5,13 @@ import 'package:mobile_app/utils/token_manager.dart';
 import 'package:mobile_app/utils/user_manager.dart';
 
 Future<bool> refreshAccessToken() async {
-    final refreshToken = await TokenManager.getRefreshToken();
+  final refreshToken = await TokenManager.getRefreshToken();
 
   if (refreshToken == null) {
     return false;
   }
 
-    final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+  final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
   try {
     final response = await dio.post(
@@ -28,62 +28,70 @@ Future<bool> refreshAccessToken() async {
     } else {
       return false;
     }
-  } catch (e) {
-    print('Error refreshing token: $e');
-    return false;
+  } on DioException catch (e) {
+    if(e.response?.statusCode == 401){
+          final email = await UserManager.getEmail();
+      final password = await UserManager.getPassword();
+      print("$email and $password");
+      if (email != null && password != null) {
+        try {
+          await authenticate(email, password);
+        } catch (e) {
+          throw Exception("error login");
+        }
+      }
+      return await refreshAccessToken();
+    }
+    throw Exception("login failed");
   }
 }
 
-Future<void> authenticate(String email, String password) async{
-
-  
-    const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
+Future<void> authenticate(String email, String password) async {
+  const String endpoint = "${ApiConfig.baseUrl}/mobile/login/";
 
   try {
-      final dio = 
-          Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
+    final dio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
-      final response = await dio.post(
-        endpoint,
-        data: {
-          "username": email,
-          "password": password,
-        },
-        options: Options(headers: {"Content-Type": "application/json"}),
-      );
+    final response = await dio.post(
+      endpoint,
+      data: {
+        "username": email,
+        "password": password,
+      },
+      options: Options(headers: {"Content-Type": "application/json"}),
+    );
 
-      final tokens = response.data['tokens'];
-      final accessToken = tokens['access'];
-      final refreshToken = tokens['refresh'];
+    final tokens = response.data['tokens'];
+    final accessToken = tokens['access'];
+    final refreshToken = tokens['refresh'];
 
-      final userId = response.data['customer_id'];
+    final userId = response.data['customer_id'];
 
-      print(response);
+    print(response);
 
-      final userName = response.data['name'];
+    final userName = response.data['name'];
 
-      await UserManager.saveUser(userId);
+    await UserManager.saveUser(userId);
 
-      print(userId);
-      print(userName);
+    print(userId);
+    print(userName);
 
-      await TokenManager.saveTokens(accessToken, refreshToken);
-      await UserManager.saveName(userName);
+    await TokenManager.saveTokens(accessToken, refreshToken);
+    await UserManager.saveName(userName);
 
-      registerFcmToken(userId);
+    registerFcmToken(userId);
+  } on DioException catch (e) {
+    String errorMessage = "Authentication failed";
 
-    } on DioException catch (e) {
-      String errorMessage = "Authentication failed";
+    print("Login error: ${e.response?.data}");
+    print("Status code: ${e.response?.statusCode}");
 
-      print("Login error: ${e.response?.data}");
-      print("Status code: ${e.response?.statusCode}");
-
-      if (e.response?.data is Map && e.response?.data['error'] != null) {
-        errorMessage = e.response!.data['error'];
-      } else if (e.response?.data is Map) {
-        errorMessage = e.response!.data.toString();
-      }
-
-      throw Exception(errorMessage);
+    if (e.response?.data is Map && e.response?.data['error'] != null) {
+      errorMessage = e.response!.data['error'];
+    } else if (e.response?.data is Map) {
+      errorMessage = e.response!.data.toString();
     }
+
+    throw Exception(errorMessage);
+  }
 }

@@ -4,19 +4,9 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .mobileViews.mobileViews import login_customer, register_customer
-from .mobileViews.stripeViews import (
-    create_payment_intent,
-    delete_payment_method,
-    list_saved_payment_methods,
-    pay_with_saved_card,
-)
-from .views.auth_views import (
-    login_restaurant,
-    login_user,
-    register_user,
-    validate_business,
-)
-from .views.menu_views import manage_menu_item, menu_items_api
+from .mobileViews.stripeViews import create_payment_intent, delete_payment_method, list_saved_payment_methods, pay_with_saved_card
+from .views.auth_views import login_restaurant, login_user, register_user, validate_business
+from .views.menu_views import manage_menu_item, menu_items_api, get_item_statistics
 from .views.orders_views import (
     create_order,
     estimate_order_eta,
@@ -26,22 +16,11 @@ from .views.orders_views import (
     update_order_category_status,
     update_order_status,
 )
-from .views.promotion_views import (
-    create_promotion,
-    delete_promotion,
-    list_promotions,
-    send_promotion,
-    update_promotion,
-)
-from .views.restaurant_views import get_menu_items, get_restaurants
+from .views.restaurant_views import get_menu_items, get_restaurant, get_restaurants
 from .views.review_views import create_review, list_reviews
-from .views.stats_views import (
-    daily_stats,
-    get_bartender_statistics,
-    get_item_statistics,
-    get_restaurant_statistics,
-)
+from .views.stats_views import daily_stats, get_bartender_statistics, get_item_statistics, get_restaurant_statistics
 from .views.worker_views import create_worker, delete_worker, get_workers, update_worker
+from .views.promotion_views import list_promotions, create_promotion, update_promotion, delete_promotion, send_promotion
 
 
 urlpatterns = [
@@ -56,15 +35,19 @@ urlpatterns = [
     path("mobile/review/create", create_review, name="create_review"),
     path("restaurants/list/", get_restaurants, name="get_restaurants"),
     path("restaurants/<int:restaurant_id>/menu/", get_menu_items, name="get_menu_items"),
+    path("restaurant/<int:restaurant_id>/", get_restaurant, name="get_restaurant"),
+
+    path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
+
     path("order/new/", create_order, name="create_order"),
     path("order/customer/", get_customer_orders, name="get_customer_orders"),
     path("order/payment/", create_payment_intent, name="create_payment"),
-    path("mobile/fcm_token/", save_fcm_token, name="save_fcm_token"),
     path("order/payment/methods/", list_saved_payment_methods, name="list_saved_payment_methods"),
     path("order/payment/saved_card/", pay_with_saved_card, name="pay_with_saved_card"),
     path("order/payment/saved_card/<str:payment_method_id>/", delete_payment_method, name="pay_with_saved_card"),
     path("order/<int:order_id>/", get_order, name="get_order"),
     path("order/estimate/", estimate_order_eta, name="estimate_order_eta"),
+
     # api
     path("api/menu-items/", menu_items_api, name="menu_items_api"),
     path("api/manage-item/", manage_menu_item, name="manage_menu_item"),

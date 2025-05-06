@@ -8,4 +8,5 @@ class AppColors {
   static const Color warning = Color(0xffDC5858);
   static const Color validGreen = Color(0xff85C441);
   static const Color secondary = Color(0xffDEDBFF);
+  static const Color greenBackground = Color(0xff2C9958);
 }
