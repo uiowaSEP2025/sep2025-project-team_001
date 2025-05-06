@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
+from dateutil.parser import isoparse
+
 from app.models import Worker
 from app.models.customer_models import CustomUser
 from app.models.order_models import Order, OrderItem
@@ -158,10 +160,11 @@ def test_create_order_sets_eta_food_only(api_client, customer, restaurant, burge
     assert body["beverage_eta_minutes"] is None
 
     # Parse timestamps
-    food_dt = datetime.fromisoformat(body["estimated_food_ready_time"])
     bev_dt = body["estimated_beverage_ready_time"]
-    assert food_dt == now + timedelta(minutes=25)
     assert bev_dt is None
+    food_dt = isoparse(body["estimated_food_ready_time"])
+    expected_dt = now + timedelta(minutes=25)
+    assert food_dt == expected_dt
 
 
 @pytest.mark.django_db

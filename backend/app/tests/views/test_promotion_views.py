@@ -1,5 +1,6 @@
 # app/tests/views/test_promotion_views.py
 import json
+import time
 
 import pytest
 from app.models.customer_models import Customer, CustomUser
@@ -25,6 +26,7 @@ def test_list_promotions_filters_by_restaurant(api_client, restaurant_with_user)
     p1 = PromotionNotification.objects.create(
         restaurant=restaurant, title="Old Promo", body="Desc1"
     )
+    time.sleep(5)  # Ensure different timestamps
     p2 = PromotionNotification.objects.create(
         restaurant=restaurant, title="New Promo", body="Desc2"
     )
@@ -43,7 +45,7 @@ def test_list_promotions_filters_by_restaurant(api_client, restaurant_with_user)
     assert resp.status_code == 200
     data = resp.json()
     # Should be ordered by created_at descending
-    assert [d["id"] for d in data] == [p1.id, p2.id]
+    assert [d["id"] for d in data] == [p2.id, p1.id]
 
 
 @pytest.mark.django_db
