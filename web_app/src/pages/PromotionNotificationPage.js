@@ -20,6 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function PromotionNotificationPage() {
   const [promotions, setPromotions] = useState([]);
@@ -31,6 +32,7 @@ function PromotionNotificationPage() {
     message: '',
     severity: 'success',
   });
+  const navigate = useNavigate();
 
   const showFlash = (message, severity = 'success') => {
     setFlash({ open: true, message, severity });
@@ -110,6 +112,12 @@ function PromotionNotificationPage() {
 
   return (
     <Container>
+      <Box display="flex" justifyContent="flex-end" mt={4} mb={2}>
+        <Button variant="outlined" onClick={() => navigate('/manager_dashboard')}>
+          Back to Dashboard
+        </Button>
+      </Box>
+
       <Typography variant="h4" gutterBottom>
         Promotions
       </Typography>

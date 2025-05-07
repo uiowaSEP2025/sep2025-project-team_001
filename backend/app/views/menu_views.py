@@ -115,6 +115,7 @@ def manage_menu_item(request):
                 else:
                     return Response({"error": f"Invalid ingredient format: {ing}"}, status=400)
 
+        item.save()
         serialized = ItemSerializer(item)
         return Response(
             {
