@@ -5,6 +5,7 @@ from decimal import Decimal
 import pytest
 from app.models.order_models import Order
 from django.utils import timezone
+from datetime import timezone as dt_timezone
 
 
 # ------------------------------------------------------------------
@@ -60,9 +61,11 @@ def test_daily_stats_no_orders(api_client, restaurant):
 @pytest.mark.django_db
 def test_daily_stats_with_orders(api_client, restaurant, customer, worker):
     api_client.force_authenticate(user=restaurant.user)
-    # Create two orders today: one completed with worker, one picked_up without
-    now = timezone.now().replace(microsecond=0)
+
+    # Use fixed UTC time
+    now = timezone.now().astimezone(dt_timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
     date_str = now.date().isoformat()
+
     o1 = Order.objects.create(
         customer=customer,
         restaurant=restaurant,
@@ -70,7 +73,6 @@ def test_daily_stats_with_orders(api_client, restaurant, customer, worker):
         status="completed",
         worker=worker
     )
-    # simulate order start_time within today
     o1.start_time = now - timedelta(hours=1)
     o1.save(update_fields=["start_time"])
 
@@ -86,13 +88,11 @@ def test_daily_stats_with_orders(api_client, restaurant, customer, worker):
     response = api_client.get(f"/daily_stats?date={date_str}")
     assert response.status_code == 200
     data = response.json()
+    print(data)
 
     assert data["total_orders"] == 2
-    # total_sales rounded to two decimals
     assert data["total_sales"] == 25.5
-    # avg_order_value = 25.5 / 2 = 12.75
     assert data["avg_order_value"] == 12.75
-    # only one order had a worker
     assert data["active_workers"] == 1
 
 
