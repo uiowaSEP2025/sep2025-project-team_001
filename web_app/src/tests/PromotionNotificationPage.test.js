@@ -4,6 +4,16 @@ import '@testing-library/jest-dom';
 import PromotionNotificationPage from '../pages/PromotionNotificationPage';
 import axios from 'axios';
 
+import { MemoryRouter } from 'react-router-dom';
+
+const renderPage = () =>
+  render(
+    <MemoryRouter>
+      <PromotionNotificationPage />
+    </MemoryRouter>
+  );
+
+
 jest.mock('axios');
 const API = 'http://test.local/api';
 process.env.REACT_APP_API_URL = API;
@@ -30,7 +40,7 @@ describe('PromotionNotificationPage', () => {
     axios.get.mockResolvedValue({ data: promos });
   });
 
-  const renderPage = () => render(<PromotionNotificationPage />);
+  //const renderPage = () => render(<PromotionNotificationPage />);
 
   test('loads and displays promotions', async () => {
     renderPage();
